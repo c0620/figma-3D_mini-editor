@@ -1,0 +1,14 @@
+{
+    "name": "3D: mini-editor",
+    "id": "1635328768238550916",
+    "api": "1.0.0",
+    "main": "dist/code.js",
+    "ui": "dist/index.html",
+    "capabilities": [],
+    "enableProposedApi": false,
+    "editorType": ["figma"],
+    "documentAccess": "dynamic-page",
+    "networkAccess": {
+        "allowedDomains": ["none"]
+    }
+}
