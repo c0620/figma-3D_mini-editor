@@ -34,3 +34,5 @@ Desktop.ini
 
 .vscode/*
 !.vscode/extensions.json
+
+*.md
