@@ -1,12 +1,12 @@
-import { NotificationService } from '../store/notificationService';
-import { SceneAnalyzer } from '../render/sceneAnalyzer';
-import { RenderService } from '../render/renderService';
-import { AssetCatalogService } from '../assets/assetCatalogService';
-import { SceneImportExportService } from './sceneImportExportService';
-import { TextureFigmaService } from './textureFigmaService';
-import { ScenePersistenceService } from './scenePersistenceService';
+import { NotificationService } from "../store/notificationService";
+import { SceneAnalyzer } from "../render/sceneAnalyzer";
+import { RenderService } from "../render/renderService";
+import { AssetCatalogService } from "../library/assetCatalogService";
+import { SceneImportExportService } from "./sceneImportExportService";
+import { TextureFigmaService } from "./textureFigmaService";
+import { ScenePersistenceService } from "./scenePersistenceService";
 
-type SceneFileType = 'OBJ' | 'FBX' | 'GLB';
+type SceneFileType = "OBJ" | "FBX" | "GLB";
 
 export class SceneTransferFacade {
   sceneIo: SceneImportExportService;
@@ -24,7 +24,7 @@ export class SceneTransferFacade {
     renderService: RenderService,
     analyzer: SceneAnalyzer,
     notifications: NotificationService,
-    assetCatalog: AssetCatalogService,
+    assetCatalog: AssetCatalogService
   ) {
     this.sceneIo = sceneIo;
     this.textureFigma = textureFigma;
