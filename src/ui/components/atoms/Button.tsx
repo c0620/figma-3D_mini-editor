@@ -1,13 +1,19 @@
-export function MainButton() {
-  return <div>MainButton</div>;
+import { Link } from "react-router";
+
+export function MainButton({ text }: { text: string }) {
+  return <div>{text}</div>;
 }
 
 export function ActionButton() {
   return <div>ActionButton</div>;
 }
 
-export function NavButton() {
-  return <div>NavButton</div>;
+export function NavLinkButton({ to }: { to: string }) {
+  return (
+    <div>
+      <Link to={to}>arrow</Link>
+    </div>
+  );
 }
 
 export function OptionButton() {

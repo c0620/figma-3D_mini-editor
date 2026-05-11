@@ -1,12 +1,22 @@
-export function CardLoading({title, text, image}: {title: string, text: string, image: }) {
+import { NavLink } from "react-router";
+
+export function CardStart({
+  title,
+  text,
+  image,
+  to,
+}: {
+  title: string;
+  text: string;
+  image: string;
+  to: string;
+}) {
   return (
     <div>
-      <h3>Библиотека ассетов</h3>
-      <div>Импорт готовых простых объектов и моделей для мокапов</div>
-      <img></img>
-      <a>
-        <img></img> arrow
-      </a>
+      <h3>{title}</h3>
+      <div>{text}</div>
+      <img src={image}></img>
+      <NavLink to={to}>Загрузить</NavLink>
     </div>
   );
 }

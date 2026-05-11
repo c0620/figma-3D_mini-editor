@@ -23,3 +23,11 @@ export function SliderCentered() {}
 export function PreviewIcon() {}
 
 export function PreviewColor() {}
+
+export function FileInput() {
+  return <div>FileInput</div>;
+}
+
+export function FigmaInput() {
+  return <div>FigmaInput</div>;
+}

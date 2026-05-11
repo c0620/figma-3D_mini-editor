@@ -1,5 +1,7 @@
-import { NavLink } from "react-router";
-import { CardLoading } from "../molecules/Cards";
+import { CardStart } from "../molecules/Cards";
+import phone from "../../../assets/images/start-phone.png";
+import sphere from "../../../assets/images/start-sphere.png";
+import suzanne from "../../../assets/images/start-suzanne.png";
 
 export default function StartScreen() {
   return (
@@ -11,11 +13,25 @@ export default function StartScreen() {
         рендеры прямо в Figma
       </div>
       <div>
-        <CardLoading image={""} />
-        <CardLoading />
-        <CardLoading />
+        <CardStart
+          title="Библиотека ассетов"
+          text="Импорт готовых простых объектов и моделей для мокапов"
+          image={phone}
+          to="/library"
+        />
+        <CardStart
+          title="Загрузка из Figma"
+          text="Восстановление сцены из фрейма Figma"
+          image={sphere}
+          to="/load/figma"
+        />
+        <CardStart
+          title="Загрузка с устройства"
+          text="Импорт моделей в форматах .fbx, .obj и .glb"
+          image={suzanne}
+          to="/load/local"
+        />
       </div>
-      <NavLink to="/editor">Editor</NavLink>
     </>
   );
 }
