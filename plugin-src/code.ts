@@ -7,10 +7,10 @@
 // full browser environment (See https://www.figma.com/plugin-docs/how-plugins-run).
 
 try {
-  const uiOptions = { height: 650, title: "", width: 500 };
+  const uiOptions = { height: 900, title: "", width: 1600 };
   switch (figma.editorType) {
     case "figma":
-      uiOptions.title = "My Figma Plugin!";
+      uiOptions.title = "3D: mini-editor";
       figma.notify("Running in Figma Plugin environment");
 
       // Calls to "parent.postMessage" from within the HTML page will trigger this
@@ -36,21 +36,6 @@ try {
         }
       };
       break;
-    case "dev":
-      uiOptions.title = "My Figma Dev Plugin!";
-      figma.notify("Running in Figma Dev environment");
-      break;
-    case "figjam":
-      uiOptions.title = "My FigJam Plugin!";
-      figma.notify("Running in FigJam environment");
-      break;
-    case "slides":
-      uiOptions.title = "My Figma Slides Plugin!";
-      figma.notify("Running in Figma Slides environment");
-      break;
-    default:
-      figma.notify(`Unhandled editor type: ${figma.editorType}`);
-      uiOptions.title = "Figma Plugin";
   }
 
   // This shows the HTML page in "ui.html".
