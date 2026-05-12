@@ -1,7 +1,20 @@
 import { Link } from "react-router";
 
-export function MainButton({ text }: { text: string }) {
-  return <div>{text}</div>;
+export function MainButton({
+  text,
+  action,
+  to,
+}: {
+  text: string;
+  action: "nav" | "event";
+  to?: string;
+}) {
+  switch (action) {
+    case "event":
+      return <div>{text}</div>;
+    case "nav":
+      return <Link to={to!}>{text}</Link>;
+  }
 }
 
 export function ActionButton() {

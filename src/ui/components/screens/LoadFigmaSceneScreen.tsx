@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { MainButton } from "../atoms/Button";
 import { FigmaInput, FileInput } from "../atoms/Input";
 import { NavTitle } from "../atoms/Navigation";
 import { TextBlock } from "../atoms/Output";
 
-export default function LoadSceneScreen({ type }: { type: "figma" | "local" }) {
+export default function LoadFigmaSceneScreen({
+  type,
+}: {
+  type: "figma" | "local";
+}) {
   const textContent = {
     figma: {
       title: "Загрузка из Figma",
@@ -26,6 +31,32 @@ export default function LoadSceneScreen({ type }: { type: "figma" | "local" }) {
   let currentTextContent =
     type == "figma" ? textContent.figma : textContent.local;
 
+  const [sceneLoadStatus, setSceneLoadStatus] = useState("initial");
+
+  let currentScreenContent;
+  // switch (sceneLoadStatus) {
+  //   case "initial":
+  //     currentScreenContent = type == "figma" ? <FigmaInput /> : <FileInput />;
+  //     break;
+  //   case "error":
+  //     currentScreenContent =
+  //       type == "figma" ? <FigmaInput error={"error"} /> : <FileInput />;
+  //     break;
+  //   case "success":
+  //     if (type == "figma") {
+  //       currentScreenContent = (
+  //         <div>
+  //           <FigmaInput success />
+  //           <div>Info component?</div>
+  //           <div>Scene Render Preview</div>
+  //           <div>Scene Textures Preview</div>
+  //         </div>
+  //       );
+  //     } else {
+  //     }
+  //     break;
+  // }
+
   return (
     <div>
       <NavTitle title={currentTextContent.title} to={"/"} />
@@ -33,7 +64,7 @@ export default function LoadSceneScreen({ type }: { type: "figma" | "local" }) {
         text={currentTextContent.text}
         textListItems={currentTextContent.textListItems}
       />
-      {type == "figma" ? <FileInput /> : <FigmaInput />}
+      {currentScreenContent}
       <MainButton text="Импортировать модель" />
     </div>
   );

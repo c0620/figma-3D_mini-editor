@@ -6,7 +6,7 @@ export function ObjectNumberInput() {
   }
 }
 
-export function ObjectColorInpur() {}
+export function ObjectColorInput() {}
 
 export function ObjectRatioInput() {}
 

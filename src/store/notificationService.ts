@@ -1,13 +1,11 @@
-import type { Notification } from "../types/ui";
+import { useUiStore } from './uiStore';
 
 export class NotificationService {
-  notifications: Notification[] = [];
-
   pushSuccess(message: string): string {
     const id = crypto.randomUUID();
-    this.notifications.push({
+    useUiStore.getState().pushNotification({
       id,
-      type: "Success",
+      type: 'Success',
       message,
       reason: null,
       createdAt: Date.now(),
@@ -17,9 +15,9 @@ export class NotificationService {
 
   pushError(message: string, reason: string): string {
     const id = crypto.randomUUID();
-    this.notifications.push({
+    useUiStore.getState().pushNotification({
       id,
-      type: "Error",
+      type: 'Error',
       message,
       reason,
       createdAt: Date.now(),
@@ -28,6 +26,6 @@ export class NotificationService {
   }
 
   close(id: string): void {
-    this.notifications = this.notifications.filter((n) => n.id !== id);
+    useUiStore.getState().removeNotification(id);
   }
 }

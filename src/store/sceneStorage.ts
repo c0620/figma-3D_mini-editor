@@ -1,23 +1,24 @@
-import type { Scene } from "../types/scene";
+import type { Scene } from '../types/scene';
+
+import { useSceneStore } from './sceneStore';
+import { useUiStore } from './uiStore';
 
 export class SceneStorage {
-  scene!: Scene;
-  projectName: string = "";
-  activeObjectId: string | null = null;
-
   load(scene: Scene): void {
-    this.scene = scene;
+    useSceneStore.getState().loadScene(scene);
   }
 
   getScene(): Scene {
-    return this.scene;
+    const scene = useSceneStore.getState().scene;
+    if (!scene) throw new Error('SceneStorage.getScene: no scene loaded');
+    return scene;
   }
 
   setActive(id: string | null): void {
-    this.activeObjectId = id;
+    useUiStore.getState().setActiveObjectId(id);
   }
 
   updateProjectName(name: string): void {
-    this.projectName = name;
+    useUiStore.getState().setProjectName(name);
   }
 }

@@ -6,7 +6,7 @@ import { SceneImportExportService } from "./sceneImportExportService";
 import { TextureFigmaService } from "./textureFigmaService";
 import { ScenePersistenceService } from "./scenePersistenceService";
 
-type SceneFileType = "OBJ" | "FBX" | "GLB";
+export type SceneFileType = "OBJ" | "FBX" | "GLB";
 
 export class SceneTransferFacade {
   sceneIo: SceneImportExportService;
@@ -35,17 +35,21 @@ export class SceneTransferFacade {
     this.assetCatalog = assetCatalog;
   }
 
-  exportSceneToFigmaLinked(): void {}
+  readonly exportSceneToFigmaLinked = (): void => {};
 
-  importSceneFromFigma(frameId: string): void {
+  readonly importSceneFromFigma = (frameId: string): void => {
     void frameId;
-  }
+  };
 
-  exportSceneToDevice(type: SceneFileType): Blob {
+  readonly exportSceneToDevice = (type: SceneFileType): Blob => {
     return this.sceneIo.exportToDevice(type);
-  }
+  };
 
-  importSceneFromDevice(type: SceneFileType, input: string): void {
-    this.sceneIo.importFromDevice(type, input);
-  }
+  readonly importSceneFromDevice = async (
+    type: SceneFileType,
+    input: ArrayBuffer | File | string
+  ): Promise<void> => {
+    const data = input instanceof File ? await input.arrayBuffer() : input;
+    await this.sceneIo.importFromDevice(type, data);
+  };
 }

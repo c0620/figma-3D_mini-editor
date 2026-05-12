@@ -1,9 +1,9 @@
 export enum TextureSlot {
-  BaseColor = 'BaseColor',
-  Normal = 'Normal',
-  Roughness = 'Roughness',
-  Metalness = 'Metalness',
-  Emissive = 'Emissive',
+  BaseColor = "BaseColor",
+  Normal = "Normal",
+  Roughness = "Roughness",
+  Metalness = "Metalness",
+  Emissive = "Emissive",
 }
 
 export interface Material {
@@ -12,7 +12,13 @@ export interface Material {
   roughness: number;
   metalness: number;
   emissive: string;
-  textures: Map<TextureSlot, string>;
+  textures: Record<TextureSlot, string | null>;
+}
+
+export interface Transform {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  scale: [number, number, number];
 }
 
 export interface SceneObject {
@@ -21,22 +27,22 @@ export interface SceneObject {
   visible: boolean;
   locked: boolean;
   pendingDelete: boolean;
-  transform: object;
-  material: Material;
+  transform: Transform;
+  materialId: string;
 }
 
 export interface Light {
   id: string;
-  type: 'Directional' | 'Ambient';
+  type: "Directional" | "Ambient";
   color: string;
   intensity: number;
 }
 
 export interface CameraState {
-  type: 'Perspective' | 'Orthographic';
+  type: "Perspective" | "Orthographic";
   zoom: number;
-  position: object;
-  target: object;
+  position: [number, number, number];
+  target: [number, number, number];
 }
 
 export interface EnvironmentState {
@@ -47,6 +53,7 @@ export interface EnvironmentState {
 export interface Scene {
   id: string;
   objects: SceneObject[];
+  materials: Record<string, Material>;
   lights: Light[];
   camera: CameraState;
   environment: EnvironmentState;
