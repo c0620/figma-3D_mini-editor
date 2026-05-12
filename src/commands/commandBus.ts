@@ -1,6 +1,7 @@
 import { CommandType } from '../types/commands';
 import type { HistoryEntry } from '../types/commands';
 import { History } from '../store/history';
+import { useUiStore } from '../store/uiStore';
 import { ActionExecutor } from './actionExecutor';
 import { ActionReverter } from './actionReverter';
 import { DeletionGarbageCollector } from './deletionGarbageCollector';
@@ -29,6 +30,7 @@ export class CommandBus {
     const evicted = this.history.push(entry);
     this.history.clearRedo();
     this.deletionGc.purgeIfEvicted(evicted);
+    this.syncHistoryFlags();
   }
 
   undo(): void {
@@ -36,6 +38,7 @@ export class CommandBus {
     if (!entry) return;
     this.history.redoActions.push(entry);
     this.reverter.revert(entry.type, entry.payload);
+    this.syncHistoryFlags();
   }
 
   redo(): void {
@@ -43,5 +46,13 @@ export class CommandBus {
     if (!entry) return;
     this.executor.run(entry.type, entry.payload);
     this.history.actions.push(entry);
+    this.syncHistoryFlags();
+  }
+
+  private syncHistoryFlags(): void {
+    useUiStore.getState().setHistoryFlags(
+      this.history.actions.length > 0,
+      this.history.redoActions.length > 0,
+    );
   }
 }

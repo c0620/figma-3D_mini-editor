@@ -2,7 +2,8 @@ import { Routes, Route, MemoryRouter } from "react-router";
 import StartScreen from "./ui/components/screens/StartScreen";
 import EditorPage from "./ui/components/screens/EditorPageScreen";
 import AssetLibraryScreen from "./ui/components/screens/AssetLibraryScreen";
-import LoadSceneScreen from "./ui/components/screens/LoadSceneScreen";
+import LoadLocalSceneScreen from "./ui/components/screens/LoadLocalSceneScreen";
+import LoadFigmaSceneScreen from "./ui/components/screens/LoadFigmaSceneScreen";
 
 function App() {
   return (
@@ -13,8 +14,11 @@ function App() {
           <Route path="editor" element={<EditorPage />} />
           <Route path="library" element={<AssetLibraryScreen />} />
           <Route path="load">
-            <Route path="local" element={<LoadSceneScreen type="local" />} />
-            <Route path="figma" element={<LoadSceneScreen type="figma" />} />
+            <Route path="local" element={<LoadLocalSceneScreen />} />
+            <Route
+              path="figma"
+              element={<LoadFigmaSceneScreen type="figma" />}
+            />
           </Route>
         </Routes>
       </MemoryRouter>
