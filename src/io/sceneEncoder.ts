@@ -13,6 +13,7 @@ import {
 } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+import { randomUUID } from "../lib/randomId";
 import type { Material, Scene, SceneObject } from "../types/scene";
 import { TextureSlot } from "../types/scene";
 import { threeAssetRegistry } from "./threeAssetRegistry";
@@ -99,7 +100,7 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
   });
 
   return {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     objects,
     materials,
     lights: [],

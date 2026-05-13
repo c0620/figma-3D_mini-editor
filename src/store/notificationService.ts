@@ -1,8 +1,10 @@
+import { randomUUID } from '../lib/randomId';
+
 import { useUiStore } from './uiStore';
 
 export class NotificationService {
   pushSuccess(message: string): string {
-    const id = crypto.randomUUID();
+    const id = randomUUID();
     useUiStore.getState().pushNotification({
       id,
       type: 'Success',
@@ -14,7 +16,7 @@ export class NotificationService {
   }
 
   pushError(message: string, reason: string): string {
-    const id = crypto.randomUUID();
+    const id = randomUUID();
     useUiStore.getState().pushNotification({
       id,
       type: 'Error',
