@@ -42,25 +42,17 @@ export function SceneRenderer() {
 
   return (
     <div className="canvas" style={{ width: "100%", height: "100%" }}>
-      <Canvas camera={{ position: scene.camera.position }}>
+      <Canvas camera={{ position: scene.camera.transform.position }}>
         <CameraControls makeDefault />
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         {scene.objects.map((obj) =>
-          activeId == obj.id ? (
-            <TransformControls>
-              <SceneObjectMesh
-                key={obj.id}
-                object={obj}
-                isActive={activeId == obj.id}
-              />
+          activeId === obj.id ? (
+            <TransformControls key={obj.id}>
+              <SceneObjectMesh object={obj} isActive />
             </TransformControls>
           ) : (
-            <SceneObjectMesh
-              key={obj.id}
-              object={obj}
-              isActive={activeId == obj.id}
-            />
+            <SceneObjectMesh key={obj.id} object={obj} isActive={false} />
           )
         )}
       </Canvas>

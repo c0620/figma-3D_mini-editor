@@ -107,9 +107,12 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     camera: {
       type: "Perspective",
       zoom: 1,
-      position: [0, 0, 5],
-      target: [0, 0, 0],
       locked: false,
+      transform: {
+        position: [0, 0, 5],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+      },
     },
     environment: { backgroundColor: null, shadowsEnabled: false },
   };

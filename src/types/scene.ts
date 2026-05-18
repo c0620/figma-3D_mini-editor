@@ -36,6 +36,7 @@ export interface Light {
   type: "Directional" | "Ambient" | "HDRI";
   color: string;
   intensity: number;
+  transform: Transform;
   visible: boolean;
   locked: boolean;
 }
@@ -43,8 +44,7 @@ export interface Light {
 export interface CameraState {
   type: "Perspective" | "Orthographic";
   zoom: number;
-  position: [number, number, number];
-  target: [number, number, number];
+  transform: Transform;
   locked: boolean;
 }
 

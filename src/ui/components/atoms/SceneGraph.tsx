@@ -28,7 +28,7 @@ export function GraphItem({
     >
       <img alt="icon" />
       {item.label}
-      {isActive && (
+      {(isActive || item.locked || !item.visible) && (
         <div>
           {" "}
           <button

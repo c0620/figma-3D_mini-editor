@@ -7,7 +7,6 @@ export class DeletionHandler extends SceneToolHandler {
   }
 
   softDelete(modelId: string): void {
-    const obj = this.scene.getScene().objects.find((o) => o.id === modelId);
-    if (obj) obj.pendingDelete = true;
+    this.scene.patchSceneObject(modelId, { pendingDelete: true, visible: false });
   }
 }
