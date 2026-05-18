@@ -109,6 +109,7 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
       zoom: 1,
       position: [0, 0, 5],
       target: [0, 0, 0],
+      locked: false,
     },
     environment: { backgroundColor: null, shadowsEnabled: false },
   };

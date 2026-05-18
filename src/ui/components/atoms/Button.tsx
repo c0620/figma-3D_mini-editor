@@ -17,8 +17,14 @@ export function MainButton({
   }
 }
 
-export function ActionButton() {
-  return <div>ActionButton</div>;
+export function ActionButton({
+  onClick,
+  text,
+}: {
+  onClick: () => void;
+  text: string;
+}) {
+  return <div onClick={onClick}>{text}</div>;
 }
 
 export function NavLinkButton({ to }: { to: string }) {

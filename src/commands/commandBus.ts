@@ -1,10 +1,10 @@
-import { CommandType } from '../types/commands';
-import type { HistoryEntry } from '../types/commands';
-import { History } from '../store/history';
-import { useUiStore } from '../store/uiStore';
-import { ActionExecutor } from './actionExecutor';
-import { ActionReverter } from './actionReverter';
-import { DeletionGarbageCollector } from './deletionGarbageCollector';
+import { CommandType } from "../types/commands";
+import type { HistoryEntry } from "../types/commands";
+import { History } from "../store/history";
+import { useUiStore } from "../store/uiStore";
+import { ActionExecutor } from "./actionExecutor";
+import { ActionReverter } from "./actionReverter";
+import { DeletionGarbageCollector } from "./deletionGarbageCollector";
 
 export class CommandBus {
   history: History;
@@ -16,7 +16,7 @@ export class CommandBus {
     history: History,
     executor: ActionExecutor,
     reverter: ActionReverter,
-    deletionGc: DeletionGarbageCollector,
+    deletionGc: DeletionGarbageCollector
   ) {
     this.history = history;
     this.executor = executor;
@@ -26,7 +26,7 @@ export class CommandBus {
 
   execute(type: CommandType, payload: object): void {
     this.executor.run(type, payload);
-    const entry: HistoryEntry = { type, payload, timestamp: Date.now() };
+    const entry: HistoryEntry = { type, payload };
     const evicted = this.history.push(entry);
     this.history.clearRedo();
     this.deletionGc.purgeIfEvicted(evicted);
@@ -50,9 +50,11 @@ export class CommandBus {
   }
 
   private syncHistoryFlags(): void {
-    useUiStore.getState().setHistoryFlags(
-      this.history.actions.length > 0,
-      this.history.redoActions.length > 0,
-    );
+    useUiStore
+      .getState()
+      .setHistoryFlags(
+        this.history.actions.length > 0,
+        this.history.redoActions.length > 0
+      );
   }
 }

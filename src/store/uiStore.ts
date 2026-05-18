@@ -1,8 +1,8 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-import type { Notification } from '../types/ui';
+import type { Notification } from "../types/ui";
 
-interface UiState {
+export interface UiState {
   activeObjectId: string | null;
   projectName: string;
   notifications: Notification[];
@@ -20,7 +20,7 @@ interface UiActions {
 
 export const useUiStore = create<UiState & UiActions>((set) => ({
   activeObjectId: null,
-  projectName: '',
+  projectName: "",
   notifications: [],
   canUndo: false,
   canRedo: false,

@@ -1,5 +1,5 @@
 import { CommandType } from "../types/commands";
-import type { EnvironmentState, Light, TextureSlot } from "../types/scene";
+import type { Light, TextureSlot } from "../types/scene";
 import { FigmaAPI } from "../figma/figmaApi";
 import { FigmaHandler } from "../figma/figmaHandler";
 import { BaseToolHandler } from "../handlers/baseToolHandler";
@@ -11,6 +11,11 @@ import { LightEditingHandler } from "../handlers/lightEditingHandler";
 import { SelectionHandler } from "../handlers/selectionHandler";
 import { TextureExportHandler } from "../handlers/textureExportHandler";
 import { TextureImportHandler } from "../handlers/textureImportHandler";
+import {
+  ObjectGraphToolsHandler,
+  ToggleLockHandler,
+  ToggleVisibilityHandler,
+} from "../handlers/objectModeChangingHandler";
 import { SceneEncoder } from "../io/sceneEncoder";
 import { SceneImportExportService } from "../io/sceneImportExportService";
 import { SceneNamingService } from "../io/sceneNamingService";
@@ -30,7 +35,11 @@ import { CommandBus } from "../commands/commandBus";
 import { DeletionGarbageCollector } from "../commands/deletionGarbageCollector";
 import { History } from "../store/history";
 import { NotificationService } from "../store/notificationService";
+import { useSceneStore } from "../store/sceneStore";
 import { SceneStorage } from "../store/sceneStorage";
+
+import type { SceneEntitySummary } from "../store/sceneEntityList";
+import { buildSceneEntityList } from "../store/sceneEntityList";
 
 /**
  * Proxy-тип для хэндлеров, команды которых идут через CommandBus (с историей).
@@ -43,6 +52,8 @@ type HandlerProxy<P extends object = object> = {
 export interface AppHandlers {
   /** Выделение объекта — без истории, вызывается напрямую */
   selection: SelectionHandler;
+  /** Видимость/блокировка мешей: см. {@link ObjectGraphToolsHandler.execute} */
+  graphTools: ObjectGraphToolsHandler;
   /** Управление камерой — без истории, вызывается напрямую */
   camera: CameraEditingHandler;
   /** Базовый трансформ (заглушка до реализации TransformObjectHandler) */
@@ -50,7 +61,7 @@ export interface AppHandlers {
 
   /** Ниже — прокси через CommandBus, действия записываются в историю */
   deletion: HandlerProxy<{ modelId: string }>;
-  visibility: HandlerProxy<{ id: string }>;
+  visibility: HandlerProxy<{ id: string | null }>;
   lock: HandlerProxy<{ id: string }>;
   lightAddition: HandlerProxy<Light>;
   lightEditing: HandlerProxy<{ id: string; changes: object }>;
@@ -70,6 +81,8 @@ export interface AppKernel {
   handlers: AppHandlers;
   undo(): void;
   redo(): void;
+  /** Текущее содержимое сцены для дерева и выбора активного объекта (снимок на момент вызова). */
+  listSceneEntities(): SceneEntitySummary[];
   transfer: SceneTransferFacade;
   notifications: NotificationService;
   help: HelpService;
@@ -101,7 +114,6 @@ export function buildKernel(): AppKernel {
     analyzer,
     notifications
   );
-  console.log(sceneIo);
   const textureFigma = new TextureFigmaService(
     figmaHandler,
     naming,
@@ -134,6 +146,9 @@ export function buildKernel(): AppKernel {
   const environmentHandler = new EnvironmentHandler(sceneStorage);
   const textureImportHandler = new TextureImportHandler(sceneStorage);
   const textureExportHandler = new TextureExportHandler(sceneStorage);
+  const graphToolsHandler = new ObjectGraphToolsHandler(sceneStorage);
+  const toggleVisibilityHandler = new ToggleVisibilityHandler(sceneStorage);
+  const toggleLockHandler = new ToggleLockHandler(sceneStorage);
 
   // --- Commands ---
   const executor = new ActionExecutor(sceneStorage);
@@ -149,6 +164,8 @@ export function buildKernel(): AppKernel {
   executor.handlers.set(CommandType.ToggleShadows, environmentHandler);
   executor.handlers.set(CommandType.ImportTexture, textureImportHandler);
   executor.handlers.set(CommandType.ExportTexture, textureExportHandler);
+  executor.handlers.set(CommandType.ToggleVisibility, toggleVisibilityHandler);
+  executor.handlers.set(CommandType.ToggleLock, toggleLockHandler);
   // SelectObject вызывается напрямую через selectionHandler, минуя bus
   // TransformObject, EditMaterial, ToggleVisibility, ToggleLock, RenameScene — TBD
 
@@ -159,6 +176,7 @@ export function buildKernel(): AppKernel {
 
   const handlers: AppHandlers = {
     selection: selectionHandler,
+    graphTools: graphToolsHandler,
     camera: cameraHandler,
     base: baseHandler,
     environment: environmentHandler,
@@ -179,6 +197,8 @@ export function buildKernel(): AppKernel {
     handlers,
     undo: () => bus.undo(),
     redo: () => bus.redo(),
+    listSceneEntities: () =>
+      buildSceneEntityList(useSceneStore.getState().scene),
     transfer,
     notifications,
     help,

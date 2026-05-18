@@ -12,7 +12,7 @@ export default function StartScreen() {
         Переносите собственные или готовые модели, создавайте и редактируйте
         рендеры прямо в Figma
       </div>
-      <div>
+      <div style={{ display: "flex" }}>
         <CardStart
           title="Библиотека ассетов"
           text="Импорт готовых простых объектов и моделей для мокапов"

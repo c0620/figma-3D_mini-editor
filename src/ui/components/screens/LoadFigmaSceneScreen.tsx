@@ -65,7 +65,7 @@ export default function LoadFigmaSceneScreen({
         textListItems={currentTextContent.textListItems}
       />
       {currentScreenContent}
-      <MainButton text="Импортировать модель" />
+      <MainButton text="Импортировать модель" action="event" />
     </div>
   );
 }

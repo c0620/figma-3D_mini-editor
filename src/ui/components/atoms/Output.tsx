@@ -1,3 +1,6 @@
+import { useContext } from "react";
+import { PanelSceneModeContext } from "../organisms/Panels";
+
 export function TextBlock({
   text,
   textListItems,
@@ -12,5 +15,10 @@ export function TextBlock({
   );
 }
 export function ScrollPanel({ children }: { children: any }) {
-  return <div>{children}</div>;
+  const mode = useContext(PanelSceneModeContext);
+  if (mode == "open") {
+    return <div>Open {children}</div>;
+  } else {
+    return <div>Close {children}</div>;
+  }
 }

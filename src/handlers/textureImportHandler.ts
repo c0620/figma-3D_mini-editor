@@ -1,5 +1,5 @@
-import { TextureSlot } from '../types/scene';
-import { SceneToolHandler } from './sceneToolHandler';
+import { TextureSlot } from "../types/scene";
+import { SceneToolHandler } from "./sceneToolHandler";
 
 export class TextureImportHandler extends SceneToolHandler {
   execute(payload: object): void {
@@ -8,7 +8,9 @@ export class TextureImportHandler extends SceneToolHandler {
       slot: TextureSlot;
       url: string;
     };
-    const obj = this.scene.getScene().objects.find((o) => o.material.id === materialId);
-    if (obj) obj.material.textures.set(slot, url);
+    const obj = this.scene
+      .getScene()
+      .objects.find((o) => o.materialId === materialId);
+    // if (obj) obj.material.textures.set(slot, url);
   }
 }

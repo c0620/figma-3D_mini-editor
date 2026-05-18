@@ -1,4 +1,4 @@
-import { SceneToolHandler } from './sceneToolHandler';
+import { SceneToolHandler } from "./sceneToolHandler";
 
 export class SelectionHandler extends SceneToolHandler {
   execute(payload: object): void {

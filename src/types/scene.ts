@@ -33,9 +33,11 @@ export interface SceneObject {
 
 export interface Light {
   id: string;
-  type: "Directional" | "Ambient";
+  type: "Directional" | "Ambient" | "HDRI";
   color: string;
   intensity: number;
+  visible: boolean;
+  locked: boolean;
 }
 
 export interface CameraState {
@@ -43,6 +45,7 @@ export interface CameraState {
   zoom: number;
   position: [number, number, number];
   target: [number, number, number];
+  locked: boolean;
 }
 
 export interface EnvironmentState {
