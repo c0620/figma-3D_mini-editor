@@ -23,4 +23,9 @@ export default defineConfig({
             "@": path.resolve(__dirname, "./src"),
         },
     },
+    test: {
+        include: ["src/tests/**/*.test.ts"],
+        environment: "happy-dom",
+        setupFiles: ["./src/tests/setup.ts"],
+    },
 });
