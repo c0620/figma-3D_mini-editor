@@ -1,14 +1,27 @@
-type Locale = 'ru' | 'en';
+import type { TranslationKey, TranslationBundle } from "../i18n/en";
+import { useSessionStore } from "../store/sessionStore";
+
+export type Locale = "ru" | "en";
 
 export class LocalizationService {
-  locale: Locale = 'en';
-  private translations: Record<Locale, Record<string, string>> = { ru: {}, en: {} };
+  private translations: Record<Locale, Partial<TranslationBundle>> = {
+    ru: {},
+    en: {},
+  };
 
-  setLocale(locale: Locale): void {
-    this.locale = locale;
+  get locale(): Locale {
+    return useSessionStore.getState().locale;
   }
 
-  t(key: string): string {
-    return this.translations[this.locale][key] ?? key;
+  setLocale(locale: Locale): void {
+    useSessionStore.getState().setLocale(locale);
+  }
+
+  addBundle(locale: Locale, bundle: TranslationBundle): void {
+    this.translations[locale] = { ...this.translations[locale], ...bundle };
+  }
+
+  t(key: TranslationKey): string {
+    return this.translations[this.locale]?.[key] ?? key;
   }
 }

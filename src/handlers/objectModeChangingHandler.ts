@@ -1,4 +1,4 @@
-import { useUiStore } from "../store/uiStore";
+import { useSessionStore } from "../store/sessionStore";
 import type { SceneObject } from "../types/scene";
 import { SceneToolHandler } from "./sceneToolHandler";
 
@@ -13,7 +13,7 @@ function resolveMeshObjectId(explicit?: string | null): string | null {
   const id =
     typeof explicit === "string" && explicit.length > 0
       ? explicit
-      : useUiStore.getState().activeObjectId;
+      : useSessionStore.getState().activeObjectId;
   return id ?? null;
 }
 

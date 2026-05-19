@@ -1,8 +1,13 @@
-import type { CameraState, Light, Scene, SceneObject } from '../types/scene';
+import type { CameraState, Light, Scene, SceneObject } from "../types/scene";
 
-import { useSceneStore } from './sceneStore';
-import type { CameraPatch, LightPatch, SceneObjectPatch } from './sceneStore';
-import { useUiStore } from './uiStore';
+import { useSceneStore } from "./sceneStore";
+import type {
+  CameraPatch,
+  LightPatch,
+  MaterialPatch,
+  SceneObjectPatch,
+} from "./sceneStore";
+import { useSessionStore } from "./sessionStore";
 
 export class SceneStorage {
   load(scene: Scene): void {
@@ -11,7 +16,7 @@ export class SceneStorage {
 
   getScene(): Scene {
     const scene = useSceneStore.getState().scene;
-    if (!scene) throw new Error('SceneStorage.getScene: no scene loaded');
+    if (!scene) throw new Error("SceneStorage.getScene: no scene loaded");
     return scene;
   }
 
@@ -25,6 +30,10 @@ export class SceneStorage {
 
   patchCamera(patch: CameraPatch): void {
     useSceneStore.getState().patchCamera(patch);
+  }
+
+  patchMaterial(materialId: string, patch: MaterialPatch): void {
+    useSceneStore.getState().patchMaterial(materialId, patch);
   }
 
   findObjectById(id: string): SceneObject | null {
@@ -44,10 +53,10 @@ export class SceneStorage {
   }
 
   setActive(id: string | null): void {
-    useUiStore.getState().setActiveObjectId(id);
+    useSessionStore.getState().setActiveObjectId(id);
   }
 
   updateProjectName(name: string): void {
-    useUiStore.getState().setProjectName(name);
+    useSessionStore.getState().setProjectName(name);
   }
 }

@@ -1,3 +1,4 @@
+import type { TranslationKey } from "../i18n/en";
 import type { Scene } from "../types/scene";
 
 export type SceneEntityKind = "mesh" | "light" | "camera";
@@ -22,14 +23,26 @@ export function isSceneCameraEntityId(
   return entityId === sceneCameraEntityId(sceneId);
 }
 
+export function isSceneEnvironmentEntityId(
+  sceneId: string,
+  entityId: string
+): boolean {
+  return entityId === `${sceneId}:environment`;
+}
+
 /**
  * Плоский список объектов для дерева сцены и выбора активного объекта.
- * Порядок: меши → источники света → камера → окружение.
+ * Порядок: меши → источники света → камера.
+ *
+ * @param t — функция перевода; если не передана, ключ i18n используется как есть.
  */
 export function buildSceneEntityList(
-  scene: Scene | null
+  scene: Scene | null,
+  t?: (key: TranslationKey) => string,
 ): SceneEntitySummary[] {
   if (!scene) return [];
+
+  const tr = t ?? ((k: string) => k);
 
   const items: SceneEntitySummary[] = [];
 
@@ -38,7 +51,7 @@ export function buildSceneEntityList(
     items.push({
       id: o.id,
       kind: "mesh",
-      label: o.name || "Mesh",
+      label: o.name || tr("entity.mesh.default"),
       visible: o.visible,
       locked: o.locked,
     });
@@ -46,7 +59,9 @@ export function buildSceneEntityList(
 
   for (const light of scene.lights) {
     const kindLabel =
-      light.type === "Directional" ? "Направленный свет" : "Окружающий свет";
+      light.type === "Directional"
+        ? tr("entity.light.directional")
+        : tr("entity.light.ambient");
     items.push({
       id: light.id,
       kind: "light",
@@ -61,8 +76,8 @@ export function buildSceneEntityList(
     kind: "camera",
     label:
       scene.camera.type === "Perspective"
-        ? "Камера (перспектива)"
-        : "Камера (ортография)",
+        ? tr("entity.camera.perspective")
+        : tr("entity.camera.orthographic"),
     visible: true,
     locked: false,
   });

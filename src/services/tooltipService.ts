@@ -1,3 +1,4 @@
+import type { TranslationKey } from '../i18n/en';
 import type { TooltipData } from '../types/ui';
 import { LocalizationService } from './localizationService';
 
@@ -14,11 +15,14 @@ export class TooltipService {
   }
 
   getTooltip(toolId: string): TooltipData {
+    const nameKey = `tooltip.${toolId}.name` as TranslationKey;
+    const descKey = `tooltip.${toolId}.description` as TranslationKey;
+    const shortcutKey = `tooltip.${toolId}.shortcut` as TranslationKey;
     return {
       toolId,
-      name: this.i18n.t(`tooltip.${toolId}.name`),
-      description: this.i18n.t(`tooltip.${toolId}.description`),
-      shortcut: this.i18n.t(`tooltip.${toolId}.shortcut`),
+      name: this.i18n.t(nameKey),
+      description: this.i18n.t(descKey),
+      shortcut: this.i18n.t(shortcutKey),
     };
   }
 }

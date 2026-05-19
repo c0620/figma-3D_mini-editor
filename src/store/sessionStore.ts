@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import type { Notification } from "../types/ui";
+import type { Locale } from "../services/localizationService";
 
 export interface UiState {
   activeObjectId: string | null;
@@ -8,6 +9,7 @@ export interface UiState {
   notifications: Notification[];
   canUndo: boolean;
   canRedo: boolean;
+  locale: Locale;
 }
 
 interface UiActions {
@@ -16,14 +18,16 @@ interface UiActions {
   pushNotification(notification: Notification): void;
   removeNotification(id: string): void;
   setHistoryFlags(canUndo: boolean, canRedo: boolean): void;
+  setLocale(locale: Locale): void;
 }
 
-export const useUiStore = create<UiState & UiActions>((set) => ({
+export const useSessionStore = create<UiState & UiActions>((set) => ({
   activeObjectId: null,
   projectName: "",
   notifications: [],
   canUndo: false,
   canRedo: false,
+  locale: "ru" as Locale,
 
   setActiveObjectId: (id) => set({ activeObjectId: id }),
   setProjectName: (name) => set({ projectName: name }),
@@ -32,4 +36,5 @@ export const useUiStore = create<UiState & UiActions>((set) => ({
   removeNotification: (id) =>
     set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) })),
   setHistoryFlags: (canUndo, canRedo) => set({ canUndo, canRedo }),
+  setLocale: (locale) => set({ locale }),
 }));

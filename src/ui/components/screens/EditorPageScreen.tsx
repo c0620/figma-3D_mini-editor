@@ -1,5 +1,5 @@
 import { NavLink } from "react-router";
-import { SceneRenderer } from "../viewport/SceneViewport";
+import { SceneCanvas } from "../viewport/SceneViewport";
 import { PanelObject, PanelScene } from "../organisms/Panels";
 import { useActiveObject } from "@/app/ApplicationKernelContext";
 
@@ -24,7 +24,7 @@ export default function EditorPage() {
         <PanelObject />
       </div>
       <div style={{ width: "100vw", height: "100vh" }}>
-        <SceneRenderer />
+        <SceneCanvas />
       </div>
     </div>
   );

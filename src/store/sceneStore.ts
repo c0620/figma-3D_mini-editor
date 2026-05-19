@@ -1,6 +1,7 @@
 import type {
   CameraState,
   Light,
+  Material,
   Scene,
   SceneObject,
   Transform,
@@ -22,6 +23,12 @@ export type CameraPatch = Partial<Omit<CameraState, 'transform'>> & {
   transform?: Partial<Transform>;
 };
 
+export type MaterialPatch = Partial<
+  Pick<Material, 'baseColor' | 'roughness' | 'metalness' | 'emissive'> & {
+    textures?: Partial<Material['textures']>;
+  }
+>;
+
 interface SceneState {
   scene: Scene | null;
 }
@@ -32,6 +39,7 @@ interface SceneActions {
   patchSceneObject(objectId: string, patch: SceneObjectPatch): void;
   patchLight(lightId: string, patch: LightPatch): void;
   patchCamera(patch: CameraPatch): void;
+  patchMaterial(materialId: string, patch: MaterialPatch): void;
 }
 
 export type { SceneObjectPatch };
@@ -89,6 +97,32 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
         scene: {
           ...state.scene,
           camera: { ...prev, ...rest, transform: nextTransform },
+        },
+      };
+    }),
+
+  patchMaterial: (materialId, patch) =>
+    set((state) => {
+      if (!state.scene) return state;
+      const prev = state.scene.materials[materialId];
+      if (!prev) return state;
+
+      const { textures: texturePatch, ...scalarPatch } = patch;
+      const nextTextures = texturePatch
+        ? { ...prev.textures, ...texturePatch }
+        : prev.textures;
+
+      return {
+        scene: {
+          ...state.scene,
+          materials: {
+            ...state.scene.materials,
+            [materialId]: {
+              ...prev,
+              ...scalarPatch,
+              textures: nextTextures,
+            },
+          },
         },
       };
     }),

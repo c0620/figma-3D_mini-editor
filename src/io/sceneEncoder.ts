@@ -16,7 +16,7 @@ import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { randomUUID } from "../lib/randomId";
 import type { Material, Scene, SceneObject } from "../types/scene";
 import { TextureSlot } from "../types/scene";
-import { threeAssetRegistry } from "./threeAssetRegistry";
+import { threeAssetRegistry } from "../store/threeAssetRegistry";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
 type ImportFileType = SceneFileType | "Figma";
@@ -50,9 +50,8 @@ function extractDomainMaterial(
 }
 
 /**
- * Обход графа Three: каждый Mesh → SceneObject (плоский), геометрия и материал
- * уходят в threeAssetRegistry под тем же id. Сама Three-структура остаётся
- * вне стора.
+ * Обход графа Three: каждый Mesh → SceneObject (плоский).
+ * Геометрия — в threeAssetRegistry; параметры материала — в scene.materials.
  */
 function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
   threeAssetRegistry.clear();
@@ -79,10 +78,7 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     const domainMat = extractDomainMaterial(threeMat);
     materials[domainMat.id] = domainMat;
 
-    threeAssetRegistry.register(id, {
-      geometry: node.geometry,
-      material: threeMat,
-    });
+    threeAssetRegistry.register(id, { geometry: node.geometry });
 
     objects.push({
       id,

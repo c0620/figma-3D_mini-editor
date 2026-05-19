@@ -27,6 +27,8 @@ import { Renderer } from "../render/renderer";
 import { RenderService } from "../render/renderService";
 import { SceneAnalyzer } from "../render/sceneAnalyzer";
 import { LocalizationService } from "../services/localizationService";
+import enBundle from "../i18n/en";
+import ruBundle from "../i18n/ru";
 import { HelpService } from "../services/helpService";
 import { TooltipService } from "../services/tooltipService";
 import { ActionExecutor } from "../commands/actionExecutor";
@@ -133,6 +135,9 @@ export function buildKernel(): AppKernel {
 
   // --- UX services ---
   const i18n = new LocalizationService();
+  i18n.addBundle("en", enBundle);
+  i18n.addBundle("ru", ruBundle);
+
   const tooltips = new TooltipService(i18n);
   const help = new HelpService(i18n, tooltips);
 
@@ -198,7 +203,7 @@ export function buildKernel(): AppKernel {
     undo: () => bus.undo(),
     redo: () => bus.redo(),
     listSceneEntities: () =>
-      buildSceneEntityList(useSceneStore.getState().scene),
+      buildSceneEntityList(useSceneStore.getState().scene, (k) => i18n.t(k)),
     transfer,
     notifications,
     help,

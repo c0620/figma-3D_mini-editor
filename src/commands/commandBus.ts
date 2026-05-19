@@ -1,7 +1,7 @@
 import { CommandType } from "../types/commands";
 import type { HistoryEntry } from "../types/commands";
 import { History } from "../store/history";
-import { useUiStore } from "../store/uiStore";
+import { useSessionStore } from "../store/sessionStore";
 import { ActionExecutor } from "./actionExecutor";
 import { ActionReverter } from "./actionReverter";
 import { DeletionGarbageCollector } from "./deletionGarbageCollector";
@@ -50,7 +50,7 @@ export class CommandBus {
   }
 
   private syncHistoryFlags(): void {
-    useUiStore
+    useSessionStore
       .getState()
       .setHistoryFlags(
         this.history.actions.length > 0,

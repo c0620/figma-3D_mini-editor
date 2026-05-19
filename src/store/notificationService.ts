@@ -1,13 +1,13 @@
-import { randomUUID } from '../lib/randomId';
+import { randomUUID } from "../lib/randomId";
 
-import { useUiStore } from './uiStore';
+import { useSessionStore } from "./sessionStore";
 
 export class NotificationService {
   pushSuccess(message: string): string {
     const id = randomUUID();
-    useUiStore.getState().pushNotification({
+    useSessionStore.getState().pushNotification({
       id,
-      type: 'Success',
+      type: "Success",
       message,
       reason: null,
       createdAt: Date.now(),
@@ -17,9 +17,9 @@ export class NotificationService {
 
   pushError(message: string, reason: string): string {
     const id = randomUUID();
-    useUiStore.getState().pushNotification({
+    useSessionStore.getState().pushNotification({
       id,
-      type: 'Error',
+      type: "Error",
       message,
       reason,
       createdAt: Date.now(),
@@ -28,6 +28,6 @@ export class NotificationService {
   }
 
   close(id: string): void {
-    useUiStore.getState().removeNotification(id);
+    useSessionStore.getState().removeNotification(id);
   }
 }

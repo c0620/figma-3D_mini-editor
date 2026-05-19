@@ -5,6 +5,7 @@ import { PanelModeToggle } from "../atoms/Navigation";
 import { createContext, useCallback, useMemo, useState } from "react";
 import {
   useHandlers,
+  useI18n,
   useSceneEntities,
   type ActiveEntity,
 } from "@/app/ApplicationKernelContext";
@@ -35,20 +36,25 @@ function activeEntityRowId(
   }
 }
 
-function activeEntityEditorHeading(active: ActiveEntity): string {
+function activeEntityEditorHeading(
+  active: ActiveEntity,
+  t: ReturnType<typeof useI18n>["t"],
+): string {
   switch (active.kind) {
     case "mesh":
-      return active.data.name?.trim() ? `mesh «${active.data.name}»` : "mesh";
+      return active.data.name?.trim()
+        ? `${t("entity.mesh.default")} «${active.data.name}»`
+        : t("entity.mesh.default");
     case "light":
       return active.data.type === "Directional"
-        ? "Направленный свет"
+        ? t("entity.light.directional")
         : active.data.type === "Ambient"
-          ? "Окружающий свет"
-          : "HDRI";
+          ? t("entity.light.ambient")
+          : t("entity.light.hdri");
     case "camera":
       return active.data.type === "Perspective"
-        ? "Камера (перспектива)"
-        : "Камера (ортография)";
+        ? t("entity.camera.perspective")
+        : t("entity.camera.orthographic");
   }
 }
 
@@ -110,6 +116,7 @@ function buildAxisFields(
 export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
   const [mode, setMode] = useState<PanelMode>("open");
   const scene = useSceneStore((s) => s.scene);
+  const { t } = useI18n();
 
   const sceneItems = useSceneEntities();
   const sceneId = scene?.id ?? null;
@@ -160,32 +167,32 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
 
     if (!showTransformBlocks) return null;
 
-    const t = transformForSelection(scene, activeObj);
-    if (!t) return null;
+    const transform = transformForSelection(scene, activeObj);
+    if (!transform) return null;
 
     const locked = isSelectionLocked(scene, activeObj);
 
-    const groups: { key: keyof Transform; ru: string }[] = [
-      { key: "position", ru: "Позиция" },
-      { key: "rotation", ru: "Поворот" },
-      { key: "scale", ru: "Масштаб" },
+    const groups: { key: keyof Transform; labelKey: "transform.position" | "transform.rotation" | "transform.scale" }[] = [
+      { key: "position", labelKey: "transform.position" },
+      { key: "rotation", labelKey: "transform.rotation" },
+      { key: "scale", labelKey: "transform.scale" },
     ];
 
     return (
       <>
         {locked ? (
           <div style={{ opacity: 0.85, marginBottom: 8 }}>
-            Объект заблокирован — параметры недоступны
+            {t("panel.scene.locked")}
           </div>
         ) : null}
-        {groups.map(({ key: dim, ru }) => (
+        {groups.map(({ key: dim, labelKey }) => (
           <ObjectNumberInput
             key={dim}
             mode={mode}
-            label={ru}
+            label={t(labelKey)}
             fields={buildAxisFields(
               dim,
-              t[dim],
+              transform[dim],
               applyTransformDimension,
               locked
             )}
@@ -194,7 +201,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
         ))}
       </>
     );
-  }, [scene, activeObj, sceneId, mode, applyTransformDimension]);
+  }, [scene, activeObj, sceneId, mode, applyTransformDimension, t]);
 
   return (
     <div
@@ -224,18 +231,18 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
           </ScrollPanel>
           <ActionButton
             onClick={() => console.log("add obj")}
-            text="Добавить объект"
+            text={t("panel.scene.addObject")}
           />
           <ActionButton
             onClick={() => console.log("add light")}
-            text="Добавить свет"
+            text={t("panel.scene.addLight")}
           />
 
           {activeObj && (
             <div>
               <div>
-                Редактирование{" "}
-                <strong>{activeEntityEditorHeading(activeObj)}</strong>{" "}
+                {t("panel.scene.editing")}{" "}
+                <strong>{activeEntityEditorHeading(activeObj, t)}</strong>{" "}
               </div>
               <div>{transformPanels}</div>
             </div>
