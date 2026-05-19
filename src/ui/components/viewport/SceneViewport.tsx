@@ -1,7 +1,8 @@
-import { Suspense, useMemo } from "react";
+import { Suspense, useLayoutEffect, useMemo } from "react";
 import { CameraControls, Outlines, TransformControls } from "@react-three/drei";
 import { useTexture } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
+import { Color, MeshStandardMaterial, type Material as ThreeMaterial } from "three";
 import type { Texture } from "three";
 
 import { useSceneStore } from "../../../store/sceneStore";
@@ -77,7 +78,29 @@ function TexturedMaterial({
   );
 }
 
-/** Материал из доменного стора; при смене textures / baseColor React пересобирает meshStandardMaterial. */
+/**
+ * Материал с импорта: те же Texture-объекты и UV/flipY, что выставил GLTF/OBJ-загрузчик.
+ * Скаляры (цвет, roughness) синхронизируются из доменного стора.
+ */
+function ImportedThreeMaterial({
+  mat,
+  source,
+}: {
+  mat: Material;
+  source: ThreeMaterial;
+}) {
+  useLayoutEffect(() => {
+    const m = source as MeshStandardMaterial;
+    if (m.color) m.color.set(mat.baseColor);
+    if (typeof m.roughness === "number") m.roughness = mat.roughness;
+    if (typeof m.metalness === "number") m.metalness = mat.metalness;
+    if (m.emissive instanceof Color) m.emissive.set(mat.emissive);
+  }, [source, mat.baseColor, mat.roughness, mat.metalness, mat.emissive]);
+
+  return <primitive attach="material" object={source} />;
+}
+
+/** Материал из URL в сторе (замена текстуры пользователем). */
 function ObjectMaterial({ mat }: { mat: Material }) {
   const textureUrls = useMemo(() => buildTextureUrlMap(mat), [mat.textures]);
 
@@ -107,6 +130,9 @@ function SceneObjectMesh({
   const asset = threeAssetRegistry.get(object.id);
   if (!asset || !material) return null;
 
+  const useImported =
+    asset.importedMaterial != null && !hasTextureUrls(material);
+
   return (
     <mesh
       geometry={asset.geometry}
@@ -116,7 +142,14 @@ function SceneObjectMesh({
       visible={object.visible}
       name={object.name}
     >
-      <ObjectMaterial mat={material} />
+      {useImported ? (
+        <ImportedThreeMaterial
+          mat={material}
+          source={asset.importedMaterial!}
+        />
+      ) : (
+        <ObjectMaterial mat={material} />
+      )}
       {isActive && <Outlines thickness={3} color="orange" />}
     </mesh>
   );

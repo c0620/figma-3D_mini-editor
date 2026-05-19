@@ -1,15 +1,22 @@
-import type { BufferGeometry } from 'three';
+import type { BufferGeometry, Material as ThreeMaterial } from "three";
 
-interface ThreeAsset {
+export interface ThreeAsset {
   geometry: BufferGeometry;
+  /** Клон материала с импорта (UV, flipY, карты уже настроены загрузчиком). */
+  importedMaterial?: ThreeMaterial;
+}
+
+function disposeThreeMaterial(material: ThreeMaterial | undefined): void {
+  if (!material) return;
+  material.dispose();
 }
 
 /**
- * Пул геометрий Three.js (GPU-буферы вершин).
- * Не в Zustand — мутабельные и тяжёлые; после импорта не меняются.
+ * Пул геометрий и импортированных материалов Three.js.
+ * Не в Zustand — мутабельные и тяжёлые.
  *
- * Материалы и текстуры живут в `scene.materials` (Zustand) и
- * рендерятся декларативно через R3F (`meshStandardMaterial`).
+ * Скаляры материала и пользовательские текстуры — в `scene.materials`;
+ * при замене текстуры из UI рендер переключается на URL из стора.
  *
  * Связь: SceneObject.id ↔ ключ в этом регистре.
  */
@@ -18,7 +25,10 @@ class ThreeAssetRegistry {
 
   register(id: string, asset: ThreeAsset): void {
     const existing = this.assets.get(id);
-    if (existing) existing.geometry.dispose();
+    if (existing) {
+      existing.geometry.dispose();
+      disposeThreeMaterial(existing.importedMaterial);
+    }
     this.assets.set(id, asset);
   }
 
@@ -30,11 +40,15 @@ class ThreeAssetRegistry {
     const asset = this.assets.get(id);
     if (!asset) return;
     asset.geometry.dispose();
+    disposeThreeMaterial(asset.importedMaterial);
     this.assets.delete(id);
   }
 
   clear(): void {
-    for (const asset of this.assets.values()) asset.geometry.dispose();
+    for (const asset of this.assets.values()) {
+      asset.geometry.dispose();
+      disposeThreeMaterial(asset.importedMaterial);
+    }
     this.assets.clear();
   }
 }

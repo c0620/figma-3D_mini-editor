@@ -21,6 +21,21 @@ import { threeAssetRegistry } from "../store/threeAssetRegistry";
 type SceneFileType = "OBJ" | "FBX" | "GLB";
 type ImportFileType = SceneFileType | "Figma";
 
+const emptyTextures = (): Material["textures"] => ({
+  [TextureSlot.BaseColor]: null,
+  [TextureSlot.Normal]: null,
+  [TextureSlot.Roughness]: null,
+  [TextureSlot.Metalness]: null,
+  [TextureSlot.Emissive]: null,
+});
+
+function cloneImportedMaterial(
+  threeMat: ThreeMaterial | ThreeMaterial[],
+): ThreeMaterial {
+  const m = Array.isArray(threeMat) ? threeMat[0] : threeMat;
+  return m.clone();
+}
+
 function extractDomainMaterial(
   threeMat: ThreeMaterial | ThreeMaterial[]
 ): Material {
@@ -39,13 +54,7 @@ function extractDomainMaterial(
     roughness: typeof std.roughness === "number" ? std.roughness : 1,
     metalness: typeof std.metalness === "number" ? std.metalness : 0,
     emissive,
-    textures: {
-      [TextureSlot.BaseColor]: null,
-      [TextureSlot.Normal]: null,
-      [TextureSlot.Roughness]: null,
-      [TextureSlot.Metalness]: null,
-      [TextureSlot.Emissive]: null,
-    },
+    textures: emptyTextures(),
   };
 }
 
@@ -78,7 +87,10 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     const domainMat = extractDomainMaterial(threeMat);
     materials[domainMat.id] = domainMat;
 
-    threeAssetRegistry.register(id, { geometry: node.geometry });
+    threeAssetRegistry.register(id, {
+      geometry: node.geometry,
+      importedMaterial: cloneImportedMaterial(threeMat),
+    });
 
     objects.push({
       id,
