@@ -3,29 +3,29 @@ import type {
   Light,
   Material,
   Scene,
-  SceneObject,
+  SceneMesh,
   Transform,
-} from '../types/scene';
+} from "../types/scene";
 
-import { create } from 'zustand';
+import { create } from "zustand";
 
 type SceneObjectPatch = Partial<
-  Pick<SceneObject, 'visible' | 'locked' | 'name' | 'pendingDelete'> & {
+  Pick<SceneMesh, "visible" | "locked" | "name" | "pendingDelete"> & {
     transform: Partial<Transform>;
   }
 >;
 
-export type LightPatch = Partial<Omit<Light, 'id' | 'transform'>> & {
+export type LightPatch = Partial<Omit<Light, "id" | "transform">> & {
   transform?: Partial<Transform>;
 };
 
-export type CameraPatch = Partial<Omit<CameraState, 'transform'>> & {
+export type CameraPatch = Partial<Omit<CameraState, "transform">> & {
   transform?: Partial<Transform>;
 };
 
 export type MaterialPatch = Partial<
-  Pick<Material, 'baseColor' | 'roughness' | 'metalness' | 'emissive'> & {
-    textures?: Partial<Material['textures']>;
+  Pick<Material, "baseColor" | "roughness" | "metalness" | "emissive"> & {
+    textures?: Partial<Material["textures"]>;
   }
 >;
 
@@ -53,16 +53,16 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
   patchSceneObject: (objectId, patch) =>
     set((state) => {
       if (!state.scene) return state;
-      const idx = state.scene.objects.findIndex((o) => o.id === objectId);
+      const idx = state.scene.meshes.findIndex((o) => o.id === objectId);
       if (idx < 0) return state;
 
-      const prev = state.scene.objects[idx];
+      const prev = state.scene.meshes[idx];
       const nextTransform = patch.transform
         ? { ...prev.transform, ...patch.transform }
         : prev.transform;
 
       const { transform: _t, ...rest } = patch;
-      const nextObjects = [...state.scene.objects];
+      const nextObjects = [...state.scene.meshes];
       nextObjects[idx] = { ...prev, ...rest, transform: nextTransform };
       return { scene: { ...state.scene, objects: nextObjects } };
     }),

@@ -1,5 +1,5 @@
 import { useSessionStore } from "../store/sessionStore";
-import type { SceneObject } from "../types/scene";
+import type { SceneMesh } from "../types/scene";
 import { SceneToolHandler } from "./sceneToolHandler";
 
 export type ObjectGraphToolsSetPayload = {
@@ -41,7 +41,7 @@ export class ObjectGraphToolsHandler extends SceneToolHandler {
     const obj = this.scene.findObjectById(resolvedId);
     if (!obj) return;
 
-    const patch: Partial<Pick<SceneObject, "visible" | "locked">> = {};
+    const patch: Partial<Pick<SceneMesh, "visible" | "locked">> = {};
     if (hasVisibility) patch.visible = visible;
     if (hasLock) patch.locked = locked;
 

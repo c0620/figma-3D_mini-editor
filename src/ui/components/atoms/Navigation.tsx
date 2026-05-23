@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { NavLinkButton } from "./Button";
-import type { PanelMode } from "../organisms/Panels";
+import type { PanelMode } from "../organisms/PanelScene";
 
 export function PanelModeToggle({
   mode,

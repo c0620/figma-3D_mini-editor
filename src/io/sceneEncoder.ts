@@ -14,7 +14,7 @@ import {
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 import { randomUUID } from "../lib/randomId";
-import type { Material, Scene, SceneObject } from "../types/scene";
+import type { Material, Scene, SceneMesh } from "../types/scene";
 import { TextureSlot } from "../types/scene";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
 
@@ -30,7 +30,7 @@ const emptyTextures = (): Material["textures"] => ({
 });
 
 function cloneImportedMaterial(
-  threeMat: ThreeMaterial | ThreeMaterial[],
+  threeMat: ThreeMaterial | ThreeMaterial[]
 ): ThreeMaterial {
   const m = Array.isArray(threeMat) ? threeMat[0] : threeMat;
   return m.clone();
@@ -66,7 +66,7 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
   threeAssetRegistry.clear();
 
   const threeRoot = "scene" in root ? root.scene : root;
-  const objects: SceneObject[] = [];
+  const meshes: SceneMesh[] = [];
   const materials: Record<string, Material> = {};
 
   threeRoot.updateMatrixWorld(true);
@@ -92,7 +92,7 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
       importedMaterial: cloneImportedMaterial(threeMat),
     });
 
-    objects.push({
+    meshes.push({
       id,
       name: node.name || "Mesh",
       visible: node.visible,
@@ -109,7 +109,7 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
 
   return {
     id: randomUUID(),
-    objects,
+    meshes,
     materials,
     lights: [],
     camera: {

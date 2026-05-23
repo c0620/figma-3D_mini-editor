@@ -1,5 +1,5 @@
 import { InputText, Slider, SliderCentered } from "../atoms/Input";
-import type { PanelMode } from "../organisms/Panels";
+import type { PanelMode } from "../organisms/PanelScene";
 
 export type InputField = {
   onChange: (value: number) => void;

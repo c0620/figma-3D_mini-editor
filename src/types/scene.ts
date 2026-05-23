@@ -21,7 +21,7 @@ export interface Transform {
   scale: [number, number, number];
 }
 
-export interface SceneObject {
+export interface SceneMesh {
   id: string;
   name: string;
   visible: boolean;
@@ -39,6 +39,7 @@ export interface Light {
   transform: Transform;
   visible: boolean;
   locked: boolean;
+  pendingDelete: boolean;
 }
 
 export interface CameraState {
@@ -55,7 +56,7 @@ export interface EnvironmentState {
 
 export interface Scene {
   id: string;
-  objects: SceneObject[];
+  meshes: SceneMesh[];
   materials: Record<string, Material>;
   lights: Light[];
   camera: CameraState;

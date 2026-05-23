@@ -1,4 +1,4 @@
-import type { CameraState, Light, Scene, SceneObject } from "../types/scene";
+import type { CameraState, Light, Scene, SceneMesh } from "../types/scene";
 
 import { useSceneStore } from "./sceneStore";
 import type {
@@ -36,10 +36,10 @@ export class SceneStorage {
     useSceneStore.getState().patchMaterial(materialId, patch);
   }
 
-  findObjectById(id: string): SceneObject | null {
+  findObjectById(id: string): SceneMesh | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;
-    return scene.objects.find((o) => o.id === id) ?? null;
+    return scene.meshes.find((o) => o.id === id) ?? null;
   }
 
   findLightById(id: string): Light | null {

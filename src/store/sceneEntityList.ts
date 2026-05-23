@@ -38,7 +38,7 @@ export function isSceneEnvironmentEntityId(
  */
 export function buildSceneEntityList(
   scene: Scene | null,
-  t?: (key: TranslationKey) => string,
+  t?: (key: TranslationKey) => string
 ): SceneEntitySummary[] {
   if (!scene) return [];
 
@@ -46,7 +46,7 @@ export function buildSceneEntityList(
 
   const items: SceneEntitySummary[] = [];
 
-  for (const o of scene.objects) {
+  for (const o of scene.meshes) {
     if (o.pendingDelete) continue;
     items.push({
       id: o.id,
@@ -58,6 +58,7 @@ export function buildSceneEntityList(
   }
 
   for (const light of scene.lights) {
+    if (light.pendingDelete) continue;
     const kindLabel =
       light.type === "Directional"
         ? tr("entity.light.directional")

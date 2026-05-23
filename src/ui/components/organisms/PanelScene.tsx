@@ -38,7 +38,7 @@ function activeEntityRowId(
 
 function activeEntityEditorHeading(
   active: ActiveEntity,
-  t: ReturnType<typeof useI18n>["t"],
+  t: ReturnType<typeof useI18n>["t"]
 ): string {
   switch (active.kind) {
     case "mesh":
@@ -65,7 +65,7 @@ function transformForSelection(
 ): Transform | null {
   switch (active.kind) {
     case "mesh": {
-      const o = scene.objects.find((x) => x.id === active.data.id);
+      const o = scene.meshes.find((x) => x.id === active.data.id);
       return o?.transform ?? null;
     }
     case "light": {
@@ -83,9 +83,7 @@ function isSelectionLocked(
 ): boolean {
   switch (active.kind) {
     case "mesh":
-      return (
-        scene.objects.find((o) => o.id === active.data.id)?.locked ?? false
-      );
+      return scene.meshes.find((o) => o.id === active.data.id)?.locked ?? false;
     case "light":
       return scene.lights.find((l) => l.id === active.data.id)?.locked ?? false;
     case "camera":
@@ -172,7 +170,10 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
 
     const locked = isSelectionLocked(scene, activeObj);
 
-    const groups: { key: keyof Transform; labelKey: "transform.position" | "transform.rotation" | "transform.scale" }[] = [
+    const groups: {
+      key: keyof Transform;
+      labelKey: "transform.position" | "transform.rotation" | "transform.scale";
+    }[] = [
       { key: "position", labelKey: "transform.position" },
       { key: "rotation", labelKey: "transform.rotation" },
       { key: "scale", labelKey: "transform.scale" },
@@ -249,21 +250,6 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
           )}
         </PanelSceneModeContext.Provider>
       </div>
-    </div>
-  );
-}
-
-export function PanelObject() {
-  return (
-    <div
-      style={{
-        background: "rgba(255, 255, 255, 0.1)",
-        backdropFilter: "blur(24px)",
-        userSelect: "none",
-        zIndex: 10,
-      }}
-    >
-      Panel Object
     </div>
   );
 }

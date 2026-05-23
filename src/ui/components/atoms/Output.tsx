@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { PanelSceneModeContext } from "../organisms/Panels";
+import { PanelSceneModeContext } from "../organisms/PanelScene";
 
 export function TextBlock({
   text,

@@ -2,12 +2,16 @@ import { Suspense, useLayoutEffect, useMemo } from "react";
 import { CameraControls, Outlines, TransformControls } from "@react-three/drei";
 import { useTexture } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { Color, MeshStandardMaterial, type Material as ThreeMaterial } from "three";
+import {
+  Color,
+  MeshStandardMaterial,
+  type Material as ThreeMaterial,
+} from "three";
 import type { Texture } from "three";
 
 import { useSceneStore } from "../../../store/sceneStore";
 import { threeAssetRegistry } from "../../../store/threeAssetRegistry";
-import type { Material, SceneObject } from "../../../types/scene";
+import type { Material, SceneMesh } from "../../../types/scene";
 import { TextureSlot } from "../../../types/scene";
 import { useSessionStore } from "@/store/sessionStore";
 
@@ -123,7 +127,7 @@ function SceneObjectMesh({
   object,
   isActive,
 }: {
-  object: SceneObject;
+  object: SceneMesh;
   isActive: boolean;
 }) {
   const material = useSceneStore((s) => s.scene?.materials[object.materialId]);
@@ -166,13 +170,13 @@ export function SceneCanvas() {
         <CameraControls makeDefault />
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
-        {scene.objects.map((obj) =>
-          activeId === obj.id ? (
-            <TransformControls key={obj.id}>
-              <SceneObjectMesh object={obj} isActive />
+        {scene.meshes.map((mesh) =>
+          activeId === mesh.id ? (
+            <TransformControls key={mesh.id}>
+              <SceneObjectMesh object={mesh} isActive />
             </TransformControls>
           ) : (
-            <SceneObjectMesh key={obj.id} object={obj} isActive={false} />
+            <SceneObjectMesh key={mesh.id} object={mesh} isActive={false} />
           )
         )}
       </Canvas>

@@ -1,10 +1,18 @@
 import { NavLink } from "react-router";
 import { SceneCanvas } from "../viewport/SceneViewport";
-import { PanelObject, PanelScene } from "../organisms/Panels";
+import { PanelScene } from "../organisms/PanelScene";
+import { PanelMesh, PanelLight, PanelCamera } from "../organisms/PanelParams";
 import { useActiveObject } from "@/app/ApplicationKernelContext";
 
 export default function EditorPage() {
   const activeObj = useActiveObject();
+
+  let panelParams;
+  switch (activeObj?.kind) {
+    case "mesh":
+      panelParams = <PanelMesh mesh={activeObj.data} />;
+  }
+
   return (
     <div style={{ width: "100%", height: "100%" }}>
       <div style={{ position: "absolute" }}>
@@ -21,7 +29,7 @@ export default function EditorPage() {
         }}
       >
         <PanelScene activeObj={activeObj} />
-        <PanelObject />
+        {panelParams}
       </div>
       <div style={{ width: "100vw", height: "100vh" }}>
         <SceneCanvas />

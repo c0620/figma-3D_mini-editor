@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 
-import type { CameraState, Light, SceneObject } from "../types/scene";
+import type { CameraState, Light, SceneMesh } from "../types/scene";
 import type { AppHandlers, AppKernel } from "./compositionRoot";
 import type { TranslationKey } from "../i18n/en";
 import type { Locale } from "../services/localizationService";
@@ -16,7 +16,7 @@ export type {
 } from "../store/sceneEntityList";
 
 export type ActiveEntity =
-  | { kind: "mesh"; data: SceneObject }
+  | { kind: "mesh"; data: SceneMesh }
   | { kind: "light"; data: Light }
   | { kind: "camera"; data: CameraState };
 
@@ -115,7 +115,7 @@ export function useActiveObject(): ActiveEntity | null {
     const light = scene.lights.find((l) => l.id === activeObjectId);
     if (light) return { kind: "light", data: light };
 
-    const obj = scene.objects.find((o) => o.id === activeObjectId);
+    const obj = scene.meshes.find((o) => o.id === activeObjectId);
     if (obj) return { kind: "mesh", data: obj };
 
     return null;
