@@ -1,4 +1,5 @@
 import { TextureSlot } from '../types/scene';
+import { defaultStoredTexture } from '../io/materialTextureExtractor';
 import { SceneToolHandler } from './sceneToolHandler';
 
 export class TextureImportHandler extends SceneToolHandler {
@@ -13,7 +14,7 @@ export class TextureImportHandler extends SceneToolHandler {
     if (!scene.materials[materialId]) return;
 
     this.scene.patchMaterial(materialId, {
-      textures: { [slot]: url },
+      textures: { [slot]: defaultStoredTexture(url, slot) },
     });
   }
 }

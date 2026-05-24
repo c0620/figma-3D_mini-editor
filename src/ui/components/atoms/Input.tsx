@@ -1,6 +1,21 @@
 import type { ChangeEvent } from "react";
 
+import type { SceneFileType } from "@/io/sceneTransferFacade";
+import type { SceneImportResources } from "@/io/sceneTransferFacade";
 import type { InputField } from "../molecules/EditorInput";
+
+const MODEL_EXT: Record<string, SceneFileType> = {
+  obj: "OBJ",
+  fbx: "FBX",
+  glb: "GLB",
+};
+
+const TEXTURE_EXT = /\.(png|jpe?g|webp|tga|bmp)$/i;
+
+function fileExtension(name: string): string {
+  const idx = name.lastIndexOf(".");
+  return idx >= 0 ? name.slice(idx + 1).toLowerCase() : "";
+}
 
 export function InputText({ field }: { field: InputField }) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -54,20 +69,47 @@ export function FileInput({
   error = null,
   success = true,
 }: {
-  onUpload: Function;
-  error?: any;
+  onUpload: (
+    type: SceneFileType,
+    file: File,
+    resources?: SceneImportResources
+  ) => void | Promise<void>;
+  error?: string | null;
   success?: boolean;
 }) {
-  console.log(error, success);
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (!file) return;
-    const fileType = file.name.split(".")[1].toUpperCase();
-    onUpload(fileType, file);
+  void error;
+  void success;
+
+  const handleFileChange = async (
+    event: ChangeEvent<HTMLInputElement>
+  ): Promise<void> => {
+    const list = event.target.files;
+    if (!list?.length) return;
+
+    const files = Array.from(list);
+    const modelFile = files.find((f) => MODEL_EXT[fileExtension(f.name)]);
+    if (!modelFile) return;
+
+    const type = MODEL_EXT[fileExtension(modelFile.name)]!;
+    const mtlFile = files.find((f) => fileExtension(f.name) === "mtl");
+
+    let resources: SceneImportResources | undefined;
+    if (type === "OBJ" && (mtlFile || files.some((f) => TEXTURE_EXT.test(f.name)))) {
+      resources = { textureFiles: {} };
+      if (mtlFile) resources.mtlText = await mtlFile.text();
+      for (const f of files) {
+        if (TEXTURE_EXT.test(f.name)) {
+          resources.textureFiles![f.name] = await f.arrayBuffer();
+        }
+      }
+    }
+
+    await onUpload(type, modelFile, resources);
   };
+
   return (
     <label>
-      <input type="file" onChange={handleFileChange}></input>
+      <input type="file" multiple onChange={handleFileChange} />
     </label>
   );
 }

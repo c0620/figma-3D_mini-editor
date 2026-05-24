@@ -59,9 +59,15 @@ export class ToggleVisibilityHandler extends SceneToolHandler {
     if (!id) return;
 
     const obj = this.scene.findObjectById(id);
-    if (!obj) return;
+    if (obj) {
+      this.scene.patchSceneObject(id, { visible: !obj.visible });
+      return;
+    }
 
-    this.scene.patchSceneObject(id, { visible: !obj.visible });
+    const light = this.scene.findLightById(id);
+    if (light) {
+      this.scene.patchLight(id, { visible: !light.visible });
+    }
   }
 }
 

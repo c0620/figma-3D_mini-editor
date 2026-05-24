@@ -64,7 +64,7 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
       const { transform: _t, ...rest } = patch;
       const nextObjects = [...state.scene.meshes];
       nextObjects[idx] = { ...prev, ...rest, transform: nextTransform };
-      return { scene: { ...state.scene, objects: nextObjects } };
+      return { scene: { ...state.scene, meshes: nextObjects } };
     }),
 
   patchLight: (lightId, patch) =>

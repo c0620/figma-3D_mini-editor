@@ -1,3 +1,4 @@
+import type { MouseEvent } from "react";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import type { SceneEntitySummary } from "@/store/sceneEntityList";
 
@@ -13,6 +14,9 @@ export function GraphItem({
   const changeVisibilityHandler = useHandlers().visibility;
   const changeLockHandler = useHandlers().lock;
   const deleteHandler = useHandlers().deletion;
+
+  const stopClick = (e: MouseEvent) => e.stopPropagation();
+
   return (
     <div
       style={
@@ -32,14 +36,27 @@ export function GraphItem({
         <div>
           {" "}
           <button
-            onClick={() => changeVisibilityHandler.execute({ id: item.id })}
+            onClick={(e) => {
+              stopClick(e);
+              changeVisibilityHandler.execute({ id: item.id });
+            }}
           >
             {item.visible ? "H" : "S"}
           </button>
-          <button onClick={() => changeLockHandler.execute({ id: item.id })}>
+          <button
+            onClick={(e) => {
+              stopClick(e);
+              changeLockHandler.execute({ id: item.id });
+            }}
+          >
             {item.locked ? "F" : "L"}
           </button>{" "}
-          <button onClick={() => deleteHandler.execute({ modelId: item.id })}>
+          <button
+            onClick={(e) => {
+              stopClick(e);
+              deleteHandler.execute({ modelId: item.id });
+            }}
+          >
             D
           </button>{" "}
         </div>

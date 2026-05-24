@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
+import { useShallow } from "zustand/react/shallow";
 
-import type { CameraState, Light, SceneMesh } from "../types/scene";
+import type { CameraState, Light, Material, SceneMesh } from "../types/scene";
 import type { AppHandlers, AppKernel } from "./compositionRoot";
 import type { TranslationKey } from "../i18n/en";
 import type { Locale } from "../services/localizationService";
@@ -82,6 +83,10 @@ export function useHelp() {
   return useKernel().help;
 }
 
+export function usePreview() {
+  return useKernel().preview;
+}
+
 export function useNotifications() {
   return useKernel().notifications;
 }
@@ -94,6 +99,22 @@ export function useSceneEntities() {
   const scene = useSceneStore((s) => s.scene);
   const { t } = useI18n();
   return useMemo(() => buildSceneEntityList(scene, t), [scene, t]);
+}
+
+export function useActiveMeshMaterials(): Material[] | null {
+  const activeObjectId = useSessionStore((s) => s.activeObjectId);
+
+  return useSceneStore(
+    useShallow((s) => {
+      if (!activeObjectId || !s.scene) return null;
+
+      const mesh = s.scene.meshes.find((m) => m.id === activeObjectId);
+      if (!mesh) return null;
+
+      const resolved = mesh.materialIDs.map((id) => s.scene!.materials[id]);
+      return resolved.every(Boolean) ? (resolved as Material[]) : null;
+    })
+  );
 }
 
 /**

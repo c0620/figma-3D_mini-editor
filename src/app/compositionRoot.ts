@@ -30,6 +30,7 @@ import { LocalizationService } from "../services/localizationService";
 import enBundle from "../i18n/en";
 import ruBundle from "../i18n/ru";
 import { HelpService } from "../services/helpService";
+import { MaterialPreviewService } from "../services/previewService";
 import { TooltipService } from "../services/tooltipService";
 import { ActionExecutor } from "../commands/actionExecutor";
 import { ActionReverter } from "../commands/actionReverter";
@@ -83,13 +84,13 @@ export interface AppKernel {
   handlers: AppHandlers;
   undo(): void;
   redo(): void;
-  /** Текущее содержимое сцены для дерева и выбора активного объекта (снимок на момент вызова). */
   listSceneEntities(): SceneEntitySummary[];
   transfer: SceneTransferFacade;
   notifications: NotificationService;
   help: HelpService;
   tooltips: TooltipService;
   i18n: LocalizationService;
+  preview: MaterialPreviewService;
 }
 
 export function buildKernel(): AppKernel {
@@ -140,6 +141,7 @@ export function buildKernel(): AppKernel {
 
   const tooltips = new TooltipService(i18n);
   const help = new HelpService(i18n, tooltips);
+  const preview = new MaterialPreviewService(128);
 
   // --- Tool handlers ---
   const baseHandler = new BaseToolHandler(sceneStorage);
@@ -209,5 +211,6 @@ export function buildKernel(): AppKernel {
     help,
     tooltips,
     i18n,
+    preview,
   };
 }

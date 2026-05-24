@@ -1,4 +1,10 @@
-import type { CameraState, Light, Scene, SceneMesh } from "../types/scene";
+import type {
+  CameraState,
+  Light,
+  Material,
+  Scene,
+  SceneMesh,
+} from "../types/scene";
 
 import { useSceneStore } from "./sceneStore";
 import type {
@@ -18,6 +24,13 @@ export class SceneStorage {
     const scene = useSceneStore.getState().scene;
     if (!scene) throw new Error("SceneStorage.getScene: no scene loaded");
     return scene;
+  }
+
+  getStaticMeshMaterials(mesh: SceneMesh): Material[] {
+    const scene = useSceneStore.getState().scene;
+    if (!scene)
+      throw new Error("SceneStorage.getMeshMaterials: no scene loaded");
+    return mesh.materialIDs.map((id) => scene.materials[id]);
   }
 
   patchSceneObject(objectId: string, patch: SceneObjectPatch): void {

@@ -1,9 +1,11 @@
 import { SceneStorage } from "../store/sceneStorage";
 import { NotificationService } from "../store/notificationService";
 import { SceneAnalyzer } from "../render/sceneAnalyzer";
-import { SceneEncoder } from "./sceneEncoder";
+import { SceneEncoder, type SceneImportResources } from "./sceneEncoder";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
+
+export type { SceneImportResources };
 
 export class SceneImportExportService {
   encoder: SceneEncoder;
@@ -30,9 +32,10 @@ export class SceneImportExportService {
 
   async importFromDevice(
     type: SceneFileType,
-    input: ArrayBuffer | string
+    input: ArrayBuffer | string,
+    resources?: SceneImportResources
   ): Promise<void> {
-    const scene = await this.encoder.import(type, input);
+    const scene = await this.encoder.import(type, input, resources);
     this.scene.load(scene);
   }
 }

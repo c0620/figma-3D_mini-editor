@@ -6,13 +6,21 @@ export enum TextureSlot {
   Emissive = "Emissive",
 }
 
+/** URL текстуры + параметры семплинга (важно для GLB: flipY = false). */
+export interface StoredTexture {
+  url: string;
+  flipY: boolean;
+  colorSpace: "srgb" | "linear";
+}
+
 export interface Material {
   id: string;
   baseColor: string;
   roughness: number;
   metalness: number;
   emissive: string;
-  textures: Record<TextureSlot, string | null>;
+  textures: Record<TextureSlot, StoredTexture | null>;
+  name: string;
 }
 
 export interface Transform {
@@ -28,7 +36,7 @@ export interface SceneMesh {
   locked: boolean;
   pendingDelete: boolean;
   transform: Transform;
-  materialId: string;
+  materialIDs: string[];
 }
 
 export interface Light {

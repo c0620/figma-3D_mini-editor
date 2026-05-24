@@ -9,6 +9,12 @@ export default function EditorPage() {
 
   let panelParams;
   switch (activeObj?.kind) {
+    case "camera":
+      panelParams = <PanelCamera camera={activeObj.data} />;
+      break;
+    case "light":
+      panelParams = <PanelLight light={activeObj.data} />;
+      break;
     case "mesh":
       panelParams = <PanelMesh mesh={activeObj.data} />;
   }

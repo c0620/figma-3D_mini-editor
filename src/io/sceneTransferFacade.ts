@@ -3,10 +3,13 @@ import { SceneAnalyzer } from "../render/sceneAnalyzer";
 import { RenderService } from "../render/renderService";
 import { AssetCatalogService } from "../library/assetCatalogService";
 import { SceneImportExportService } from "./sceneImportExportService";
+import type { SceneImportResources } from "./sceneImportExportService";
 import { TextureFigmaService } from "./textureFigmaService";
 import { ScenePersistenceService } from "./scenePersistenceService";
 
 export type SceneFileType = "OBJ" | "FBX" | "GLB";
+
+export type { SceneImportResources };
 
 export class SceneTransferFacade {
   sceneIo: SceneImportExportService;
@@ -47,9 +50,10 @@ export class SceneTransferFacade {
 
   readonly importSceneFromDevice = async (
     type: SceneFileType,
-    input: ArrayBuffer | File | string
+    input: ArrayBuffer | File | string,
+    resources?: SceneImportResources
   ): Promise<void> => {
     const data = input instanceof File ? await input.arrayBuffer() : input;
-    await this.sceneIo.importFromDevice(type, data);
+    await this.sceneIo.importFromDevice(type, data, resources);
   };
 }
