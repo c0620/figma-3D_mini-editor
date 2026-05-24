@@ -1,15 +1,8 @@
-import {
-  Color,
-  MeshStandardMaterial,
-  TextureLoader,
-  type Texture,
-} from "three";
+import { Color, MeshStandardMaterial, type Texture } from "three";
 
-import { applyStoredTextureSettings } from "../io/materialTextureExtractor";
+import { textureGpuPool } from "../store/textureGpuPool";
 import type { Material, StoredTexture } from "../types/scene";
 import { TextureSlot } from "../types/scene";
-
-const textureLoader = new TextureLoader();
 
 /** Без emissive-карты свечение берётся из baseColor при intensity > 0. */
 export function resolveEmissiveForRender(material: Material): {
@@ -43,9 +36,7 @@ async function loadStoredTexture(
 ): Promise<Texture | null> {
   if (!stored?.url) return null;
   try {
-    const texture = await textureLoader.loadAsync(stored.url);
-    applyStoredTextureSettings(texture, stored);
-    return texture;
+    return await textureGpuPool.load(stored);
   } catch {
     return null;
   }
@@ -82,12 +73,18 @@ export async function buildMeshStandardMaterialFromDomain(
 }
 
 export function disposeMeshStandardMaterial(
-  material: MeshStandardMaterial
+  material: MeshStandardMaterial,
+  options?: { disposeTextures?: boolean }
 ): void {
-  material.map?.dispose();
-  material.normalMap?.dispose();
-  material.roughnessMap?.dispose();
-  material.metalnessMap?.dispose();
-  material.emissiveMap?.dispose();
+  const disposeTextures = options?.disposeTextures ?? false;
+
+  if (disposeTextures) {
+    material.map?.dispose();
+    material.normalMap?.dispose();
+    material.roughnessMap?.dispose();
+    material.metalnessMap?.dispose();
+    material.emissiveMap?.dispose();
+  }
+
   material.dispose();
 }
