@@ -1,4 +1,4 @@
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { CameraControls, Outlines, TransformControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
@@ -9,6 +9,8 @@ import type { Material, SceneMesh } from "../../../types/scene";
 import { resolveEmissiveForRender } from "../../../render/domainMaterialBuilder";
 import { useSessionStore } from "@/store/sessionStore";
 import { useMaterialGpuTextures } from "./useMaterialGpuTextures";
+import type { Object3D } from "three";
+import { useHandlers } from "@/app/ApplicationKernelContext";
 
 function hasTextureUrls(mat: Material): boolean {
   return Object.values(mat.textures).some((entry) => entry?.url != null);
@@ -29,7 +31,13 @@ function SolidMaterialSlot({ mat, attach }: { mat: Material; attach: string }) {
   );
 }
 
-function TexturedMaterialSlot({ mat, attach }: { mat: Material; attach: string }) {
+function TexturedMaterialSlot({
+  mat,
+  attach,
+}: {
+  mat: Material;
+  attach: string;
+}) {
   const maps = useMaterialGpuTextures(mat.textures);
   const emissive = useMemo(() => resolveEmissiveForRender(mat), [mat]);
 
@@ -74,49 +82,79 @@ function MaterialSlotById({
 function SceneObjectMesh({
   object,
   isActive,
+  onChange,
 }: {
   object: SceneMesh;
   isActive: boolean;
+  onChange: (value: object) => void;
 }) {
-  const meshState = useSceneStore(
-    useShallow((s) => {
-      const mesh = s.scene?.meshes.find((m) => m.id === object.id);
-      if (!mesh) return null;
-      return {
-        transform: mesh.transform,
-        visible: mesh.visible,
-        materialIDs: mesh.materialIDs,
-        name: mesh.name,
-      };
-    })
-  );
+  // const meshState = useSceneStore(
+  //   useShallow((s) => {
+  //     const mesh = s.scene?.meshes.find((m) => m.id === object.id);
+  //     if (!mesh) return null;
+  //     return {
+  //       transform: mesh.transform,
+  //       visible: mesh.visible,
+  //       materialIDs: mesh.materialIDs,
+  //       name: mesh.name,
+  //     };
+  //   })
+  // );
 
   const asset = threeAssetRegistry.get(object.id);
 
-  if (!asset || !meshState) return null;
+  if (!asset || !object) return null;
 
-  const { transform, visible, materialIDs, name } = meshState;
+  const { transform, visible, materialIDs, name } = object;
+
+  const active = useRef<Object3D>(undefined);
 
   return (
-    <mesh
-      geometry={asset.geometry}
-      position={transform.position}
-      rotation={transform.rotation}
-      scale={transform.scale}
-      visible={visible}
-      name={name}
-    >
-      {materialIDs.map((materialId, index) => (
-        <MaterialSlotById
-          key={materialId}
-          materialId={materialId}
-          attach={
-            materialIDs.length === 1 ? "material" : `material-${index}`
+    <>
+      <mesh
+        ref={active}
+        geometry={asset.geometry}
+        position={transform.position}
+        rotation={transform.rotation}
+        scale={transform.scale}
+        visible={visible}
+        name={name}
+      >
+        {materialIDs.map((materialId, index) => (
+          <MaterialSlotById
+            key={materialId}
+            materialId={materialId}
+            attach={materialIDs.length === 1 ? "material" : `material-${index}`}
+          />
+        ))}
+        {isActive && <Outlines thickness={3} color="orange" />}
+      </mesh>
+      {!object.locked && isActive && (
+        <TransformControls
+          object={active.current}
+          onChange={() =>
+            onChange({
+              id: object.id,
+              position: active.current!.position.toArray() as [
+                number,
+                number,
+                number,
+              ],
+              rotation: [
+                active.current!.rotation.x,
+                active.current!.rotation.y,
+                active.current!.rotation.z,
+              ],
+              scale: active.current!.scale.toArray() as [
+                number,
+                number,
+                number,
+              ],
+            })
           }
         />
-      ))}
-      {isActive && <Outlines thickness={3} color="orange" />}
-    </mesh>
+      )}
+    </>
   );
 }
 
@@ -126,6 +164,7 @@ export function SceneCanvas() {
     (s) => s.scene?.camera.transform.position
   );
   const activeId = useSessionStore((s) => s.activeObjectId);
+  const { base } = useHandlers();
 
   if (!meshes || !cameraPosition) return null;
 
@@ -135,19 +174,16 @@ export function SceneCanvas() {
         <CameraControls makeDefault />
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
-        {meshes.map((mesh) =>
-          activeId === mesh.id && !mesh.locked ? (
-            <TransformControls key={mesh.id}>
-              <SceneObjectMesh object={mesh} isActive={activeId === mesh.id} />
-            </TransformControls>
-          ) : (
+        {meshes.map((mesh) => (
+          <>
             <SceneObjectMesh
               key={mesh.id}
               object={mesh}
               isActive={activeId === mesh.id}
+              onChange={(value) => base.execute(value)}
             />
-          )
-        )}
+          </>
+        ))}
       </Canvas>
     </div>
   );
