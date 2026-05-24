@@ -13,8 +13,12 @@ import {
 import {
   buildMeshStandardMaterialFromDomain,
   disposeMeshStandardMaterial,
+  resolveEmissiveForRender,
 } from "../render/domainMaterialBuilder";
+import { textureGpuPool } from "../store/textureGpuPool";
 import type { Material } from "../types/scene";
+import { TextureSlot } from "../types/scene";
+import type { Texture } from "three";
 
 export interface MaterialPreviewOptions {
   size?: number;
@@ -24,7 +28,11 @@ export interface MaterialPreviewOptions {
   useCache?: boolean;
 }
 
-export function materialPreviewCacheKey(material: Material): string {
+export function materialPreviewTextureKey(material: Material): string {
+  return JSON.stringify(material.textures);
+}
+
+export function materialPreviewScalarKey(material: Material): string {
   return JSON.stringify({
     id: material.id,
     baseColor: material.baseColor,
@@ -32,9 +40,21 @@ export function materialPreviewCacheKey(material: Material): string {
     metalness: material.metalness,
     emissive: material.emissive,
     emissiveIntensity: material.emissiveIntensity,
-    textures: material.textures,
   });
 }
+
+/** @deprecated Используйте materialPreviewTextureKey + materialPreviewScalarKey */
+export function materialPreviewCacheKey(material: Material): string {
+  return `${materialPreviewTextureKey(material)}:${materialPreviewScalarKey(material)}`;
+}
+
+type PreviewGpuMaps = {
+  map?: Texture;
+  normalMap?: Texture;
+  roughnessMap?: Texture;
+  metalnessMap?: Texture;
+  emissiveMap?: Texture;
+};
 
 /**
  * Offscreen-превью материала на сфере.
@@ -49,6 +69,7 @@ export class MaterialPreviewService {
   private readonly mesh: Mesh<SphereGeometry, MeshStandardMaterial>;
   private readonly size: number;
   private readonly cache = new Map<string, string | Blob>();
+  private readonly textureMapsCache = new Map<string, PreviewGpuMaps>();
   private renderQueue: Promise<void> = Promise.resolve();
 
   constructor(size = 128) {
@@ -106,12 +127,50 @@ export class MaterialPreviewService {
     return result;
   }
 
+  private async loadPreviewGpuMaps(material: Material): Promise<PreviewGpuMaps> {
+    const textureKey = materialPreviewTextureKey(material);
+    const cached = this.textureMapsCache.get(textureKey);
+    if (cached) return cached;
+
+    const loadSlot = async (stored: Material["textures"][TextureSlot]) => {
+      if (!stored?.url) return undefined;
+      return textureGpuPool.load(stored);
+    };
+
+    const maps: PreviewGpuMaps = {
+      map: await loadSlot(material.textures[TextureSlot.BaseColor]),
+      normalMap: await loadSlot(material.textures[TextureSlot.Normal]),
+      roughnessMap: await loadSlot(material.textures[TextureSlot.Roughness]),
+      metalnessMap: await loadSlot(material.textures[TextureSlot.Metalness]),
+      emissiveMap: await loadSlot(material.textures[TextureSlot.Emissive]),
+    };
+
+    this.textureMapsCache.set(textureKey, maps);
+    return maps;
+  }
+
   private async renderMaterialUncached(
     material: Material,
     format: "dataUrl" | "blob"
   ): Promise<string | Blob> {
     const prev = this.mesh.material;
-    const threeMat = await buildMeshStandardMaterialFromDomain(material);
+    const maps = await this.loadPreviewGpuMaps(material);
+    const emissive = resolveEmissiveForRender(material);
+
+    const threeMat = new MeshStandardMaterial({
+      color: material.baseColor,
+      roughness: material.roughness,
+      metalness: material.metalness,
+      emissive: new Color(emissive.color),
+      emissiveIntensity: emissive.intensity,
+      map: maps.map,
+      normalMap: maps.normalMap,
+      roughnessMap: maps.roughnessMap,
+      metalnessMap: maps.metalnessMap,
+      emissiveMap: maps.emissiveMap,
+      name: material.name,
+    });
+
     this.mesh.material = threeMat;
     if (prev !== threeMat) disposeMeshStandardMaterial(prev);
 
@@ -131,6 +190,7 @@ export class MaterialPreviewService {
 
   clearCache(): void {
     this.cache.clear();
+    this.textureMapsCache.clear();
   }
 
   dispose(): void {

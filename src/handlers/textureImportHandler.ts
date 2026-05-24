@@ -1,6 +1,7 @@
-import { TextureSlot } from '../types/scene';
-import { defaultStoredTexture } from '../io/materialTextureExtractor';
-import { SceneToolHandler } from './sceneToolHandler';
+import { TextureSlot } from "../types/scene";
+import { defaultStoredTexture } from "../io/materialTextureExtractor";
+import { textureGpuPool } from "../store/textureGpuPool";
+import { SceneToolHandler } from "./sceneToolHandler";
 
 export class TextureImportHandler extends SceneToolHandler {
   execute(payload: object): void {
@@ -11,7 +12,11 @@ export class TextureImportHandler extends SceneToolHandler {
     };
 
     const scene = this.scene.getScene();
-    if (!scene.materials[materialId]) return;
+    const material = scene.materials[materialId];
+    if (!material) return;
+
+    const prevUrl = material.textures[slot]?.url;
+    if (prevUrl) textureGpuPool.evict(prevUrl);
 
     this.scene.patchMaterial(materialId, {
       textures: { [slot]: defaultStoredTexture(url, slot) },

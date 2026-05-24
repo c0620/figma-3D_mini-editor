@@ -21,6 +21,7 @@ import { randomUUID } from "../lib/randomId";
 import type { Material, Scene, SceneMesh } from "../types/scene";
 import { TextureSlot } from "../types/scene";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
+import { textureGpuPool } from "../store/textureGpuPool";
 import {
   extractTexturesFromThreeMaterial,
   extractTexturesFromThreeMaterialAsync,
@@ -315,7 +316,8 @@ async function buildDomainSceneFromThreeRoot(
 }
 
 function beginSceneImport(): TextureUrlCache {
-  threeAssetRegistry.clear(); //clean scene res when imported
+  threeAssetRegistry.clear();
+  textureGpuPool.clear();
   activeTextureCache?.dispose();
   activeTextureCache = new TextureUrlCache();
   return activeTextureCache;
