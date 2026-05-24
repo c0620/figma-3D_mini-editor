@@ -1,4 +1,4 @@
-import { InputText, Slider, SliderCentered } from "../atoms/Input";
+import { InputVal, Slider, SliderCentered } from "../atoms/Input";
 import type { PanelMode } from "../organisms/PanelScene";
 
 export type InputField = {
@@ -19,7 +19,7 @@ export function ObjectNumberInput({
   label: string;
   sliderType: "default" | "centered" | null;
 }) {
-  const inputs = fields.map((field) => <InputText field={field} />);
+  const inputs = fields.map((field) => <InputVal field={field} />);
   const slider = sliderType ? (
     sliderType === "default" ? (
       <Slider />

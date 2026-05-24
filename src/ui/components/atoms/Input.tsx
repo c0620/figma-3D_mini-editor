@@ -1,4 +1,9 @@
-import type { ChangeEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from "react";
 
 import type { SceneFileType } from "@/io/sceneTransferFacade";
 import type { SceneImportResources } from "@/io/sceneTransferFacade";
@@ -12,27 +17,71 @@ const MODEL_EXT: Record<string, SceneFileType> = {
 
 const TEXTURE_EXT = /\.(png|jpe?g|webp|tga|bmp)$/i;
 
+/** Промежуточный ввод: "0.", ".5", "-", "" */
+const DECIMAL_DRAFT = /^-?(\d*\.?\d*|\.\d*)?$/;
+
 function fileExtension(name: string): string {
   const idx = name.lastIndexOf(".");
   return idx >= 0 ? name.slice(idx + 1).toLowerCase() : "";
 }
 
-export function InputText({ field }: { field: InputField }) {
+function isCompleteNumber(text: string): boolean {
+  if (text === "" || text === "-" || text === "." || text === "-.")
+    return false;
+  if (text.endsWith(".")) return false;
+  return !Number.isNaN(Number(text));
+}
+
+export function InputVal({ field }: { field: InputField }) {
+  const [draft, setDraft] = useState(() => String(field.value));
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!focused) setDraft(String(field.value));
+  }, [field.value, focused]);
+
+  const commit = (text: string) => {
+    if (isCompleteNumber(text)) {
+      field.onChange(Number(text));
+      setDraft(String(Number(text)));
+      return;
+    }
+    setDraft(String(field.value));
+  };
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const parsed = Number.parseFloat(e.target.value.replace(",", "."));
-    if (!Number.isFinite(parsed)) return;
-    field.onChange(parsed);
+    const next = e.target.value;
+    if (next !== "" && !DECIMAL_DRAFT.test(next)) return;
+
+    setDraft(next);
+    if (isCompleteNumber(next)) {
+      field.onChange(Number(next));
+    }
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    commit(draft);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.currentTarget.blur();
+    }
   };
 
   return (
     <>
       {field.label ? <label>{field.label}</label> : null}
       <input
-        type="number"
-        step="any"
+        type="text"
+        inputMode="decimal"
         style={field.isActive ? { color: "orange" } : { color: "white" }}
         onChange={handleChange}
-        value={Number.isFinite(field.value) ? field.value : 0}
+        onFocus={() => setFocused(true)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        value={draft}
       />
     </>
   );
@@ -94,7 +143,10 @@ export function FileInput({
     const mtlFile = files.find((f) => fileExtension(f.name) === "mtl");
 
     let resources: SceneImportResources | undefined;
-    if (type === "OBJ" && (mtlFile || files.some((f) => TEXTURE_EXT.test(f.name)))) {
+    if (
+      type === "OBJ" &&
+      (mtlFile || files.some((f) => TEXTURE_EXT.test(f.name)))
+    ) {
       resources = { textureFiles: {} };
       if (mtlFile) resources.mtlText = await mtlFile.text();
       for (const f of files) {
