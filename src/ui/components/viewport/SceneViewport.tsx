@@ -1,13 +1,8 @@
-import { Suspense, useLayoutEffect, useMemo, useRef } from "react";
+import { Suspense, useLayoutEffect, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { CameraControls, Outlines, TransformControls } from "@react-three/drei";
 import { useTexture } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import {
-  type Material as ThreeMaterial,
-  type Mesh as ThreeMesh,
-  type MeshStandardMaterial,
-} from "three";
 import type { Texture } from "three";
 
 import { useSceneStore } from "../../../store/sceneStore";
@@ -15,23 +10,11 @@ import { threeAssetRegistry } from "../../../store/threeAssetRegistry";
 import type { Material, SceneMesh } from "../../../types/scene";
 import { TextureSlot } from "../../../types/scene";
 import { applyStoredTextureSettings } from "../../../io/materialTextureExtractor";
+import { resolveEmissiveForRender } from "../../../render/domainMaterialBuilder";
 import { useSessionStore } from "@/store/sessionStore";
 
 function hasTextureUrls(mat: Material): boolean {
   return Object.values(mat.textures).some((entry) => entry?.url != null);
-}
-
-function importedMaterialHasMaps(materials: ThreeMaterial[]): boolean {
-  return materials.some((m) => {
-    const s = m as MeshStandardMaterial;
-    return !!(
-      s.map ||
-      s.normalMap ||
-      s.roughnessMap ||
-      s.metalnessMap ||
-      s.emissiveMap
-    );
-  });
 }
 
 function buildTextureUrlMap(mat: Material): Record<string, string> {
@@ -50,13 +33,16 @@ function buildTextureUrlMap(mat: Material): Record<string, string> {
 }
 
 function SolidMaterial({ mat, attach }: { mat: Material; attach: string }) {
+  const emissive = useMemo(() => resolveEmissiveForRender(mat), [mat]);
+
   return (
     <meshStandardMaterial
       attach={attach}
       color={mat.baseColor}
       roughness={mat.roughness}
       metalness={mat.metalness}
-      emissive={mat.emissive}
+      emissive={emissive.color}
+      emissiveIntensity={emissive.intensity}
     />
   );
 }
@@ -79,6 +65,7 @@ function TexturedMaterial({
   attach: string;
 }) {
   const maps = useTexture(urls) as LoadedTextureMaps;
+  const emissive = useMemo(() => resolveEmissiveForRender(mat), [mat]);
 
   useLayoutEffect(() => {
     applyStoredTextureSettings(maps.map, mat.textures[TextureSlot.BaseColor]);
@@ -106,7 +93,8 @@ function TexturedMaterial({
       color={mat.baseColor}
       roughness={mat.roughness}
       metalness={mat.metalness}
-      emissive={mat.emissive}
+      emissive={emissive.color}
+      emissiveIntensity={emissive.intensity}
       map={maps.map}
       normalMap={maps.normalMap}
       roughnessMap={maps.roughnessMap}
@@ -136,7 +124,7 @@ function MaterialSlot({ mat, attach }: { mat: Material; attach: string }) {
   );
 }
 
-/** Материалы из `scene.materials` (источник истины для текстур). */
+/** Материалы из `scene.materials` — единственный источник для viewport. */
 function ObjectMaterial({ mats }: { mats: Material[] }) {
   if (mats.length === 1) {
     return <MaterialSlot mat={mats[0]} attach="material" />;
@@ -157,8 +145,6 @@ function SceneObjectMesh({
   object: SceneMesh;
   isActive: boolean;
 }) {
-  const meshRef = useRef<ThreeMesh>(null);
-
   const materials = useSceneStore(
     useShallow((s) => {
       const scene = s.scene;
@@ -169,25 +155,11 @@ function SceneObjectMesh({
   );
 
   const asset = threeAssetRegistry.get(object.id);
-  const importedMaterials = asset?.importedMaterials;
-
-  const useImportedRender =
-    importedMaterials != null &&
-    importedMaterialHasMaps(importedMaterials);
-
-  useLayoutEffect(() => {
-    const mesh = meshRef.current;
-    if (!mesh || !useImportedRender || !importedMaterials?.length) return;
-
-    mesh.material =
-      importedMaterials.length === 1 ? importedMaterials[0] : importedMaterials;
-  }, [useImportedRender, importedMaterials]);
 
   if (!asset || !materials) return null;
 
   return (
     <mesh
-      ref={meshRef}
       geometry={asset.geometry}
       position={object.transform.position}
       rotation={object.transform.rotation}
@@ -195,7 +167,7 @@ function SceneObjectMesh({
       visible={object.visible}
       name={object.name}
     >
-      {!useImportedRender && <ObjectMaterial mats={materials} />}
+      <ObjectMaterial mats={materials} />
       {isActive && <Outlines thickness={3} color="orange" />}
     </mesh>
   );

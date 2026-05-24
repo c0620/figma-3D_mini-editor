@@ -40,7 +40,9 @@ export function ObjectNumberInput({
   }
 }
 
-export function ObjectColorInput() {}
+export function ObjectColorInput() {
+  return <div>Object Color Input</div>;
+}
 
 export function ObjectRatioInput() {}
 

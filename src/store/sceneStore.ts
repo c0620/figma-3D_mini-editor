@@ -24,7 +24,10 @@ export type CameraPatch = Partial<Omit<CameraState, "transform">> & {
 };
 
 export type MaterialPatch = Partial<
-  Pick<Material, "baseColor" | "roughness" | "metalness" | "emissive"> & {
+  Pick<
+    Material,
+    "baseColor" | "roughness" | "metalness" | "emissive" | "emissiveIntensity"
+  > & {
     textures?: Partial<Material["textures"]>;
   }
 >;

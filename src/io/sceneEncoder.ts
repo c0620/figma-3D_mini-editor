@@ -36,10 +36,6 @@ type ImportFileType = SceneFileType | "Figma";
 
 let activeTextureCache: TextureUrlCache | null = null;
 
-function cloneImportedMaterials(materials: ThreeMaterial[]): ThreeMaterial[] {
-  return materials.map((m) => m.clone());
-}
-
 function getMaxMaterialIndex(geometry: BufferGeometry): number {
   const groups = geometry.groups;
   if (!groups.length) return 0;
@@ -99,7 +95,9 @@ function buildDomainMaterialFromThree(
     baseColor: hasBaseMap ? "#ffffff" : color,
     roughness: typeof std.roughness === "number" ? std.roughness : 1,
     metalness: typeof std.metalness === "number" ? std.metalness : 0,
-    emissive: hasEmissiveMap ? "#000000" : emissive,
+    emissive: hasEmissiveMap ? "#ffffff" : emissive,
+    emissiveIntensity:
+      typeof std.emissiveIntensity === "number" ? std.emissiveIntensity : 1,
     textures,
     name: std.name,
   };
@@ -284,7 +282,6 @@ async function buildDomainSceneFromThreeRoot(
 
     threeAssetRegistry.register(entry.id, {
       geometry: entry.node.geometry,
-      importedMaterials: cloneImportedMaterials(entry.threeMats),
     });
 
     meshes.push({

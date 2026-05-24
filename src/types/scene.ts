@@ -19,6 +19,7 @@ export interface Material {
   roughness: number;
   metalness: number;
   emissive: string;
+  emissiveIntensity: number;
   textures: Record<TextureSlot, StoredTexture | null>;
   name: string;
 }

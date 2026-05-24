@@ -20,6 +20,7 @@ export class LightAdditionHandler extends SceneToolHandler {
         rotation: [0, 0, 0],
         scale: [1, 1, 1],
       },
+      pendingDelete: incoming.pendingDelete ?? false,
     };
 
     useSceneStore.setState((state) => {

@@ -43,6 +43,7 @@ import { SceneStorage } from "../store/sceneStorage";
 
 import type { SceneEntitySummary } from "../store/sceneEntityList";
 import { buildSceneEntityList } from "../store/sceneEntityList";
+import { MaterialEditingHandler } from "@/handlers/materialEditingHandler";
 
 /**
  * Proxy-тип для хэндлеров, команды которых идут через CommandBus (с историей).
@@ -66,6 +67,7 @@ export interface AppHandlers {
   deletion: HandlerProxy<{ modelId: string }>;
   visibility: HandlerProxy<{ id: string | null }>;
   lock: HandlerProxy<{ id: string }>;
+  materialEditing: HandlerProxy<{ id: string; changes: object }>;
   lightAddition: HandlerProxy<Light>;
   lightEditing: HandlerProxy<{ id: string; changes: object }>;
   background: HandlerProxy<{ backgroundColor: string | null }>;
@@ -156,6 +158,7 @@ export function buildKernel(): AppKernel {
   const graphToolsHandler = new ObjectGraphToolsHandler(sceneStorage);
   const toggleVisibilityHandler = new ToggleVisibilityHandler(sceneStorage);
   const toggleLockHandler = new ToggleLockHandler(sceneStorage);
+  const materialEditingHandler = new MaterialEditingHandler(sceneStorage);
 
   // --- Commands ---
   const executor = new ActionExecutor(sceneStorage);
@@ -173,8 +176,9 @@ export function buildKernel(): AppKernel {
   executor.handlers.set(CommandType.ExportTexture, textureExportHandler);
   executor.handlers.set(CommandType.ToggleVisibility, toggleVisibilityHandler);
   executor.handlers.set(CommandType.ToggleLock, toggleLockHandler);
+  executor.handlers.set(CommandType.EditMaterial, materialEditingHandler);
   // SelectObject вызывается напрямую через selectionHandler, минуя bus
-  // TransformObject, EditMaterial, ToggleVisibility, ToggleLock, RenameScene — TBD
+  // TransformObject, ToggleVisibility, ToggleLock, RenameScene — TBD
 
   // --- Сборка handlers-объекта для UI ---
   const makeProxy = <P extends object>(type: CommandType): HandlerProxy<P> => ({
@@ -198,6 +202,7 @@ export function buildKernel(): AppKernel {
     sceneRename: makeProxy(CommandType.RenameScene),
     textureImport: makeProxy(CommandType.ImportTexture),
     textureExport: makeProxy(CommandType.ExportTexture),
+    materialEditing: makeProxy(CommandType.EditMaterial),
   };
 
   return {

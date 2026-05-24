@@ -31,6 +31,7 @@ export function materialPreviewCacheKey(material: Material): string {
     roughness: material.roughness,
     metalness: material.metalness,
     emissive: material.emissive,
+    emissiveIntensity: material.emissiveIntensity,
     textures: material.textures,
   });
 }

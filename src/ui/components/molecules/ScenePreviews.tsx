@@ -3,7 +3,15 @@ import { materialPreviewCacheKey } from "@/services/previewService";
 import type { Material } from "@/types/scene";
 import { useEffect, useMemo, useState } from "react";
 
-export function MaterialPreviewThumb({ material }: { material: Material }) {
+export function MaterialPreviewThumb({
+  material,
+  isActive,
+  onClick,
+}: {
+  material: Material;
+  isActive: boolean;
+  onClick: () => void;
+}) {
   const preview = usePreview();
   const [src, setSrc] = useState<string | null>(null);
   const materialKey = useMemo(
@@ -33,8 +41,11 @@ export function MaterialPreviewThumb({ material }: { material: Material }) {
       style={{
         display: "flex",
       }}
+      onClick={onClick}
     >
-      {material.name}
+      <p style={isActive ? { color: "orange" } : { color: "white" }}>
+        {material.name}
+      </p>
       {src ? (
         <img
           src={src}

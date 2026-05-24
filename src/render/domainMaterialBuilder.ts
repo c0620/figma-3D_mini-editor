@@ -11,6 +11,33 @@ import { TextureSlot } from "../types/scene";
 
 const textureLoader = new TextureLoader();
 
+/** Без emissive-карты свечение берётся из baseColor при intensity > 0. */
+export function resolveEmissiveForRender(material: Material): {
+  color: string;
+  intensity: number;
+} {
+  const hasEmissiveMap = material.textures[TextureSlot.Emissive]?.url != null;
+
+  if (hasEmissiveMap) {
+    return {
+      color: material.emissive,
+      intensity: material.emissiveIntensity,
+    };
+  }
+
+  if (material.emissiveIntensity > 1) {
+    return {
+      color: material.baseColor,
+      intensity: material.emissiveIntensity,
+    };
+  }
+
+  return {
+    color: material.emissive,
+    intensity: material.emissiveIntensity,
+  };
+}
+
 async function loadStoredTexture(
   stored: StoredTexture | null
 ): Promise<Texture | null> {
@@ -37,11 +64,14 @@ export async function buildMeshStandardMaterialFromDomain(
       loadStoredTexture(material.textures[TextureSlot.Emissive]),
     ]);
 
+  const emissive = resolveEmissiveForRender(material);
+
   return new MeshStandardMaterial({
     color: material.baseColor,
     roughness: material.roughness,
     metalness: material.metalness,
-    emissive: new Color(material.emissive),
+    emissive: new Color(emissive.color),
+    emissiveIntensity: emissive.intensity,
     map: map ?? undefined,
     normalMap: normalMap ?? undefined,
     roughnessMap: roughnessMap ?? undefined,
