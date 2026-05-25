@@ -75,7 +75,7 @@ export function InputVal({ field }: { field: InputField }) {
       {field.label ? <label>{field.label}</label> : null}
       <input
         type="text"
-        inputMode="decimal"
+        step="1"
         style={field.isActive ? { color: "orange" } : { color: "white" }}
         onChange={handleChange}
         onFocus={() => setFocused(true)}
@@ -87,9 +87,65 @@ export function InputVal({ field }: { field: InputField }) {
   );
 }
 
-export function InputMultipleText() {}
+// export function InputMultipleText() {}
 
-export function InputColor() {}
+export function InputColor({
+  color,
+  onChange,
+}: {
+  color: string;
+  onChange: (hex: string) => void;
+}) {
+  function decodeHEX(value: string, channel: "R" | "G" | "B"): number {
+    switch (channel) {
+      case "R":
+        return parseInt(value.slice(1, 3), 16);
+      case "G":
+        return parseInt(value.slice(3, 5), 16);
+      case "B":
+        return parseInt(value.slice(5), 16);
+    }
+  }
+
+  function codeHEX(value: number, channel: "R" | "G" | "B") {
+    let hex = value.toString(16);
+    hex = hex.length == 1 ? `0${hex}` : hex;
+    switch (channel) {
+      case "R":
+        return "#" + hex + color.slice(3);
+      case "G":
+        return color.slice(0, 3) + hex + color.slice(5);
+      case "B":
+        return color.slice(0, 5) + hex;
+    }
+  }
+
+  return (
+    <>
+      <input type="color" value={color} />
+      <input type="text" value={color} />
+      <div>
+        RGB:
+        <input
+          type="number"
+          value={decodeHEX(color, "R")}
+          min={0}
+          onChange={(e) => onChange(codeHEX(+e.target.value, "R"))}
+        />
+        <input
+          type="number"
+          value={decodeHEX(color, "G")}
+          onChange={(e) => onChange(codeHEX(+e.target.value, "G"))}
+        />
+        <input
+          type="number"
+          value={decodeHEX(color, "B")}
+          onChange={(e) => onChange(codeHEX(+e.target.value, "B"))}
+        />
+      </div>
+    </>
+  );
+}
 
 export function InputProjectName() {}
 

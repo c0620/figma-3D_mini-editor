@@ -112,6 +112,7 @@ function SceneObjectMesh({
   return (
     <>
       <mesh
+        key={object.id}
         ref={active}
         geometry={asset.geometry}
         position={transform.position}

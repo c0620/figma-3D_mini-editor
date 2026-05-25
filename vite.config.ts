@@ -5,27 +5,27 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 
 // https://vite.dev/config/
 export default defineConfig({
-    build: {
-        assetsInlineLimit: 100000000,
-        chunkSizeWarningLimit: 100000000,
-        cssCodeSplit: false,
-        outDir: "dist",
-        rollupOptions: {
-            output: {
-                inlineDynamicImports: true,
-            },
-        },
-        target: "esnext",
+  build: {
+    assetsInlineLimit: 100000000,
+    chunkSizeWarningLimit: 100000000,
+    cssCodeSplit: false,
+    outDir: "dist",
+    rollupOptions: {
+      output: {
+        inlineDynamicImports: true,
+      },
     },
-    plugins: [react(), viteSingleFile()],
-    resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-        },
+    target: "esnext",
+  },
+  plugins: [react(), viteSingleFile()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-    test: {
-        include: ["src/tests/**/*.test.ts"],
-        environment: "happy-dom",
-        setupFiles: ["./src/tests/setup.ts"],
-    },
+  },
+  // test: {
+  //     include: ["src/tests/**/*.test.ts"],
+  //     environment: "happy-dom",
+  //     setupFiles: ["./src/tests/setup.ts"],
+  // },
 });

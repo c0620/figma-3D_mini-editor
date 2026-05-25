@@ -5,12 +5,12 @@ import {
   useHandlers,
   usePreview,
 } from "@/app/ApplicationKernelContext";
-import { materialPreviewCacheKey } from "@/services/previewService";
+
 import { useEffect, useMemo, useState } from "react";
 import { MaterialPreviewThumb } from "../molecules/ScenePreviews";
 import { ObjectNumberInput } from "../molecules/EditorInput";
 import type { PanelMode } from "./PanelScene";
-import { roughness } from "three/tsl";
+import { InputColor } from "../atoms/Input";
 
 export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
   void mesh;
@@ -95,6 +95,15 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
               label="Сила свечения"
               sliderType="default"
             />
+            <InputColor
+              color={activeMaterial.baseColor}
+              onChange={(color) =>
+                materialEditing.execute({
+                  id: activeMaterial.id,
+                  changes: { baseColor: color },
+                })
+              }
+            />
           </>
         )}
       </div>
@@ -112,7 +121,7 @@ export function PanelCamera({ camera }: { camera: CameraState }) {
         zIndex: 10,
       }}
     >
-      Panel Camera
+      {camera.locked}
     </div>
   );
 }
@@ -127,7 +136,7 @@ export function PanelLight({ light }: { light: Light }) {
         zIndex: 10,
       }}
     >
-      Panel Light
+      {light.locked}
     </div>
   );
 }
