@@ -5,6 +5,7 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/figma-3D_mini-editor/",
   build: {
     assetsInlineLimit: 100000000,
     chunkSizeWarningLimit: 100000000,
