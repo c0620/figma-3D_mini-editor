@@ -1,5 +1,6 @@
 import { Euler, Vector3 } from "three";
 import type { Transform } from "../types/scene";
+import { spotTargetPatchForTransform } from "../lights/lightTransform";
 import { isSceneCameraEntityId } from "../store/sceneEntityList";
 import { useSessionStore } from "../store/sessionStore";
 import { SceneToolHandler } from "./sceneToolHandler";
@@ -77,7 +78,10 @@ export class BaseToolHandler extends SceneToolHandler {
 
     const light = this.scene.findLightById(id);
     if (light) {
-      this.scene.patchLight(id, { transform: transformPatch });
+      this.scene.patchLight(id, {
+        transform: transformPatch,
+        ...spotTargetPatchForTransform(light, transformPatch),
+      });
       return;
     }
 

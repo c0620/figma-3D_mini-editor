@@ -40,15 +40,24 @@ export interface SceneMesh {
   materialIDs: string[];
 }
 
+export type LightType = "Ambient" | "Spot" | "HDRI";
+
+export type HdriPresetId = "studio" | "sunset" | "warehouse";
+
 export interface Light {
   id: string;
-  type: "Directional" | "Ambient" | "HDRI";
+  type: LightType;
   color: string;
   intensity: number;
   transform: Transform;
   visible: boolean;
   locked: boolean;
   pendingDelete: boolean;
+  distance: number;
+  penumbra: number;
+  angle: number;
+  target: [number, number, number];
+  hdriPreset: HdriPresetId;
 }
 
 export interface CameraState {

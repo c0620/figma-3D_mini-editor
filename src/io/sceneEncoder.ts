@@ -17,6 +17,7 @@ import {
 } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+import { withDefaultAmbientLight } from "../lights/lightDefaults";
 import { randomUUID } from "../lib/randomId";
 import type { Material, Scene, SceneMesh } from "../types/scene";
 import { DEFAULT_CAMERA_STATE, TextureSlot } from "../types/scene";
@@ -300,7 +301,7 @@ async function buildDomainSceneFromThreeRoot(
     id: randomUUID(),
     meshes,
     materials,
-    lights: [],
+    lights: withDefaultAmbientLight([]),
     camera: { ...DEFAULT_CAMERA_STATE },
     environment: { backgroundColor: null, shadowsEnabled: false },
   };

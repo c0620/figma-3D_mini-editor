@@ -16,13 +16,20 @@ import {
   useActiveMeshMaterials,
   useHandlers,
   useI18n,
-  usePreview,
 } from "@/app/ApplicationKernelContext";
 import { useSceneStore } from "@/store/sceneStore";
-import type { CameraPatch } from "@/store/sceneStore";
+import type { CameraPatch, LightPatch } from "@/store/sceneStore";
+import type { LightType } from "@/types/scene";
+import type { TranslationKey } from "@/i18n/en";
+import { HDRI_PRESETS } from "@/lights/hdriPresets";
+import {
+  buildSpotLightPositionPresetPatch,
+  SPOT_LIGHT_POSITION_PRESETS,
+} from "@/lights/spotLightPresets";
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  HdriPreviewThumb,
   MaterialPreviewThumb,
   TexturePreviewThumb,
 } from "../molecules/ScenePreviews";
@@ -286,6 +293,26 @@ export function PanelCamera(_props: { camera: CameraState }) {
 }
 
 export function PanelLight({ light }: { light: Light }) {
+  const liveLight =
+    useSceneStore((s) => s.scene?.lights.find((l) => l.id === light.id)) ?? light;
+  const [mode] = useState<PanelMode>("open");
+  const { lightEditing } = useHandlers();
+  const { t } = useI18n();
+
+  const locked = liveLight.locked;
+
+  const patch = (changes: LightPatch) => {
+    if (locked) return;
+    lightEditing.execute({ id: liveLight.id, changes });
+  };
+
+  const lightTypes: LightType[] = ["Ambient", "Spot", "HDRI"];
+  const lightTypeLabel: Record<LightType, TranslationKey> = {
+    Ambient: "light.type.ambient",
+    Spot: "light.type.spot",
+    HDRI: "light.type.hdri",
+  };
+
   return (
     <div
       style={{
@@ -295,7 +322,144 @@ export function PanelLight({ light }: { light: Light }) {
         zIndex: 10,
       }}
     >
-      {light.locked}
+      <div>
+        <p>{t("panel.scene.editing")}</p>
+        {locked ? (
+          <div style={{ opacity: 0.85, marginBottom: 8 }}>
+            {t("panel.scene.locked")}
+          </div>
+        ) : null}
+        <div style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+          {lightTypes.map((type) => (
+            <ActionButton
+              key={type}
+              text={t(lightTypeLabel[type])}
+              onClick={() => patch({ type })}
+            />
+          ))}
+        </div>
+
+        {liveLight.type === "Ambient" && (
+          <>
+            <ObjectNumberInput
+              mode={mode}
+              label={t("light.intensity")}
+              sliderType="default"
+              fields={[
+                {
+                  value: liveLight.intensity,
+                  isActive: false,
+                  onChange: (value) => patch({ intensity: value }),
+                },
+              ]}
+            />
+            <InputColor
+              color={liveLight.color}
+              onChange={(color) => patch({ color })}
+            />
+          </>
+        )}
+
+        {liveLight.type === "Spot" && (
+          <>
+            <ObjectNumberInput
+              mode={mode}
+              label={t("light.intensity")}
+              sliderType="default"
+              fields={[
+                {
+                  value: liveLight.intensity,
+                  isActive: false,
+                  onChange: (value) => patch({ intensity: value }),
+                },
+              ]}
+            />
+            <ObjectNumberInput
+              mode={mode}
+              label={t("light.distance")}
+              sliderType="default"
+              fields={[
+                {
+                  value: liveLight.distance,
+                  isActive: false,
+                  onChange: (value) => patch({ distance: value }),
+                },
+              ]}
+            />
+            <ObjectNumberInput
+              mode={mode}
+              label={t("light.penumbra")}
+              sliderType="default"
+              fields={[
+                {
+                  value: liveLight.penumbra,
+                  isActive: false,
+                  onChange: (value) => patch({ penumbra: value }),
+                },
+              ]}
+            />
+            <ObjectNumberInput
+              mode={mode}
+              label={t("light.angle")}
+              sliderType="default"
+              fields={[
+                {
+                  value: liveLight.angle,
+                  isActive: false,
+                  onChange: (value) => patch({ angle: value }),
+                },
+              ]}
+            />
+            <InputColor
+              color={liveLight.color}
+              onChange={(color) => patch({ color })}
+            />
+            <p style={{ marginTop: 12 }}>{t("camera.presets")}</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {SPOT_LIGHT_POSITION_PRESETS.map((preset) => (
+                <ActionButton
+                  key={preset}
+                  text={t(`camera.preset.${preset}`)}
+                  onClick={() =>
+                    patch(buildSpotLightPositionPresetPatch(liveLight, preset))
+                  }
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {liveLight.type === "HDRI" && (
+          <>
+            <p>{t("light.hdriPreset")}</p>
+            <ScrollPanel>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {HDRI_PRESETS.map((preset) => (
+                  <HdriPreviewThumb
+                    key={preset.id}
+                    presetId={preset.id}
+                    label={t(preset.labelKey)}
+                    isActive={liveLight.hdriPreset === preset.id}
+                    onClick={() => patch({ hdriPreset: preset.id })}
+                  />
+                ))}
+              </div>
+            </ScrollPanel>
+            <ObjectNumberInput
+              mode={mode}
+              label={t("light.intensity")}
+              sliderType="default"
+              fields={[
+                {
+                  value: liveLight.intensity,
+                  isActive: false,
+                  onChange: (value) => patch({ intensity: value }),
+                },
+              ]}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }

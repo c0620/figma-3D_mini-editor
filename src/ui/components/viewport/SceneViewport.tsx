@@ -27,6 +27,7 @@ import {
 import { resolveEmissiveForRender } from "../../../render/domainMaterialBuilder";
 import { useSessionStore } from "@/store/sessionStore";
 import { useMaterialGpuTextures } from "./useMaterialGpuTextures";
+import { SceneLights } from "./SceneLights";
 import type { Object3D } from "three";
 import {
   OrthographicCamera as ThreeOrthographicCamera,
@@ -493,8 +494,7 @@ export function SceneCanvas() {
     <div className="canvas" style={{ width: "100%", height: "100%" }}>
       <Canvas>
         <SceneCameraRig state={camera} />
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
+        <SceneLights activeId={activeId} />
         {meshes.map((mesh) => (
           <SceneObjectMesh
             key={mesh.id}

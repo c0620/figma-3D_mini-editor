@@ -1,24 +1,29 @@
 import {
+  ACESFilmicToneMapping,
   AmbientLight,
   Color,
   DirectionalLight,
+  EquirectangularReflectionMapping,
   Mesh,
   MeshStandardMaterial,
   PerspectiveCamera,
+  PMREMGenerator,
   Scene,
   SphereGeometry,
   WebGLRenderer,
 } from "three";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import type { Texture } from "three";
 
+import { getHdriPresetUrl } from "../lights/hdriPresets";
 import {
   buildMeshStandardMaterialFromDomain,
   disposeMeshStandardMaterial,
   resolveEmissiveForRender,
 } from "../render/domainMaterialBuilder";
 import { textureGpuPool } from "../store/textureGpuPool";
-import type { Material } from "../types/scene";
+import type { HdriPresetId, Material } from "../types/scene";
 import { TextureSlot } from "../types/scene";
-import type { Texture } from "three";
 
 export interface MaterialPreviewOptions {
   size?: number;
@@ -72,6 +77,16 @@ export class MaterialPreviewService {
   private readonly textureMapsCache = new Map<string, PreviewGpuMaps>();
   private renderQueue: Promise<void> = Promise.resolve();
 
+  private readonly hdriRenderer: WebGLRenderer;
+  private readonly hdriScene: Scene;
+  private readonly hdriCamera: PerspectiveCamera;
+  private readonly hdriMesh: Mesh<SphereGeometry, MeshStandardMaterial>;
+  private readonly pmremGenerator: PMREMGenerator;
+  private readonly rgbeLoader = new RGBELoader();
+  private readonly envMapCache = new Map<HdriPresetId, Texture>();
+  private readonly hdriCache = new Map<string, string | Blob>();
+  private hdriRenderQueue: Promise<void> = Promise.resolve();
+
   constructor(size = 128) {
     this.size = size;
 
@@ -103,6 +118,34 @@ export class MaterialPreviewService {
     const fill = new DirectionalLight(0xffffff, 0.35);
     fill.position.set(-2, -1, 1);
     this.scene.add(fill);
+
+    this.hdriRenderer = new WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+    });
+    this.hdriRenderer.setSize(size, size);
+    this.hdriRenderer.setPixelRatio(1);
+    this.hdriRenderer.toneMapping = ACESFilmicToneMapping;
+
+    this.pmremGenerator = new PMREMGenerator(this.hdriRenderer);
+    this.pmremGenerator.compileEquirectangularShader();
+
+    this.hdriScene = new Scene();
+    this.hdriCamera = new PerspectiveCamera(35, 1, 0.1, 20);
+    this.hdriCamera.position.set(0, 2, 2.4);
+    this.hdriCamera.lookAt(0, 0, 0);
+
+    const hdriGeometry = new SphereGeometry(0.85, 48, 48);
+    this.hdriMesh = new Mesh(
+      hdriGeometry,
+      new MeshStandardMaterial({
+        color: 0xffffff,
+        metalness: 1,
+        roughness: 0.18,
+      })
+    );
+    this.hdriScene.add(this.hdriMesh);
   }
 
   async renderMaterial(
@@ -188,15 +231,82 @@ export class MaterialPreviewService {
     return canvas.toDataURL("image/png");
   }
 
+  async renderHdriPreset(
+    presetId: HdriPresetId,
+    options: MaterialPreviewOptions = {}
+  ): Promise<string | Blob> {
+    const format = options.format ?? "dataUrl";
+    const useCache = options.useCache ?? true;
+    const cacheKey = `${format}:${presetId}`;
+
+    if (useCache) {
+      const cached = this.hdriCache.get(cacheKey);
+      if (cached) return cached;
+    }
+
+    let result!: string | Blob;
+    this.hdriRenderQueue = this.hdriRenderQueue.then(async () => {
+      result = await this.renderHdriPresetUncached(presetId, format);
+      if (useCache) this.hdriCache.set(cacheKey, result);
+    });
+    await this.hdriRenderQueue;
+    return result;
+  }
+
+  private async loadEnvMap(presetId: HdriPresetId): Promise<Texture> {
+    const cached = this.envMapCache.get(presetId);
+    if (cached) return cached;
+
+    const url = getHdriPresetUrl(presetId);
+    const hdrTexture = await this.rgbeLoader.loadAsync(url);
+    hdrTexture.mapping = EquirectangularReflectionMapping;
+    const envMap = this.pmremGenerator.fromEquirectangular(hdrTexture).texture;
+    hdrTexture.dispose();
+    this.envMapCache.set(presetId, envMap);
+    return envMap;
+  }
+
+  private async renderHdriPresetUncached(
+    presetId: HdriPresetId,
+    format: "dataUrl" | "blob"
+  ): Promise<string | Blob> {
+    const envMap = await this.loadEnvMap(presetId);
+    this.hdriScene.environment = envMap;
+    this.hdriMesh.material.envMap = envMap;
+    this.hdriMesh.material.needsUpdate = true;
+
+    this.hdriRenderer.render(this.hdriScene, this.hdriCamera);
+
+    const canvas = this.hdriRenderer.domElement;
+    if (format === "blob") {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error("toBlob failed"))),
+          "image/png"
+        );
+      });
+    }
+    return canvas.toDataURL("image/png");
+  }
+
   clearCache(): void {
     this.cache.clear();
     this.textureMapsCache.clear();
+    this.hdriCache.clear();
   }
 
   dispose(): void {
     this.clearCache();
+    for (const envMap of this.envMapCache.values()) {
+      envMap.dispose();
+    }
+    this.envMapCache.clear();
+    this.pmremGenerator.dispose();
     disposeMeshStandardMaterial(this.mesh.material);
+    disposeMeshStandardMaterial(this.hdriMesh.material);
     this.mesh.geometry.dispose();
+    this.hdriMesh.geometry.dispose();
     this.renderer.dispose();
+    this.hdriRenderer.dispose();
   }
 }

@@ -60,9 +60,11 @@ export function buildSceneEntityList(
   for (const light of scene.lights) {
     if (light.pendingDelete) continue;
     const kindLabel =
-      light.type === "Directional"
-        ? tr("entity.light.directional")
-        : tr("entity.light.ambient");
+      light.type === "Ambient"
+        ? tr("entity.light.ambient")
+        : light.type === "Spot"
+          ? tr("entity.light.spot")
+          : tr("entity.light.hdri");
     items.push({
       id: light.id,
       kind: "light",

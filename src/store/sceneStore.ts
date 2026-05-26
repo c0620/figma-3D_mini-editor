@@ -11,6 +11,7 @@ import {
   orthographicZoomFromPerspective,
   perspectiveZoomFromOrthographic,
 } from "../types/scene";
+import { applyLightTypeDefaults, normalizeLight, withDefaultAmbientLight } from "../lights/lightDefaults";
 
 import { create } from "zustand";
 
@@ -60,6 +61,9 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
       scene: {
         ...scene,
         camera: normalizeCameraState(scene.camera),
+        lights: withDefaultAmbientLight(
+          scene.lights.map((light) => normalizeLight(light))
+        ),
       },
     }),
   clearScene: () => set({ scene: null }),
@@ -93,8 +97,17 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
         : prev.transform;
 
       const { transform: _t, ...rest } = patch;
+      let nextLight = { ...prev, ...rest, transform: nextTransform };
+
+      if (patch.type && patch.type !== prev.type) {
+        nextLight = {
+          ...nextLight,
+          ...applyLightTypeDefaults(prev, patch.type),
+        };
+      }
+
       const nextLights = [...state.scene.lights];
-      nextLights[idx] = { ...prev, ...rest, transform: nextTransform };
+      nextLights[idx] = nextLight;
       return { scene: { ...state.scene, lights: nextLights } };
     }),
 

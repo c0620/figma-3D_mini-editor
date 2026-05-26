@@ -19,6 +19,7 @@ const en = {
   "entity.mesh.default": "Mesh",
   "entity.light.directional": "Directional light",
   "entity.light.ambient": "Ambient light",
+  "entity.light.spot": "Spotlight",
   "entity.light.hdri": "HDRI",
   "entity.camera.perspective": "Camera (perspective)",
   "entity.camera.orthographic": "Camera (orthographic)",
@@ -43,6 +44,19 @@ const en = {
   "camera.preset.right": "Right",
   "camera.preset.saved": "Saved",
   "camera.preset.saveCurrent": "Save current view",
+
+  "light.type.ambient": "Ambient",
+  "light.type.spot": "Spot",
+  "light.type.hdri": "HDRI",
+  "light.intensity": "Intensity",
+  "light.distance": "Distance",
+  "light.penumbra": "Penumbra",
+  "light.angle": "Angle",
+  "light.target": "Target direction",
+  "light.hdriPreset": "HDRI preset",
+  "light.hdriPreset.studio": "Studio",
+  "light.hdriPreset.sunset": "Sunset",
+  "light.hdriPreset.warehouse": "Warehouse",
 
   // --- Notifications ---
   "notify.scene.imported": "Scene imported",

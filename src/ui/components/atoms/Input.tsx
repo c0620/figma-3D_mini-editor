@@ -161,7 +161,34 @@ export function InputModelSource() {}
 
 export function Toggle() {}
 
-export function SelectIcon() {}
+export function SelectIcon({
+  options,
+  value,
+  onChange,
+}: {
+  options: { id: string; label: string }[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {options.map((option) => (
+        <div
+          key={option.id}
+          onClick={() => onChange(option.id)}
+          style={{
+            backgroundColor: "black",
+            opacity: value === option.id ? 1 : 0.55,
+            padding: "4px 8px",
+            cursor: "pointer",
+          }}
+        >
+          {option.label}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function SelectColor() {}
 

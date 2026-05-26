@@ -14,6 +14,8 @@ import { useSceneStore } from "@/store/sceneStore";
 import { ObjectNumberInput, type InputField } from "../molecules/EditorInput";
 import type { Transform } from "@/types/scene";
 import { activeZoom } from "@/types/scene";
+import { createDefaultLight } from "@/lights/lightDefaults";
+import { randomUUID } from "@/lib/randomId";
 
 export type PanelMode = "open" | "close";
 
@@ -47,10 +49,10 @@ function activeEntityEditorHeading(
         ? `${t("entity.mesh.default")} «${active.data.name}»`
         : t("entity.mesh.default");
     case "light":
-      return active.data.type === "Directional"
-        ? t("entity.light.directional")
-        : active.data.type === "Ambient"
-          ? t("entity.light.ambient")
+      return active.data.type === "Ambient"
+        ? t("entity.light.ambient")
+        : active.data.type === "Spot"
+          ? t("entity.light.spot")
           : t("entity.light.hdri");
     case "camera":
       return active.data.type === "Perspective"
@@ -119,7 +121,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
 
   const sceneItems = useSceneEntities();
   const sceneId = scene?.id ?? null;
-  const { selection, base, camera: cameraHandler } = useHandlers();
+  const { selection, base, camera: cameraHandler, lightAddition } = useHandlers();
 
   const activeRowId = useMemo(
     () => activeEntityRowId(activeObj, sceneId),
@@ -161,7 +163,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
 
     const showTransformBlocks =
       activeObj.kind === "mesh" ||
-      (activeObj.kind === "light" && activeObj.data.type !== "HDRI") ||
+      (activeObj.kind === "light" && activeObj.data.type === "Spot") ||
       activeObj.kind === "camera";
 
     if (!showTransformBlocks) return null;
@@ -264,7 +266,11 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
             text={t("panel.scene.addObject")}
           />
           <ActionButton
-            onClick={() => console.log("add light")}
+            onClick={() => {
+              const id = randomUUID();
+              lightAddition.execute(createDefaultLight({ id }));
+              selection.execute({ id });
+            }}
             text={t("panel.scene.addLight")}
           />
 

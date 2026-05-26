@@ -16,6 +16,7 @@ const ru: TranslationBundle = {
   "entity.mesh.default": "Меш",
   "entity.light.directional": "Направленный свет",
   "entity.light.ambient": "Окружающий свет",
+  "entity.light.spot": "Прожектор",
   "entity.light.hdri": "HDRI",
   "entity.camera.perspective": "Камера (перспектива)",
   "entity.camera.orthographic": "Камера (ортография)",
@@ -40,6 +41,19 @@ const ru: TranslationBundle = {
   "camera.preset.right": "Справа",
   "camera.preset.saved": "Сохранённый",
   "camera.preset.saveCurrent": "Сохранить ракурс",
+
+  "light.type.ambient": "Ambient",
+  "light.type.spot": "Spot",
+  "light.type.hdri": "HDRI",
+  "light.intensity": "Сила свечения",
+  "light.distance": "Дальность",
+  "light.penumbra": "Penumbra",
+  "light.angle": "Угол",
+  "light.target": "Направление",
+  "light.hdriPreset": "HDR-пресет",
+  "light.hdriPreset.studio": "Студия",
+  "light.hdriPreset.sunset": "Закат",
+  "light.hdriPreset.warehouse": "Склад",
 
   // --- Notifications ---
   "notify.scene.imported": "Сцена импортирована",

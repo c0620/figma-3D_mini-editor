@@ -24,7 +24,11 @@ export function ActionButton({
   onClick: () => void;
   text: string;
 }) {
-  return <div onClick={onClick}>{text}</div>;
+  return (
+    <div style={{ backgroundColor: "black" }} onClick={onClick}>
+      {text}
+    </div>
+  );
 }
 
 export function NavLinkButton({ to }: { to: string }) {
@@ -37,4 +41,18 @@ export function NavLinkButton({ to }: { to: string }) {
 
 export function OptionButton() {
   return <div>OptionButton</div>;
+}
+
+export function ActionButtonIcon({
+  onClick,
+  src,
+}: {
+  onClick: () => void;
+  src: string;
+}) {
+  return (
+    <div onClick={onClick} style={{ backgroundColor: "black" }}>
+      <img src={src}></img>
+    </div>
+  );
 }
