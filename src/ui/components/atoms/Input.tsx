@@ -122,8 +122,16 @@ export function InputColor({
 
   return (
     <>
-      <input type="color" value={color} />
-      <input type="text" value={color} />
+      <input
+        type="color"
+        value={color}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <input
+        type="text"
+        value={color}
+        onChange={(e) => onChange(e.target.value)}
+      />
       <div>
         RGB:
         <input
