@@ -228,7 +228,8 @@ function applyCameraProjectionAspect(
     camera.fov = state.fov;
     camera.aspect = projectionAspect;
   } else {
-    const halfH = 1 / camera.zoom;
+    // Единичный frustum: масштаб только через camera.zoom (как ожидает CameraControls).
+    const halfH = 1;
     const halfW = halfH * projectionAspect;
     camera.left = -halfW;
     camera.right = halfW;
@@ -395,8 +396,11 @@ function SceneCameraSync({ state }: { state: CameraState }) {
 
   useEffect(() => {
     if (!controls) return;
-    controls.mouseButtons.wheel = CameraControlsImplLib.ACTION.ZOOM;
-  }, [controls]);
+    controls.mouseButtons.wheel =
+      state.type === "Perspective"
+        ? CameraControlsImplLib.ACTION.DOLLY
+        : CameraControlsImplLib.ACTION.ZOOM;
+  }, [controls, state.type]);
 
   useEffect(() => {
     if (!controls) return;

@@ -34,6 +34,15 @@ const en = {
   "camera.aspectPreview": "Aspect preview",
   "camera.aspectPreview.on": "Preview on",
   "camera.aspectPreview.off": "Preview off",
+  "camera.presets": "View presets",
+  "camera.preset.front": "Front",
+  "camera.preset.back": "Back",
+  "camera.preset.top": "Top",
+  "camera.preset.bottom": "Bottom",
+  "camera.preset.left": "Left",
+  "camera.preset.right": "Right",
+  "camera.preset.saved": "Saved",
+  "camera.preset.saveCurrent": "Save current view",
 
   // --- Notifications ---
   "notify.scene.imported": "Scene imported",

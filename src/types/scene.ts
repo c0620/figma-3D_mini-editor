@@ -68,6 +68,23 @@ export interface CameraState {
   orbitTarget: [number, number, number];
   transform: Transform;
   locked: boolean;
+  /** Пользовательский сохранённый ракурс (один слот, перезаписывается). */
+  savedView: SavedCameraView | null;
+}
+
+export type StandardCameraPresetId =
+  | "front"
+  | "back"
+  | "top"
+  | "bottom"
+  | "left"
+  | "right";
+
+export interface SavedCameraView {
+  transform: Transform;
+  orbitTarget: [number, number, number];
+  perspectiveZoom: number;
+  orthographicZoom: number;
 }
 
 /** @deprecated Legacy single zoom field from older scenes. */
@@ -157,6 +174,7 @@ export function normalizeCameraState(camera: LegacyCameraState): CameraState {
       camera.perspectiveZoom ?? legacyZoom ?? 1,
     orthographicZoom:
       camera.orthographicZoom ?? legacyZoom ?? defaultOrthoZoom,
+    savedView: camera.savedView ?? null,
   };
 }
 

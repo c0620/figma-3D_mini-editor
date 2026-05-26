@@ -5,6 +5,12 @@ import type {
   SceneMesh,
   TextureSlot,
 } from "@/types/scene";
+import {
+  buildApplySavedCameraViewPatch,
+  buildSaveCameraViewPatch,
+  buildStandardCameraPresetPatch,
+  STANDARD_CAMERA_PRESETS,
+} from "@/camera/cameraPresets";
 import { ScrollPanel } from "../atoms/Output";
 import {
   useActiveMeshMaterials,
@@ -13,6 +19,7 @@ import {
   usePreview,
 } from "@/app/ApplicationKernelContext";
 import { useSceneStore } from "@/store/sceneStore";
+import type { CameraPatch } from "@/store/sceneStore";
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -157,7 +164,7 @@ export function PanelCamera(_props: { camera: CameraState }) {
 
   const locked = camera.locked;
 
-  const patch = (changes: Partial<CameraState>) => {
+  const patch = (changes: CameraPatch) => {
     if (locked) return;
     cameraHandler.execute(changes);
   };
@@ -248,6 +255,31 @@ export function PanelCamera(_props: { camera: CameraState }) {
             ]}
           />
         )}
+        <p style={{ marginTop: 12 }}>{t("camera.presets")}</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+          {STANDARD_CAMERA_PRESETS.map((preset) => (
+            <ActionButton
+              key={preset}
+              text={t(`camera.preset.${preset}`)}
+              onClick={() =>
+                patch(buildStandardCameraPresetPatch(camera, preset))
+              }
+            />
+          ))}
+          {camera.savedView ? (
+            <ActionButton
+              text={t("camera.preset.saved")}
+              onClick={() => {
+                const savedPatch = buildApplySavedCameraViewPatch(camera);
+                if (savedPatch) patch(savedPatch);
+              }}
+            />
+          ) : null}
+        </div>
+        <ActionButton
+          text={t("camera.preset.saveCurrent")}
+          onClick={() => patch(buildSaveCameraViewPatch(camera))}
+        />
       </div>
     </div>
   );

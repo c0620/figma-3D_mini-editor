@@ -31,6 +31,15 @@ const ru: TranslationBundle = {
   "camera.aspectPreview": "Предпросмотр aspect",
   "camera.aspectPreview.on": "Предпросмотр вкл",
   "camera.aspectPreview.off": "Предпросмотр выкл",
+  "camera.presets": "Пресеты ракурса",
+  "camera.preset.front": "Спереди",
+  "camera.preset.back": "Сзади",
+  "camera.preset.top": "Сверху",
+  "camera.preset.bottom": "Снизу",
+  "camera.preset.left": "Слева",
+  "camera.preset.right": "Справа",
+  "camera.preset.saved": "Сохранённый",
+  "camera.preset.saveCurrent": "Сохранить ракурс",
 
   // --- Notifications ---
   "notify.scene.imported": "Сцена импортирована",
