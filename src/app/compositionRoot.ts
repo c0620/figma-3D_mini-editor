@@ -41,7 +41,10 @@ import { NotificationService } from "../store/notificationService";
 import { useSceneStore } from "../store/sceneStore";
 import { SceneStorage } from "../store/sceneStorage";
 
-import type { SceneEntitySummary } from "../store/sceneEntityList";
+import type {
+  SceneEntityKind,
+  SceneEntitySummary,
+} from "../store/sceneEntityList";
 import { buildSceneEntityList } from "../store/sceneEntityList";
 import { MaterialEditingHandler } from "@/handlers/materialEditingHandler";
 
@@ -64,9 +67,15 @@ export interface AppHandlers {
   base: BaseToolHandler;
 
   /** Ниже — прокси через CommandBus, действия записываются в историю */
-  deletion: HandlerProxy<{ modelId: string }>;
-  visibility: HandlerProxy<{ id: string | null }>;
-  lock: HandlerProxy<{ id: string }>;
+  deletion: HandlerProxy<{
+    modelId: string;
+    type: Exclude<SceneEntityKind, "camera">;
+  }>;
+  visibility: HandlerProxy<{
+    id: string | null;
+    type: Exclude<SceneEntityKind, "camera">;
+  }>;
+  lock: HandlerProxy<{ id: string; type: SceneEntityKind }>;
   materialEditing: HandlerProxy<{ id: string; changes: object }>;
   lightAddition: HandlerProxy<Light>;
   lightEditing: HandlerProxy<{ id: string; changes: object }>;

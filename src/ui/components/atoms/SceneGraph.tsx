@@ -1,6 +1,9 @@
 import type { MouseEvent } from "react";
 import { useHandlers } from "@/app/ApplicationKernelContext";
-import type { SceneEntitySummary } from "@/store/sceneEntityList";
+import type {
+  SceneEntityKind,
+  SceneEntitySummary,
+} from "@/store/sceneEntityList";
 
 export function GraphItem({
   item,
@@ -34,31 +37,40 @@ export function GraphItem({
       {item.label}
       {(isActive || item.locked || !item.visible) && (
         <div>
-          {" "}
           <button
             onClick={(e) => {
               stopClick(e);
-              changeVisibilityHandler.execute({ id: item.id });
-            }}
-          >
-            {item.visible ? "H" : "S"}
-          </button>
-          <button
-            onClick={(e) => {
-              stopClick(e);
-              changeLockHandler.execute({ id: item.id });
+              changeLockHandler.execute({ id: item.id, type: item.kind });
             }}
           >
             {item.locked ? "F" : "L"}
           </button>{" "}
-          <button
-            onClick={(e) => {
-              stopClick(e);
-              deleteHandler.execute({ modelId: item.id });
-            }}
-          >
-            D
-          </button>{" "}
+          {item.kind !== "camera" && (
+            <>
+              <button
+                onClick={(e) => {
+                  stopClick(e);
+                  changeVisibilityHandler.execute({
+                    id: item.id,
+                    type: item.kind as Exclude<SceneEntityKind, "camera">,
+                  });
+                }}
+              >
+                {item.visible ? "H" : "S"}
+              </button>
+              <button
+                onClick={(e) => {
+                  stopClick(e);
+                  deleteHandler.execute({
+                    modelId: item.id,
+                    type: item.kind as Exclude<SceneEntityKind, "camera">,
+                  });
+                }}
+              >
+                D
+              </button>{" "}
+            </>
+          )}
         </div>
       )}
     </div>

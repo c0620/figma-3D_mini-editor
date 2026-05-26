@@ -80,7 +80,7 @@ export function buildSceneEntityList(
         ? tr("entity.camera.perspective")
         : tr("entity.camera.orthographic"),
     visible: true,
-    locked: false,
+    locked: scene.camera.locked,
   });
 
   return items;

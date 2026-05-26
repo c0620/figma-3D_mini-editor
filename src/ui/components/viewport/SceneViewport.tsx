@@ -1,6 +1,11 @@
 import { Suspense, useMemo, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { CameraControls, Outlines, TransformControls } from "@react-three/drei";
+import {
+  CameraControls,
+  OrbitControls,
+  Outlines,
+  TransformControls,
+} from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 
 import { useSceneStore } from "../../../store/sceneStore";
@@ -161,18 +166,16 @@ function SceneObjectMesh({
 
 export function SceneCanvas() {
   const meshes = useSceneStore((s) => s.scene?.meshes);
-  const cameraPosition = useSceneStore(
-    (s) => s.scene?.camera.transform.position
-  );
+  const camera = useSceneStore((s) => s.scene?.camera);
   const activeId = useSessionStore((s) => s.activeObjectId);
   const { base } = useHandlers();
 
-  if (!meshes || !cameraPosition) return null;
+  if (!meshes || !camera) return null;
 
   return (
     <div className="canvas" style={{ width: "100%", height: "100%" }}>
-      <Canvas camera={{ position: cameraPosition }}>
-        <CameraControls makeDefault />
+      <Canvas camera={{ position: camera.transform.position }}>
+        <CameraControls makeDefault enabled={!camera.locked} />
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         {meshes.map((mesh) => (

@@ -46,10 +46,10 @@ export class BaseToolHandler extends SceneToolHandler {
       return;
     }
 
-    const obj = this.scene.findObjectById(id);
+    const obj = this.scene.findMeshById(id);
     if (!obj) return;
 
-    this.scene.patchSceneObject(id, { transform: transformPatch });
+    this.scene.patchSceneMesh(id, { transform: transformPatch });
   }
 
   private buildTransformPatch(parts: Partial<Transform>): Partial<Transform> {

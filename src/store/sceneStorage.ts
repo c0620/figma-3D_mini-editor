@@ -33,7 +33,7 @@ export class SceneStorage {
     return mesh.materialIDs.map((id) => scene.materials[id]);
   }
 
-  patchSceneObject(objectId: string, patch: SceneObjectPatch): void {
+  patchSceneMesh(objectId: string, patch: SceneObjectPatch): void {
     useSceneStore.getState().patchSceneObject(objectId, patch);
   }
 
@@ -49,7 +49,7 @@ export class SceneStorage {
     useSceneStore.getState().patchMaterial(materialId, patch);
   }
 
-  findObjectById(id: string): SceneMesh | null {
+  findMeshById(id: string): SceneMesh | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;
     return scene.meshes.find((o) => o.id === id) ?? null;

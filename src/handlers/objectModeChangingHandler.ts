@@ -1,3 +1,4 @@
+import type { SceneEntityKind } from "@/store/sceneEntityList";
 import { useSessionStore } from "../store/sessionStore";
 import type { SceneMesh } from "../types/scene";
 import { SceneToolHandler } from "./sceneToolHandler";
@@ -38,14 +39,14 @@ export class ObjectGraphToolsHandler extends SceneToolHandler {
     const resolvedId = resolveMeshObjectId(explicitObjectId);
     if (!resolvedId) return;
 
-    const obj = this.scene.findObjectById(resolvedId);
+    const obj = this.scene.findMeshById(resolvedId);
     if (!obj) return;
 
     const patch: Partial<Pick<SceneMesh, "visible" | "locked">> = {};
     if (hasVisibility) patch.visible = visible;
     if (hasLock) patch.locked = locked;
 
-    this.scene.patchSceneObject(resolvedId, patch);
+    this.scene.patchSceneMesh(resolvedId, patch);
   }
 }
 
@@ -58,9 +59,9 @@ export class ToggleVisibilityHandler extends SceneToolHandler {
         : resolveMeshObjectId();
     if (!id) return;
 
-    const obj = this.scene.findObjectById(id);
+    const obj = this.scene.findMeshById(id);
     if (obj) {
-      this.scene.patchSceneObject(id, { visible: !obj.visible });
+      this.scene.patchSceneMesh(id, { visible: !obj.visible });
       return;
     }
 
@@ -79,10 +80,25 @@ export class ToggleLockHandler extends SceneToolHandler {
         ? (payload as { id: string }).id
         : resolveMeshObjectId();
     if (!id) return;
+    const payloadType = (payload as { type?: SceneEntityKind }).type;
 
-    const obj = this.scene.findObjectById(id);
-    if (!obj) return;
-
-    this.scene.patchSceneObject(id, { locked: !obj.locked });
+    var obj;
+    switch (payloadType) {
+      case "mesh":
+        obj = this.scene.findMeshById(id);
+        if (!obj) throw new Error("ToggleLockHandler: no mesh with given id");
+        this.scene.patchSceneMesh(id, { locked: !obj.locked });
+        break;
+      case "camera":
+        obj = this.scene.getCamera();
+        if (!obj) throw new Error("ToggleLockHandler: no camera state");
+        this.scene.patchCamera({ locked: !obj.locked });
+        break;
+      case "light":
+        obj = this.scene.findLightById(id);
+        if (!obj) throw new Error("ToggleLockHandler: no light with given id");
+        this.scene.patchLight(id, { locked: !obj.locked });
+        break;
+    }
   }
 }
