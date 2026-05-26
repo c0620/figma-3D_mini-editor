@@ -13,6 +13,7 @@ import { sceneCameraEntityId } from "@/store/sceneEntityList";
 import { useSceneStore } from "@/store/sceneStore";
 import { ObjectNumberInput, type InputField } from "../molecules/EditorInput";
 import type { Transform } from "@/types/scene";
+import { activeZoom } from "@/types/scene";
 
 export type PanelMode = "open" | "close";
 
@@ -118,7 +119,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
 
   const sceneItems = useSceneEntities();
   const sceneId = scene?.id ?? null;
-  const { selection, base } = useHandlers();
+  const { selection, base, camera: cameraHandler } = useHandlers();
 
   const activeRowId = useMemo(
     () => activeEntityRowId(activeObj, sceneId),
@@ -173,11 +174,17 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
     const groups: {
       key: keyof Transform;
       labelKey: "transform.position" | "transform.rotation" | "transform.scale";
-    }[] = [
-      { key: "position", labelKey: "transform.position" },
-      { key: "rotation", labelKey: "transform.rotation" },
-      { key: "scale", labelKey: "transform.scale" },
-    ];
+    }[] =
+      activeObj.kind === "camera"
+        ? [
+            { key: "position", labelKey: "transform.position" },
+            { key: "rotation", labelKey: "transform.rotation" },
+          ]
+        : [
+            { key: "position", labelKey: "transform.position" },
+            { key: "rotation", labelKey: "transform.rotation" },
+            { key: "scale", labelKey: "transform.scale" },
+          ];
 
     return (
       <>
@@ -200,9 +207,31 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
             sliderType={null}
           />
         ))}
+        {activeObj.kind === "camera" && (
+          <ObjectNumberInput
+            mode={mode}
+            label={t("camera.zoom")}
+            sliderType="default"
+            fields={[
+              {
+                value: activeZoom(scene.camera),
+                isActive: false,
+                onChange: (value) => {
+                  if (!locked) {
+                    cameraHandler.execute(
+                      scene.camera.type === "Perspective"
+                        ? { perspectiveZoom: value }
+                        : { orthographicZoom: value }
+                    );
+                  }
+                },
+              },
+            ]}
+          />
+        )}
       </>
     );
-  }, [scene, activeObj, sceneId, mode, applyTransformDimension, t]);
+  }, [scene, activeObj, sceneId, mode, applyTransformDimension, t, cameraHandler]);
 
   return (
     <div

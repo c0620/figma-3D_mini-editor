@@ -19,7 +19,7 @@ import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 import { randomUUID } from "../lib/randomId";
 import type { Material, Scene, SceneMesh } from "../types/scene";
-import { TextureSlot } from "../types/scene";
+import { DEFAULT_CAMERA_STATE, TextureSlot } from "../types/scene";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
 import { textureGpuPool } from "../store/textureGpuPool";
 import {
@@ -301,16 +301,7 @@ async function buildDomainSceneFromThreeRoot(
     meshes,
     materials,
     lights: [],
-    camera: {
-      type: "Perspective",
-      zoom: 1,
-      locked: false,
-      transform: {
-        position: [0, 0, 5],
-        rotation: [0, 0, 0],
-        scale: [1, 1, 1],
-      },
-    },
+    camera: { ...DEFAULT_CAMERA_STATE },
     environment: { backgroundColor: null, shadowsEnabled: false },
   };
 }

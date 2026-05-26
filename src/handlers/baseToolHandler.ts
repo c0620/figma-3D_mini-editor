@@ -1,3 +1,4 @@
+import { Euler, Vector3 } from "three";
 import type { Transform } from "../types/scene";
 import { isSceneCameraEntityId } from "../store/sceneEntityList";
 import { useSessionStore } from "../store/sessionStore";
@@ -8,6 +9,23 @@ export interface BaseToolPayload {
   position?: [number, number, number];
   rotation?: [number, number, number];
   scale?: [number, number, number];
+}
+
+function computeOrbitTargetFromRotation(
+  position: [number, number, number],
+  currentTarget: [number, number, number],
+  rotation: [number, number, number]
+): [number, number, number] {
+  const pos = new Vector3(...position);
+  const target = new Vector3(...currentTarget);
+  const distance = pos.distanceTo(target) || 5;
+  const forward = new Vector3(0, 0, -1).applyEuler(
+    new Euler(rotation[0], rotation[1], rotation[2], "XYZ")
+  );
+  return pos
+    .clone()
+    .add(forward.multiplyScalar(distance))
+    .toArray() as [number, number, number];
 }
 
 /**
@@ -36,7 +54,24 @@ export class BaseToolHandler extends SceneToolHandler {
     const sceneId = this.scene.getScene().id;
 
     if (isSceneCameraEntityId(sceneId, id)) {
-      this.scene.patchCamera({ transform: transformPatch });
+      const cam = this.scene.getCamera();
+      if (!cam) return;
+
+      const nextPosition = transformPatch.position ?? cam.transform.position;
+      const cameraPatch: {
+        transform: Partial<Transform>;
+        orbitTarget?: [number, number, number];
+      } = { transform: transformPatch };
+
+      if (transformPatch.rotation !== undefined) {
+        cameraPatch.orbitTarget = computeOrbitTargetFromRotation(
+          nextPosition,
+          cam.orbitTarget,
+          transformPatch.rotation
+        );
+      }
+
+      this.scene.patchCamera(cameraPatch);
       return;
     }
 

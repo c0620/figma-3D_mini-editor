@@ -53,10 +53,131 @@ export interface Light {
 
 export interface CameraState {
   type: "Perspective" | "Orthographic";
-  zoom: number;
+  near: number;
+  far: number;
+  /** Целевое соотношение сторон рендера (не размер canvas). */
+  aspect: number;
+  aspectPreviewEnabled: boolean;
+  /** Только для Perspective. */
+  fov: number;
+  /** Масштаб вида перспективной камеры (camera.zoom). */
+  perspectiveZoom: number;
+  /** Масштаб вида ортографической камеры (camera.zoom). */
+  orthographicZoom: number;
+  /** Точка, на которую смотрит камера (CameraControls target). */
+  orbitTarget: [number, number, number];
   transform: Transform;
   locked: boolean;
 }
+
+/** @deprecated Legacy single zoom field from older scenes. */
+type LegacyCameraState = Partial<CameraState> & { zoom?: number };
+
+export function cameraOrbitDistance(
+  position: [number, number, number],
+  orbitTarget: [number, number, number]
+): number {
+  return (
+    Math.hypot(
+      position[0] - orbitTarget[0],
+      position[1] - orbitTarget[1],
+      position[2] - orbitTarget[2]
+    ) || 5
+  );
+}
+
+export function perspectiveVisibleHalfHeight(
+  position: [number, number, number],
+  orbitTarget: [number, number, number],
+  fov: number
+): number {
+  const dist = cameraOrbitDistance(position, orbitTarget);
+  return dist * Math.tan((fov * Math.PI) / 180 / 2);
+}
+
+export function orthographicZoomFromPerspective(
+  perspectiveZoom: number,
+  position: [number, number, number],
+  orbitTarget: [number, number, number],
+  fov: number
+): number {
+  const halfH = perspectiveVisibleHalfHeight(position, orbitTarget, fov);
+  return perspectiveZoom / halfH;
+}
+
+export function perspectiveZoomFromOrthographic(
+  orthographicZoom: number,
+  position: [number, number, number],
+  orbitTarget: [number, number, number],
+  fov: number
+): number {
+  const halfH = perspectiveVisibleHalfHeight(position, orbitTarget, fov);
+  return orthographicZoom * halfH;
+}
+
+export function computeDefaultOrthographicZoom(
+  position: [number, number, number] = [0, 0, 5],
+  orbitTarget: [number, number, number] = [0, 0, 0],
+  fov = 50
+): number {
+  return orthographicZoomFromPerspective(1, position, orbitTarget, fov);
+}
+
+export function activeZoom(state: CameraState): number {
+  return state.type === "Perspective"
+    ? state.perspectiveZoom
+    : state.orthographicZoom;
+}
+
+export function normalizeCameraState(camera: LegacyCameraState): CameraState {
+  const legacyZoom = camera.zoom;
+  const transform = camera.transform ?? DEFAULT_CAMERA_TRANSFORM;
+  const orbitTarget = camera.orbitTarget ?? [0, 0, 0] as [number, number, number];
+  const fov = camera.fov ?? 50;
+  const defaultOrthoZoom = computeDefaultOrthographicZoom(
+    transform.position,
+    orbitTarget,
+    fov
+  );
+
+  const { zoom: _legacy, ...rest } = camera;
+
+  return {
+    type: "Perspective",
+    near: 0.1,
+    far: 1000,
+    aspect: 16 / 9,
+    aspectPreviewEnabled: false,
+    fov,
+    orbitTarget,
+    locked: false,
+    transform,
+    ...rest,
+    perspectiveZoom:
+      camera.perspectiveZoom ?? legacyZoom ?? 1,
+    orthographicZoom:
+      camera.orthographicZoom ?? legacyZoom ?? defaultOrthoZoom,
+  };
+}
+
+const DEFAULT_CAMERA_TRANSFORM: Transform = {
+  position: [0, 0, 5],
+  rotation: [0, 0, 0],
+  scale: [1, 1, 1],
+};
+
+export const DEFAULT_CAMERA_STATE: CameraState = normalizeCameraState({
+  type: "Perspective",
+  near: 0.1,
+  far: 1000,
+  aspect: 16 / 9,
+  aspectPreviewEnabled: false,
+  fov: 50,
+  perspectiveZoom: 1,
+  orbitTarget: [0, 0, 0],
+  locked: false,
+  transform: DEFAULT_CAMERA_TRANSFORM,
+});
 
 export interface EnvironmentState {
   backgroundColor: string | null;

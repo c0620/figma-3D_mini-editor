@@ -23,6 +23,18 @@ const en = {
   "entity.camera.perspective": "Camera (perspective)",
   "entity.camera.orthographic": "Camera (orthographic)",
 
+  // --- Camera params ---
+  "camera.near": "Near",
+  "camera.far": "Far",
+  "camera.aspect": "Aspect",
+  "camera.fov": "FOV",
+  "camera.zoom": "Zoom",
+  "camera.type.perspective": "Perspective",
+  "camera.type.orthographic": "Orthographic",
+  "camera.aspectPreview": "Aspect preview",
+  "camera.aspectPreview.on": "Preview on",
+  "camera.aspectPreview.off": "Preview off",
+
   // --- Notifications ---
   "notify.scene.imported": "Scene imported",
   "notify.scene.exported": "Scene exported",

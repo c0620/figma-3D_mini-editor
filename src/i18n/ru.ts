@@ -20,6 +20,18 @@ const ru: TranslationBundle = {
   "entity.camera.perspective": "Камера (перспектива)",
   "entity.camera.orthographic": "Камера (ортография)",
 
+  // --- Camera params ---
+  "camera.near": "Near",
+  "camera.far": "Far",
+  "camera.aspect": "Aspect",
+  "camera.fov": "FOV",
+  "camera.zoom": "Zoom",
+  "camera.type.perspective": "Перспектива",
+  "camera.type.orthographic": "Ортография",
+  "camera.aspectPreview": "Предпросмотр aspect",
+  "camera.aspectPreview.on": "Предпросмотр вкл",
+  "camera.aspectPreview.off": "Предпросмотр выкл",
+
   // --- Notifications ---
   "notify.scene.imported": "Сцена импортирована",
   "notify.scene.exported": "Сцена экспортирована",

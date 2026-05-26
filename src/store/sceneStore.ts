@@ -6,6 +6,11 @@ import type {
   SceneMesh,
   Transform,
 } from "../types/scene";
+import {
+  normalizeCameraState,
+  orthographicZoomFromPerspective,
+  perspectiveZoomFromOrthographic,
+} from "../types/scene";
 
 import { create } from "zustand";
 
@@ -50,7 +55,13 @@ export type { SceneObjectPatch };
 export const useSceneStore = create<SceneState & SceneActions>((set) => ({
   scene: null,
 
-  loadScene: (scene) => set({ scene }),
+  loadScene: (scene) =>
+    set({
+      scene: {
+        ...scene,
+        camera: normalizeCameraState(scene.camera),
+      },
+    }),
   clearScene: () => set({ scene: null }),
 
   patchSceneObject: (objectId, patch) =>
@@ -96,10 +107,34 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
         : prev.transform;
 
       const { transform: _t, ...rest } = patch;
+      const nextCamera = { ...prev, ...rest, transform: nextTransform };
+
+      if (patch.type && patch.type !== prev.type) {
+        const position = nextTransform.position;
+        const orbitTarget = nextCamera.orbitTarget;
+        const fov = nextCamera.fov;
+
+        if (patch.type === "Orthographic") {
+          nextCamera.orthographicZoom = orthographicZoomFromPerspective(
+            prev.perspectiveZoom,
+            position,
+            orbitTarget,
+            fov
+          );
+        } else {
+          nextCamera.perspectiveZoom = perspectiveZoomFromOrthographic(
+            prev.orthographicZoom,
+            position,
+            orbitTarget,
+            fov
+          );
+        }
+      }
+
       return {
         scene: {
           ...state.scene,
-          camera: { ...prev, ...rest, transform: nextTransform },
+          camera: nextCamera,
         },
       };
     }),
