@@ -1,3 +1,4 @@
+import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
@@ -19,6 +20,8 @@ import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 import { withDefaultAmbientLight } from "../lights/lightDefaults";
 import { randomUUID } from "../lib/randomId";
+import type { SceneExportOptions } from "../types/export";
+import { buildThreeSceneFromDomain } from "../render/domainSceneBuilder";
 import type { Material, Scene, SceneMesh } from "../types/scene";
 import { DEFAULT_CAMERA_STATE, TextureSlot } from "../types/scene";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
@@ -325,10 +328,28 @@ async function threeObjectToDomainScene(
 }
 
 export class SceneEncoder {
-  export(type: SceneFileType, scene: Scene): string {
-    void type;
-    void scene;
-    return "";
+  async export(
+    type: SceneFileType,
+    scene: Scene,
+    options?: SceneExportOptions
+  ): Promise<ArrayBuffer> {
+    if (type !== "GLB") {
+      throw new Error("SceneEncoder.export: only GLB is supported");
+    }
+
+    const built = await buildThreeSceneFromDomain(scene, {
+      includeCamera: options?.includeCamera ?? false,
+    });
+
+    try {
+      const glb = await new GLTFExporter().parseAsync(built.root, {
+        binary: true,
+        embedImages: !(options?.includeTextures ?? false),
+      });
+      return glb as ArrayBuffer;
+    } finally {
+      built.dispose();
+    }
   }
 
   async import(

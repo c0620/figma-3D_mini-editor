@@ -4,9 +4,12 @@ import { PanelScene } from "../organisms/PanelScene";
 import { PanelMesh, PanelLight, PanelCamera } from "../organisms/PanelParams";
 import { useActiveObject } from "@/app/ApplicationKernelContext";
 import { PanelBottom, PanelTop } from "../organisms/EditorTools";
+import { ExportModal } from "./ExportModal";
+import { useState } from "react";
 
 export default function EditorPage() {
   const activeObj = useActiveObject();
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   let panelParams;
   switch (activeObj?.kind) {
@@ -22,6 +25,9 @@ export default function EditorPage() {
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
+      {isExportOpen && (
+        <ExportModal onClose={() => setIsExportOpen(false)} />
+      )}
       <div
         style={{
           position: "absolute",
@@ -46,7 +52,7 @@ export default function EditorPage() {
           alignItems: "center",
         }}
       >
-        <PanelTop />
+        <PanelTop openModal={(val: boolean) => setIsExportOpen(val)} />
         <PanelBottom activeObj={activeObj} />
       </div>
       <div style={{ width: "100vw", height: "100vh" }}>

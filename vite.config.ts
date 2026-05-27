@@ -1,6 +1,6 @@
-import react from "@vitejs/plugin-react";
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
 import { viteSingleFile } from "vite-plugin-singlefile";
 
 // https://vite.dev/config/
@@ -24,9 +24,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // test: {
-  //     include: ["src/tests/**/*.test.ts"],
-  //     environment: "happy-dom",
-  //     setupFiles: ["./src/tests/setup.ts"],
-  // },
+  test: {
+    include: ["src/**/*.test.ts"],
+    environment: "happy-dom",
+  },
 });

@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { NavLinkButton } from "./Button";
+import { NavLinkButton, OptionButton } from "./Button";
 import type { PanelMode } from "../organisms/PanelScene";
 
 export function PanelModeToggle({
@@ -25,6 +25,26 @@ export function NavTitle({ title, to }: { title: string; to: string }) {
     <div>
       <NavLinkButton to={to} />
       {title}
+    </div>
+  );
+}
+
+export function NavModal({
+  title,
+  switchText,
+  switchMode,
+  onClose,
+}: {
+  title: string;
+  switchText: string;
+  switchMode: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div>
+      <p>{title}</p>{" "}
+      <OptionButton onClick={switchMode} text={switchText}></OptionButton>
+      <img onClick={onClose}></img>
     </div>
   );
 }

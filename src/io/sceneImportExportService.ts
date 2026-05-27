@@ -1,6 +1,7 @@
 import { SceneStorage } from "../store/sceneStorage";
 import { NotificationService } from "../store/notificationService";
 import { SceneAnalyzer } from "../render/sceneAnalyzer";
+import type { SceneExportOptions } from "../types/export";
 import { SceneEncoder, type SceneImportResources } from "./sceneEncoder";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
@@ -25,8 +26,10 @@ export class SceneImportExportService {
     this.notifications = notifications;
   }
 
-  exportToDevice(type: SceneFileType): Blob {
-    const raw = this.encoder.export(type, this.scene.getScene());
+  async exportToDevice(type: SceneFileType, options?: SceneExportOptions): Promise<Blob> {
+    const scene = this.scene.getScene();
+    if (!scene) return new Blob();
+    const raw = await this.encoder.export(type, scene, options);
     return new Blob([raw]);
   }
 

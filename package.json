@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "npm run start",
     "build": "tsc -b && vite build --emptyOutDir=false && npm run build:main",
-    "build:main": "esbuild plugin-src/code.ts --bundle --outfile=dist/code.js",
-    "build:main:watch": "esbuild plugin-src/code.ts --bundle --outfile=dist/code.js --watch",
+    "build:main": "esbuild plugin-src/code.ts --bundle --outfile=dist/code.js --target=es2017",
+    "build:main:watch": "esbuild plugin-src/code.ts --bundle --outfile=dist/code.js --target=es2017 --watch",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --max-warnings=0 --no-warn-ignored",
     "lint:debug": "eslint --ext .jsx,.js,.ts,.tsx ./src --debug --max-warnings=0",
     "lint:fix": "npx eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix --max-warnings=0 --no-warn-ignored",

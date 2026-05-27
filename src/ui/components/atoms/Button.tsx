@@ -21,12 +21,21 @@ export function MainButton({
 export function ActionButton({
   onClick,
   text,
+  disabled = false,
 }: {
   onClick: () => void;
   text: string;
+  disabled?: boolean;
 }) {
   return (
-    <div style={{ backgroundColor: "black" }} onClick={onClick}>
+    <div
+      style={{
+        backgroundColor: "black",
+        opacity: disabled ? 0.4 : 1,
+        pointerEvents: disabled ? "none" : "auto",
+      }}
+      onClick={disabled ? undefined : onClick}
+    >
       {text}
     </div>
   );
@@ -40,8 +49,14 @@ export function NavLinkButton({ to }: { to: string }) {
   );
 }
 
-export function OptionButton() {
-  return <div>OptionButton</div>;
+export function OptionButton({
+  text,
+  onClick,
+}: {
+  text: string;
+  onClick: () => void;
+}) {
+  return <div onClick={onClick}>{text}</div>;
 }
 
 export function ActionButtonIcon({

@@ -13,11 +13,16 @@ export class RenderService {
     this.scene = scene;
   }
 
-  exportRender(options: RenderOptions): RenderResult {
-    const canvas = document.createElement('canvas');
+  async exportRender(options: RenderOptions): Promise<RenderResult> {
+    const scene = this.scene.getScene();
+    if (!scene) {
+      return { png: new Blob(), durationMs: 0 };
+    }
+
+    const canvas = document.createElement("canvas");
     canvas.width = options.width;
     canvas.height = options.height;
-    const result = this.renderer.renderScene(canvas, this.scene.getScene(), options);
+    const result = await this.renderer.renderScene(canvas, scene, options);
     this.progressListeners.forEach((l) => l(100));
     return result;
   }

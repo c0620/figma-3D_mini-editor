@@ -123,7 +123,7 @@ export function PanelBottom({ activeObj }: { activeObj: ActiveEntity | null }) {
   );
 }
 
-export function PanelTop() {
+export function PanelTop({ openModal }: { openModal: (val: boolean) => void }) {
   const scene = useSceneStore((s) => s.scene);
   const { deletion, background, shadows, selection } = useHandlers();
 
@@ -186,7 +186,7 @@ export function PanelTop() {
         <InputProjectName />
       </div>
       <PanelButton url="q" onClick={() => console.log("q")} />
-      <PanelButton url="ren" onClick={() => console.log("ren")} />
+      <PanelButton url="ren" onClick={() => openModal(true)} />
     </div>
   );
 }

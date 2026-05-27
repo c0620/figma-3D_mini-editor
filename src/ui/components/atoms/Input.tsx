@@ -7,6 +7,7 @@ import {
 
 import type { SceneFileType } from "@/io/sceneTransferFacade";
 import type { SceneImportResources } from "@/io/sceneTransferFacade";
+import type { LinkedSelectionSummary } from "@/figma/figmaMessages";
 import { useSessionStore } from "@/store/sessionStore";
 import type { InputField } from "../molecules/EditorInput";
 
@@ -187,7 +188,24 @@ export function InputProjectName() {
 
 export function InputModelSource() {}
 
-export function Toggle() {}
+export function Toggle({
+  checked,
+  onChange,
+  disabled = false,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <input
+      type="checkbox"
+      checked={checked}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.checked)}
+    />
+  );
+}
 
 export function SelectIcon({
   options,
@@ -286,15 +304,32 @@ export function FileInput({
 }
 
 export function FigmaInput({
+  selectedFrame = null,
   error = null,
-  success = true,
+  loading = false,
 }: {
-  error?: any;
-  success?: boolean;
+  selectedFrame?: LinkedSelectionSummary | null;
+  error?: string | null;
+  loading?: boolean;
 }) {
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (loading) {
+    return <div>Загрузка связанного рендера...</div>;
+  }
+
+  if (selectedFrame) {
+    return (
+      <div>
+        <p>Выбран фрейм: {selectedFrame.frameName}</p>
+        <p>Проект: {selectedFrame.projectName}</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      FileInput {error ? error : ""} {success ? "success" : ""}
-    </div>
+    <div>Выберите на canvas фрейм со связанным рендером</div>
   );
 }

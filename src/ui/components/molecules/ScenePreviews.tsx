@@ -140,7 +140,7 @@ export function MaterialPreviewThumb({
 export function TexturePreviewThumb({
   isActive,
   name,
-  materialID,
+  materialID: _materialID,
   url,
   onClick,
 }: {
