@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router";
 
 export function MainButton({
@@ -53,6 +54,37 @@ export function ActionButtonIcon({
   return (
     <div onClick={onClick} style={{ backgroundColor: "black" }}>
       <img src={src}></img>
+    </div>
+  );
+}
+
+export function PanelButton({
+  url,
+  onClick,
+  children,
+  active = false,
+  disabled = false,
+  label,
+}: {
+  url: string;
+  onClick?: () => void;
+  children?: ReactNode;
+  active?: boolean;
+  disabled?: boolean;
+  label?: string;
+}) {
+  return (
+    <div
+      onClick={disabled || !onClick ? undefined : onClick}
+      style={{
+        opacity: disabled ? 0.4 : 1,
+        pointerEvents: disabled ? "none" : "auto",
+        backgroundColor: active ? "rgba(255, 89, 0, 0.35)" : undefined,
+        outline: active ? "1px solid #ff5900" : undefined,
+      }}
+    >
+      <img src={url} /> {label ?? url}
+      {children}
     </div>
   );
 }

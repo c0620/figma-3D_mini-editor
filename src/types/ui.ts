@@ -1,3 +1,6 @@
+export type TransformToolMode = "translate" | "rotate" | "scale";
+export type ActiveTransformToolMode = TransformToolMode | null;
+
 export interface TooltipData {
   toolId: string;
   name: string;

@@ -3,6 +3,7 @@ import { SceneCanvas } from "../viewport/SceneViewport";
 import { PanelScene } from "../organisms/PanelScene";
 import { PanelMesh, PanelLight, PanelCamera } from "../organisms/PanelParams";
 import { useActiveObject } from "@/app/ApplicationKernelContext";
+import { PanelBottom, PanelTop } from "../organisms/EditorTools";
 
 export default function EditorPage() {
   const activeObj = useActiveObject();
@@ -21,9 +22,6 @@ export default function EditorPage() {
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
-      <div style={{ position: "absolute" }}>
-        <NavLink to="/">Main</NavLink>
-      </div>
       <div
         style={{
           position: "absolute",
@@ -36,6 +34,20 @@ export default function EditorPage() {
       >
         <PanelScene activeObj={activeObj} />
         {panelParams}
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <PanelTop />
+        <PanelBottom activeObj={activeObj} />
       </div>
       <div style={{ width: "100vw", height: "100vh" }}>
         <SceneCanvas />

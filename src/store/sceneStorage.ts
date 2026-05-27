@@ -49,6 +49,13 @@ export class SceneStorage {
     useSceneStore.getState().patchMaterial(materialId, patch);
   }
 
+  removeLight(lightId: string): void {
+    useSceneStore.getState().removeLight(lightId);
+    if (useSessionStore.getState().activeObjectId === lightId) {
+      this.setActive(null);
+    }
+  }
+
   findMeshById(id: string): SceneMesh | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;

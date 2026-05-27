@@ -7,6 +7,7 @@ import {
 
 import type { SceneFileType } from "@/io/sceneTransferFacade";
 import type { SceneImportResources } from "@/io/sceneTransferFacade";
+import { useSessionStore } from "@/store/sessionStore";
 import type { InputField } from "../molecules/EditorInput";
 
 const MODEL_EXT: Record<string, SceneFileType> = {
@@ -155,7 +156,34 @@ export function InputColor({
   );
 }
 
-export function InputProjectName() {}
+export function InputProjectName() {
+  const projectName = useSessionStore((s) => s.projectName);
+  const setProjectName = useSessionStore((s) => s.setProjectName);
+  const [draft, setDraft] = useState(projectName);
+
+  useEffect(() => {
+    setDraft(projectName);
+  }, [projectName]);
+
+  const commit = () => {
+    setProjectName(draft);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.currentTarget.blur();
+    }
+  };
+
+  return (
+    <input
+      value={draft}
+      onChange={(e: ChangeEvent<HTMLInputElement>) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={handleKeyDown}
+    />
+  );
+}
 
 export function InputModelSource() {}
 

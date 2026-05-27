@@ -1,11 +1,12 @@
 import { Environment, useHelper } from "@react-three/drei";
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type RefObject } from "react";
 import { SpotLightHelper } from "three";
-import type { SpotLight as ThreeSpotLight } from "three";
+import type { Group, Object3D, SpotLight as ThreeSpotLight } from "three";
 
 import { useSceneStore } from "../../../store/sceneStore";
 import type { HdriPresetId, Light } from "../../../types/scene";
 import { useThree } from "@react-three/fiber";
+import { SceneTransformGizmo } from "./SceneTransformGizmo";
 
 const SELECTION_COLOR = "#ff5900";
 
@@ -25,16 +26,27 @@ function SceneSpotLightNode({
   const { transform, visible } = light;
   const [rx, ry, rz] = transform.rotation;
   const [sx, sy, sz] = transform.scale;
+  const groupRef = useRef<Group>(undefined);
 
   return (
-    <group
-      position={transform.position}
-      rotation={[rx, ry, rz]}
-      scale={[sx, sy, sz]}
-      visible={visible}
-    >
-      <SpotLightLocal light={light} isActive={isActive} />
-    </group>
+    <>
+      <group
+        ref={groupRef}
+        position={transform.position}
+        rotation={[rx, ry, rz]}
+        scale={[sx, sy, sz]}
+        visible={visible}
+      >
+        <SpotLightLocal light={light} isActive={isActive} />
+      </group>
+      <SceneTransformGizmo
+        entityId={light.id}
+        objectRef={groupRef}
+        isActive={isActive}
+        locked={light.locked}
+        scaleEnabled
+      />
+    </>
   );
 }
 
@@ -45,11 +57,15 @@ function SpotLightLocal({
   light: Light;
   isActive: boolean;
 }) {
-  const lightRef = useRef<ThreeSpotLight>(null);
+  const lightRef = useRef<ThreeSpotLight>(undefined);
   const { scene } = useThree();
   const [tx, ty, tz] = light.target;
 
-  useHelper(isActive && lightRef, SpotLightHelper, SELECTION_COLOR);
+  useHelper(
+    isActive ? (lightRef as RefObject<Object3D>) : false,
+    SpotLightHelper,
+    SELECTION_COLOR
+  );
 
   useLayoutEffect(() => {
     const spot = lightRef.current;

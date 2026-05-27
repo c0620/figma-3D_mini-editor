@@ -3,6 +3,10 @@ import type { Light, TextureSlot } from "../types/scene";
 import { FigmaAPI } from "../figma/figmaApi";
 import { FigmaHandler } from "../figma/figmaHandler";
 import { BaseToolHandler } from "../handlers/baseToolHandler";
+import type {
+  TransformObjectInversePayload,
+  TransformObjectPayload,
+} from "../handlers/baseToolHandler";
 import { CameraEditingHandler } from "../handlers/cameraEditingHandler";
 import { DeletionHandler } from "../handlers/deletionHandler";
 import { EnvironmentHandler } from "../handlers/environmentHandler";
@@ -34,6 +38,7 @@ import { MaterialPreviewService } from "../services/previewService";
 import { TooltipService } from "../services/tooltipService";
 import { ActionExecutor } from "../commands/actionExecutor";
 import { ActionReverter } from "../commands/actionReverter";
+import { HistoryInverseBuilder } from "../commands/historyInverseBuilder";
 import { CommandBus } from "../commands/commandBus";
 import { DeletionGarbageCollector } from "../commands/deletionGarbageCollector";
 import { History } from "../store/history";
@@ -56,6 +61,14 @@ type HandlerProxy<P extends object = object> = {
   execute(payload: P): void;
 };
 
+export interface TransformHandler {
+  execute(payload: TransformObjectPayload): void;
+  commit(
+    forward: TransformObjectPayload,
+    inverse: TransformObjectInversePayload
+  ): void;
+}
+
 export interface AppHandlers {
   /** Выделение объекта — без истории, вызывается напрямую */
   selection: SelectionHandler;
@@ -63,8 +76,10 @@ export interface AppHandlers {
   graphTools: ObjectGraphToolsHandler;
   /** Управление камерой — без истории, вызывается напрямую */
   camera: CameraEditingHandler;
-  /** Базовый трансформ (заглушка до реализации TransformObjectHandler) */
+  /** Live-трансформ без истории (drag preview) */
   base: BaseToolHandler;
+  /** Трансформ с записью в undo/redo */
+  transform: TransformHandler;
 
   /** Ниже — прокси через CommandBus, действия записываются в историю */
   deletion: HandlerProxy<{
@@ -171,9 +186,10 @@ export function buildKernel(): AppKernel {
 
   // --- Commands ---
   const executor = new ActionExecutor(sceneStorage);
-  const reverter = new ActionReverter(sceneStorage);
+  const reverter = new ActionReverter(sceneStorage, executor);
+  const inverseBuilder = new HistoryInverseBuilder(sceneStorage);
   const gc = new DeletionGarbageCollector(sceneStorage);
-  const bus = new CommandBus(history, executor, reverter, gc);
+  const bus = new CommandBus(history, executor, reverter, gc, inverseBuilder);
 
   executor.handlers.set(CommandType.DeleteModel, deletionHandler);
   executor.handlers.set(CommandType.AddLight, lightAdditionHandler);
@@ -186,8 +202,8 @@ export function buildKernel(): AppKernel {
   executor.handlers.set(CommandType.ToggleVisibility, toggleVisibilityHandler);
   executor.handlers.set(CommandType.ToggleLock, toggleLockHandler);
   executor.handlers.set(CommandType.EditMaterial, materialEditingHandler);
+  executor.handlers.set(CommandType.TransformObject, baseHandler);
   // SelectObject вызывается напрямую через selectionHandler, минуя bus
-  // TransformObject, ToggleVisibility, ToggleLock, RenameScene — TBD
 
   // --- Сборка handlers-объекта для UI ---
   const makeProxy = <P extends object>(type: CommandType): HandlerProxy<P> => ({
@@ -199,6 +215,14 @@ export function buildKernel(): AppKernel {
     graphTools: graphToolsHandler,
     camera: cameraHandler,
     base: baseHandler,
+    transform: {
+      execute: (payload: TransformObjectPayload) =>
+        bus.execute(CommandType.TransformObject, payload),
+      commit: (forward, inverse) =>
+        bus.execute(CommandType.TransformObject, forward, {
+          inversePayload: inverse,
+        }),
+    },
     environment: environmentHandler,
 
     deletion: makeProxy(CommandType.DeleteModel),

@@ -16,6 +16,10 @@ import type { Transform } from "@/types/scene";
 import { activeZoom } from "@/types/scene";
 import { createDefaultLight } from "@/lights/lightDefaults";
 import { randomUUID } from "@/lib/randomId";
+import {
+  isSelectionLocked,
+  isTransformEditable,
+} from "@/lib/transformSelection";
 
 export type PanelMode = "open" | "close";
 
@@ -80,20 +84,6 @@ function transformForSelection(
   }
 }
 
-function isSelectionLocked(
-  scene: NonNullable<ReturnType<typeof useSceneStore.getState>["scene"]>,
-  active: ActiveEntity
-): boolean {
-  switch (active.kind) {
-    case "mesh":
-      return scene.meshes.find((o) => o.id === active.data.id)?.locked ?? false;
-    case "light":
-      return scene.lights.find((l) => l.id === active.data.id)?.locked ?? false;
-    case "camera":
-      return scene.camera.locked;
-  }
-}
-
 function buildAxisFields(
   key: keyof Transform,
   tuple: [number, number, number],
@@ -121,7 +111,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
 
   const sceneItems = useSceneEntities();
   const sceneId = scene?.id ?? null;
-  const { selection, base, camera: cameraHandler, lightAddition } = useHandlers();
+  const { selection, transform, camera: cameraHandler, lightAddition } = useHandlers();
 
   const activeRowId = useMemo(
     () => activeEntityRowId(activeObj, sceneId),
@@ -145,28 +135,23 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
 
       switch (dimensionKey) {
         case "position":
-          base.execute({ id: rowId, position: nextTuple });
+          transform.execute({ id: rowId, position: nextTuple });
           break;
         case "rotation":
-          base.execute({ id: rowId, rotation: nextTuple });
+          transform.execute({ id: rowId, rotation: nextTuple });
           break;
         case "scale":
-          base.execute({ id: rowId, scale: nextTuple });
+          transform.execute({ id: rowId, scale: nextTuple });
           break;
       }
     },
-    [activeObj, sceneId, base]
+    [activeObj, sceneId, transform]
   );
 
   const transformPanels = useMemo(() => {
     if (!scene || !activeObj || !sceneId) return null;
 
-    const showTransformBlocks =
-      activeObj.kind === "mesh" ||
-      (activeObj.kind === "light" && activeObj.data.type === "Spot") ||
-      activeObj.kind === "camera";
-
-    if (!showTransformBlocks) return null;
+    if (!isTransformEditable(activeObj)) return null;
 
     const transform = transformForSelection(scene, activeObj);
     if (!transform) return null;

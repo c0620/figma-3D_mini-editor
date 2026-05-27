@@ -49,6 +49,7 @@ interface SceneActions {
   patchLight(lightId: string, patch: LightPatch): void;
   patchCamera(patch: CameraPatch): void;
   patchMaterial(materialId: string, patch: MaterialPatch): void;
+  removeLight(lightId: string): void;
 }
 
 export type { SceneObjectPatch };
@@ -174,6 +175,16 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
               textures: nextTextures,
             },
           },
+        },
+      };
+    }),
+  removeLight: (lightId) =>
+    set((state) => {
+      if (!state.scene) return state;
+      return {
+        scene: {
+          ...state.scene,
+          lights: state.scene.lights.filter((light) => light.id !== lightId),
         },
       };
     }),

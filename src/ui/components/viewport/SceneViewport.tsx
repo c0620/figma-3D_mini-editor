@@ -12,7 +12,6 @@ import {
   OrthographicCamera,
   Outlines,
   PerspectiveCamera,
-  TransformControls,
 } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 
@@ -30,6 +29,7 @@ import { useMaterialGpuTextures } from "./useMaterialGpuTextures";
 import { SceneLights } from "./SceneLights";
 import type { Object3D } from "three";
 import {
+  Color,
   OrthographicCamera as ThreeOrthographicCamera,
   PerspectiveCamera as ThreePerspectiveCamera,
   Vector3,
@@ -39,8 +39,26 @@ import CameraControlsImplLib from "camera-controls";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import type { CameraPatch } from "@/store/sceneStore";
 import type { CameraEditingHandler } from "@/handlers/cameraEditingHandler";
+import { sceneCameraEntityId } from "@/store/sceneEntityList";
+import { SceneTransformGizmo } from "./SceneTransformGizmo";
 
 const ZOOM_EPSILON = 1e-4;
+const DEFAULT_VIEWPORT_CLEAR_COLOR = 0x111111;
+
+function SceneBackground({ color }: { color: string | null }) {
+  const { scene, gl } = useThree();
+
+  useLayoutEffect(() => {
+    if (color) {
+      scene.background = new Color(color);
+    } else {
+      scene.background = null;
+    }
+    gl.setClearColor(color ?? DEFAULT_VIEWPORT_CLEAR_COLOR);
+  }, [color, scene, gl]);
+
+  return null;
+}
 
 function hasTextureUrls(mat: Material): boolean {
   return Object.values(mat.textures).some((entry) => entry?.url != null);
@@ -112,11 +130,9 @@ function MaterialSlotById({
 function SceneObjectMesh({
   object,
   isActive,
-  onChange,
 }: {
   object: SceneMesh;
   isActive: boolean;
-  onChange: (value: object) => void;
 }) {
   const asset = threeAssetRegistry.get(object.id);
 
@@ -124,13 +140,13 @@ function SceneObjectMesh({
 
   const { transform, visible, materialIDs, name } = object;
 
-  const active = useRef<Object3D>(undefined);
+  const meshRef = useRef<Object3D>(undefined);
 
   return (
     <>
       <mesh
         key={object.id}
-        ref={active}
+        ref={meshRef}
         geometry={asset.geometry}
         position={transform.position}
         rotation={transform.rotation}
@@ -147,31 +163,13 @@ function SceneObjectMesh({
         ))}
         {isActive && <Outlines thickness={3} color="orange" />}
       </mesh>
-      {!object.locked && isActive && (
-        <TransformControls
-          object={active.current}
-          onChange={() =>
-            onChange({
-              id: object.id,
-              position: active.current!.position.toArray() as [
-                number,
-                number,
-                number,
-              ],
-              rotation: [
-                active.current!.rotation.x,
-                active.current!.rotation.y,
-                active.current!.rotation.z,
-              ],
-              scale: active.current!.scale.toArray() as [
-                number,
-                number,
-                number,
-              ],
-            })
-          }
-        />
-      )}
+      <SceneTransformGizmo
+        entityId={object.id}
+        objectRef={meshRef}
+        isActive={isActive}
+        locked={object.locked}
+        scaleEnabled
+      />
     </>
   );
 }
@@ -328,7 +326,7 @@ function AspectPreviewFraming({
 
     gl.setScissorTest(false);
     gl.setViewport(0, 0, size.width, size.height);
-    gl.setClearColor(0x111111);
+    gl.setClearColor(DEFAULT_VIEWPORT_CLEAR_COLOR);
     gl.clear(true, true, true);
 
     const rect = computeAspectRect(size.width, size.height, aspect);
@@ -461,7 +459,44 @@ function SceneCameraSync({ state }: { state: CameraState }) {
   );
 }
 
-function SceneCameraRig({ state }: { state: CameraState }) {
+function SceneCameraTransformGizmo({
+  sceneId,
+  activeId,
+  locked,
+}: {
+  sceneId: string;
+  activeId: string | null;
+  locked: boolean;
+}) {
+  const cameraEntityId = sceneCameraEntityId(sceneId);
+  const isActive = activeId === cameraEntityId;
+  const { camera } = useThree();
+  const cameraRef = useRef<Object3D>(camera);
+
+  useEffect(() => {
+    cameraRef.current = camera;
+  }, [camera]);
+
+  return (
+    <SceneTransformGizmo
+      entityId={cameraEntityId}
+      objectRef={cameraRef}
+      isActive={isActive}
+      locked={locked}
+      scaleEnabled={false}
+    />
+  );
+}
+
+function SceneCameraRig({
+  state,
+  sceneId,
+  activeId,
+}: {
+  state: CameraState;
+  sceneId: string;
+  activeId: string | null;
+}) {
   return (
     <>
       {state.type === "Perspective" ? (
@@ -477,6 +512,11 @@ function SceneCameraRig({ state }: { state: CameraState }) {
         <OrthographicCamera key="orthographic" manual makeDefault />
       )}
       <SceneCameraSync key={state.type} state={state} />
+      <SceneCameraTransformGizmo
+        sceneId={sceneId}
+        activeId={activeId}
+        locked={state.locked}
+      />
     </>
   );
 }
@@ -485,22 +525,23 @@ export function SceneCanvas() {
   const meshes = useSceneStore((s) => s.scene?.meshes);
   const camera = useSceneStore((s) => s.scene?.camera);
   const sceneId = useSceneStore((s) => s.scene?.id);
+  const backgroundColor =
+    useSceneStore((s) => s.scene?.environment.backgroundColor ?? null);
   const activeId = useSessionStore((s) => s.activeObjectId);
-  const { base } = useHandlers();
 
   if (!meshes || !camera || !sceneId) return null;
 
   return (
     <div className="canvas" style={{ width: "100%", height: "100%" }}>
       <Canvas>
-        <SceneCameraRig state={camera} />
+        <SceneBackground color={backgroundColor} />
+        <SceneCameraRig state={camera} sceneId={sceneId} activeId={activeId} />
         <SceneLights activeId={activeId} />
         {meshes.map((mesh) => (
           <SceneObjectMesh
             key={mesh.id}
             object={mesh}
             isActive={activeId === mesh.id}
-            onChange={(value) => base.execute(value)}
           />
         ))}
       </Canvas>
