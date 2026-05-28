@@ -10,19 +10,65 @@
   box-sizing: border-box;
 }
 
+/* Typography & surfaces from Figma «Диплом» / Page 2 (H1, Tag, Text L, H3, Text M, T3, H2) */
 .modal {
+  --export-panel: var(--interactive-color-interactive-background-primary);
+  --export-text-body: var(--common-color-common-text);
+  --export-text-secondary: var(--interactive-color-interactive-text-secondary);
+  --export-text-tertiary: var(--interactive-color-interactive-text-tertiary);
+  --export-section-radius: var(--border-radius-m);
+
+  font-family: "NT Somic", system-ui, sans-serif;
+
   width: min(100%, var(--window-size-modal-width));
   height: min(100%, var(--window-size-modal-height));
   max-height: min(100%, var(--window-size-modal-height));
   overflow: hidden;
-  background: var(--interactive-color-interactive-background-primary);
+  background: var(--editor-utils-color-panel-background, rgba(71, 71, 71, 0.33));
   border-radius: var(--border-radius-m);
   border: var(--border-weight) solid var(--utils-color-edge);
-  padding: var(--margin-l);
+  padding: var(--export-padding-panel, var(--margin-m));
   display: flex;
   flex-direction: column;
-  gap: var(--margin-m);
+  gap: var(--export-gap-block, var(--margin-m));
   box-sizing: border-box;
+}
+
+[data-window-size="Large"] .modal {
+  --export-font-title: 32px;
+  --export-font-tag: 16px;
+  --export-font-section: 24px;
+  --export-font-label: 20px;
+  --export-font-body: 24px;
+  --export-font-hint: 20px;
+  --export-font-stat: 24px;
+  --export-font-input: 16px;
+  --export-font-cta: 32px;
+  --export-lh-cta: 36px;
+  --export-lh-stat: 24px;
+  --export-padding-panel: 20px;
+  --export-gap-block: 20px;
+}
+
+[data-window-size="Small"] .modal {
+  --export-font-title: 20px;
+  --export-font-tag: 13px;
+  --export-font-section: 14px;
+  --export-font-label: 14px;
+  --export-font-body: 13px;
+  --export-font-hint: 12px;
+  --export-font-stat: 13px;
+  --export-font-input: 13px;
+  --export-font-cta: 16px;
+  --export-lh-cta: 1.2;
+  --export-lh-stat: 1.45;
+  --export-section-radius: var(--border-radius-s);
+  --export-padding-panel: var(--margin-m);
+  --export-gap-block: var(--margin-m);
+}
+
+[data-theme="Light"] .modal {
+  background: var(--interactive-color-interactive-background-primary);
 }
 
 .modalScroll {
@@ -31,76 +77,113 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--margin-m);
+  gap: var(--export-gap-block, var(--margin-m));
 }
 
 .modal[data-export-type="figma"] .sceneBar {
   display: none;
 }
 
+/* Header — H1 + Tag */
+.modal > header h2 {
+  font-family: inherit;
+  font-size: var(--export-font-title);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--export-text-body);
+}
+
+.modal > header > div > button:first-child {
+  background: var(--common-color-common-black);
+  color: var(--common-color-common-white);
+  font-family: inherit;
+  font-size: var(--export-font-tag);
+  font-weight: 600;
+  line-height: normal;
+  border-radius: var(--border-radius-m);
+  height: var(--button-size-button-option-height);
+}
+
+.modal > header > div > button:first-child:hover {
+  background: color-mix(in srgb, var(--common-color-common-black) 85%, white);
+}
+
 .infoBanner {
   display: flex;
   align-items: flex-start;
-  gap: var(--margin-s);
-  padding: var(--margin-m);
-  background: var(--interactive-color-interactive-background-secondary);
-  border-radius: var(--border-radius-s);
+  gap: var(--export-gap-block, var(--margin-m));
+  padding: var(--export-padding-panel, var(--margin-m));
+  background: var(--export-panel);
+  border-radius: var(--export-section-radius);
 }
 
 .infoBanner img {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
-  margin-top: 2px;
-  opacity: 0.85;
+  margin-top: 0;
 }
 
 .infoBanner p {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--interactive-color-interactive-text-secondary);
+  font-family: inherit;
+  font-size: var(--export-font-body);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--export-text-body);
+}
+
+.infoBanner strong {
+  font-weight: 600;
 }
 
 .sceneBar {
   display: flex;
   flex-direction: column;
-  gap: var(--margin-s);
+  gap: var(--export-gap-block, var(--margin-m));
+  padding: var(--export-padding-panel, var(--margin-m));
+  background: var(--export-panel);
+  border-radius: var(--export-section-radius);
 }
 
 .sceneBarTitle {
   margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--interactive-color-interactive-text-secondary);
+  font-family: inherit;
+  font-size: var(--export-font-section);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--export-text-body);
 }
 
 .sceneStats {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--margin-m);
+  align-items: center;
+  gap: var(--margin-l);
 }
 
 .sceneStatItem {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--interactive-color-interactive-text-secondary);
+  gap: 20px;
+  font-family: inherit;
+  font-size: var(--export-font-stat);
+  font-weight: 400;
+  line-height: var(--export-lh-stat);
+  color: var(--export-text-body);
 }
 
 .sceneStatIcon {
-  width: 18px;
-  height: 18px;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
   display: block;
-  opacity: 0.85;
 }
 
 .columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--margin-m);
+  gap: var(--margin-l);
   min-height: 0;
 }
 
@@ -113,30 +196,32 @@
 .column {
   display: flex;
   flex-direction: column;
-  gap: var(--margin-m);
-  padding: var(--margin-m);
-  background: var(--interactive-color-interactive-background-secondary);
-  border-radius: var(--border-radius-s);
+  gap: var(--margin-s);
+  padding: var(--export-padding-panel, var(--margin-m));
+  background: var(--export-panel);
+  border-radius: var(--export-section-radius);
   min-width: 0;
 }
 
 .columnTitle {
   margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--interactive-color-interactive-text-secondary);
+  font-family: inherit;
+  font-size: var(--export-font-section);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--export-text-body);
 }
 
 .columnBody {
   display: flex;
   flex-direction: column;
-  gap: var(--margin-m);
+  gap: var(--margin-s);
 }
 
 .settingRow {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: var(--margin-m);
 }
 
@@ -147,17 +232,29 @@
 
 .settingTitle {
   margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
-  color: var(--common-color-common-text);
+  font-family: inherit;
+  font-size: var(--export-font-label);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--export-text-body);
 }
 
 .settingHint {
-  margin: 4px 0 0;
-  font-size: 12px;
-  line-height: 1.35;
-  color: var(--interactive-color-interactive-text-secondary);
+  margin: 2px 0 0;
+  font-family: inherit;
+  font-size: var(--export-font-hint);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--export-text-body);
+}
+
+.modal[data-export-type="figma"] .framesEmpty {
+  color: var(--export-text-secondary);
+}
+
+.modal[data-export-type="figma"] .framesEmpty strong {
+  color: var(--export-text-body);
+  font-weight: 600;
 }
 
 .isDimmed {
@@ -174,50 +271,104 @@
 .resolutionRow {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: var(--margin-m);
 }
 
 .resolutionInputs {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
+}
+
+.resolutionInputs input {
+  height: var(--inputs-size-input-height);
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-s);
+  background: var(--interactive-color-interactive-background-toggle);
+  color: var(--export-text-body);
+  font-family: inherit;
+  font-size: var(--export-font-input);
+  font-weight: 400;
+  line-height: normal;
+}
+
+.resolutionInputs input:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--utils-color-edge) 40%, transparent);
+}
+
+.resolutionInputs input[class*="valInputActive"] {
+  background: var(--export-panel);
+  border-color: color-mix(
+    in srgb,
+    var(--common-color-common-accent) 55%,
+    transparent
+  );
+  color: var(--export-text-body);
 }
 
 .axisField {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  width: 72px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: auto;
   min-width: 0;
 }
 
 .axisLabel {
-  font-size: 11px;
-  color: var(--interactive-color-interactive-text-tertiary);
+  font-family: inherit;
+  font-size: var(--export-font-input);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--export-text-tertiary);
   text-transform: lowercase;
+}
+
+.axisField input {
+  width: 72px;
 }
 
 .framesList {
   margin: 0;
   padding-left: 1.25rem;
-  font-size: 13px;
-  color: var(--common-color-common-text);
+  font-family: inherit;
+  font-size: var(--export-font-body);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--export-text-body);
 }
 
 .framesEmpty {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--interactive-color-interactive-text-secondary);
+  font-family: inherit;
+  font-size: var(--export-font-body);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--export-text-secondary);
 }
 
 .framesEmpty strong {
-  color: var(--common-color-common-text);
+  color: var(--export-text-body);
   font-weight: 600;
 }
 
 .footer {
   margin-top: auto;
   flex-shrink: 0;
+}
+
+.footer button,
+.footer [class*="actionButton"] {
+  width: 100%;
+  min-height: var(--button-size-button-main-max-height);
+  padding: 12px 70px;
+  border-radius: var(--border-radius-m);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: var(--export-font-cta);
+  line-height: var(--export-lh-cta);
+  color: var(--common-color-common-white);
 }

@@ -151,13 +151,13 @@ export class SceneTransferFacade {
 
   readonly exportToFigma = async (
     options: FigmaExportOptions
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     if (!isFigmaPlugin()) {
       this.notifications.pushError(
         "Экспорт в Figma недоступен",
         "Откройте редактор как плагин Figma"
       );
-      return;
+      return false;
     }
 
     const scene = this.sceneIo.scene.getScene();
@@ -166,7 +166,7 @@ export class SceneTransferFacade {
         "Не удалось экспортировать сцену",
         "Сцена не загружена"
       );
-      return;
+      return false;
     }
 
     const projectName = useSessionStore.getState().projectName;
@@ -203,10 +203,12 @@ export class SceneTransferFacade {
       });
 
       this.notifications.pushSuccess("Сцена сохранена как связанный рендер");
+      return true;
     } catch (error) {
       const reason =
         error instanceof Error ? error.message : "Неизвестная ошибка экспорта";
       this.notifications.pushError("Не удалось экспортировать в Figma", reason);
+      return false;
     }
   };
 
@@ -264,14 +266,14 @@ export class SceneTransferFacade {
 
   readonly exportToDevice = async (
     options: DeviceExportOptions
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     const scene = this.sceneIo.scene.getScene();
     if (!scene) {
       this.notifications.pushError(
         "Не удалось экспортировать сцену",
         "Сцена не загружена"
       );
-      return;
+      return false;
     }
 
     const projectName = useSessionStore.getState().projectName;
@@ -301,10 +303,12 @@ export class SceneTransferFacade {
       }
 
       this.notifications.pushSuccess("Экспорт завершён");
+      return true;
     } catch (error) {
       const reason =
         error instanceof Error ? error.message : "Неизвестная ошибка экспорта";
       this.notifications.pushError("Не удалось экспортировать сцену", reason);
+      return false;
     }
   };
 
@@ -328,6 +332,25 @@ export class SceneTransferFacade {
       const reason =
         error instanceof Error ? error.message : "Неизвестная ошибка импорта";
       this.notifications.pushError("Не удалось импортировать сцену", reason);
+      throw error;
+    }
+  };
+
+  readonly appendLibraryAsset = async (
+    assetId: string,
+    meshName: string
+  ): Promise<string | null> => {
+    try {
+      const meshId = await this.assetCatalog.appendAssetToScene(
+        assetId,
+        meshName
+      );
+      this.notifications.pushSuccess("Объект добавлен в сцену");
+      return meshId;
+    } catch (error) {
+      const reason =
+        error instanceof Error ? error.message : "Неизвестная ошибка импорта";
+      this.notifications.pushError("Не удалось добавить объект", reason);
       throw error;
     }
   };

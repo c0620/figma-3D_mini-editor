@@ -1,9 +1,20 @@
-import { PanelCtaButton } from "../atoms/Button";
+import { EditorIconButton, PanelCtaButton } from "../atoms/Button";
 import { useSessionStore } from "@/store/sessionStore";
 import { ScrollPanel } from "../atoms/Output";
 import { GraphItem } from "../atoms/SceneGraph";
 import { PanelModeToggle } from "../atoms/Navigation";
-import { createContext, useCallback, useMemo, useState } from "react";
+import { PanelSectionHeading } from "../molecules/PanelSectionHeading";
+import sceneIcon from "@/assets/images/icons/descriptive/scene.svg";
+import meshIcon from "@/assets/images/icons/descriptive/mesh.svg";
+import spotLightIcon from "@/assets/images/icons/descriptive/spotLight.svg";
+import compactStyles from "./PanelCompact.module.css";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import {
   useHandlers,
   useI18n,
@@ -25,6 +36,15 @@ import {
 export type PanelMode = "openL" | "closeL" | "openR" | "closeR";
 
 export const PanelSceneModeContext = createContext<PanelMode>("openL");
+
+export function isPanelOpen(mode: PanelMode): boolean {
+  return mode === "openL" || mode === "openR";
+}
+
+export function usePanelCompact(): boolean {
+  const mode = useContext(PanelSceneModeContext);
+  return !isPanelOpen(mode);
+}
 
 const AXIS = ["x", "y", "z"] as const;
 
@@ -106,7 +126,13 @@ function buildAxisFields(
   }));
 }
 
-export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
+export function PanelScene({
+  activeObj,
+  onOpenAssetLibrary,
+}: {
+  activeObj: ActiveEntity | null;
+  onOpenAssetLibrary: () => void;
+}) {
   const [mode, setMode] = useState<PanelMode>("openL");
   const scene = useSceneStore((s) => s.scene);
   const transformToolMode = useSessionStore((s) => s.transformToolMode);
@@ -241,22 +267,35 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
     transformToolMode,
   ]);
 
-  const isOpen = mode === "openL" || mode === "openR";
+  const isOpen = isPanelOpen(mode);
   const showSceneTransformEditor =
     activeObj != null && isTransformEditable(activeObj);
 
+  const containerClass = [
+    "panel-container",
+    "panel-container--editor",
+    !isOpen ? "panel-container--compact" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div className="panel-container panel-container--editor">
-      <div className="panel-header">
-        <PanelModeToggle mode={mode} setMode={setMode} />
-        {isOpen ? (
-          <div className="panel-header-title">
-            <h2>{t("panel.scene.title")}</h2>
-          </div>
-        ) : null}
-      </div>
-      <h3 className="panel-editor-h3">{t("panel.scene.content")}</h3>
+    <div className={containerClass}>
       <PanelSceneModeContext.Provider value={mode}>
+        <div className="panel-header">
+          <PanelModeToggle mode={mode} setMode={setMode} />
+          {isOpen ? (
+            <div className="panel-header-title">
+              <h2>{t("panel.scene.title")}</h2>
+            </div>
+          ) : null}
+        </div>
+        <PanelSectionHeading
+          text={t("panel.scene.content")}
+          iconSrc={sceneIcon}
+          headingLevel="h3"
+          className="panel-editor-h3"
+        />
         <div className="panel-scene-body">
           <ScrollPanel variant="graph" fillAvailable={!showSceneTransformEditor}>
             {sceneItems.map((item) => (
@@ -276,7 +315,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
             <div className="panel-actions">
               <PanelCtaButton
                 text={t("panel.scene.addObject")}
-                onClick={() => console.log("add obj")}
+                onClick={onOpenAssetLibrary}
               />
               <PanelCtaButton
                 text={t("panel.scene.addLight")}
@@ -287,16 +326,37 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
                 }}
               />
             </div>
-          ) : null}
+          ) : (
+            <div className={compactStyles.compactActions}>
+              <EditorIconButton
+                className={compactStyles.compactActionBtn}
+                src={meshIcon}
+                title={t("panel.scene.addObject")}
+                onClick={onOpenAssetLibrary}
+              />
+              <EditorIconButton
+                className={compactStyles.compactActionBtn}
+                src={spotLightIcon}
+                title={t("panel.scene.addLight")}
+                onClick={() => {
+                  const id = randomUUID();
+                  lightAddition.execute(createDefaultLight({ id }));
+                  selection.execute({ id });
+                }}
+              />
+            </div>
+          )}
 
-          {showSceneTransformEditor && isOpen ? (
+          {showSceneTransformEditor ? (
             <div className="panel-section">
-              <h3 className="panel-editor-section-heading">
-                {t("panel.scene.editing")}{" "}
-                <span className="panel-editor-section-heading-em">
-                  {activeEntityEditorHeading(activeObj!, t)}
-                </span>
-              </h3>
+              {isOpen ? (
+                <h3 className="panel-editor-section-heading">
+                  {t("panel.scene.editing")}{" "}
+                  <span className="panel-editor-section-heading-em">
+                    {activeEntityEditorHeading(activeObj!, t)}
+                  </span>
+                </h3>
+              ) : null}
               {transformPanels}
             </div>
           ) : null}

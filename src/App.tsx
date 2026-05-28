@@ -7,6 +7,7 @@ import LoadLocalSceneScreen from "./ui/components/screens/LoadLocalSceneScreen";
 import LoadFigmaSceneScreen from "./ui/components/screens/LoadFigmaSceneScreen";
 import { useSessionStore } from "./store/sessionStore";
 import { HelpModal } from "./ui/components/screens/HelpModal";
+import { preloadHdriBlobUrls } from "./lights/hdriAssets";
 
 function App() {
   const colorTheme = useSessionStore((s) => s.colorTheme);
@@ -18,6 +19,10 @@ function App() {
     document.documentElement.setAttribute("data-theme", colorTheme);
     document.documentElement.setAttribute("data-window-size", windowSize);
   }, [colorTheme, windowSize]);
+
+  useEffect(() => {
+    preloadHdriBlobUrls();
+  }, []);
 
   return (
     <div className="app">

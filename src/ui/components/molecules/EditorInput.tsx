@@ -1,5 +1,5 @@
 import { AspectCenteredSlider, InputVal, Slider, SliderCentered } from "../atoms/Input";
-import type { PanelMode } from "../organisms/PanelScene";
+import { isPanelOpen, type PanelMode } from "../organisms/PanelScene";
 import {
   aspectToRatioPair,
   ratioPairToAspect,
@@ -34,16 +34,27 @@ export function ObjectNumberInput({
   inputWidth?: "default" | "compact";
   highlight?: boolean;
 }) {
-  const isOpen = mode === "openR" || mode === "openL";
-  if (!isOpen) {
-    return <div className={styles.collapsed} aria-hidden />;
-  }
+  const isOpen = isPanelOpen(mode);
+  const isCompact = !isOpen;
 
   const labelClass = highlight
     ? `${styles.label} ${styles.labelActive}`
     : styles.label;
 
   const singleField = fields.length === 1 ? fields[0] : null;
+
+  if (isCompact) {
+    return (
+      <div className={styles.groupCompact}>
+        {fields.map((field, i) => (
+          <div key={field.label ?? i} className={styles.compactField}>
+            <InputVal field={field} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   const inline =
     sliderLayout === "inline" && singleField != null && sliderType != null;
 
@@ -102,11 +113,39 @@ export function ObjectRatioInput({
   value: number;
   onChange: (aspect: number) => void;
 }) {
-  const isOpen = mode === "openR" || mode === "openL";
+  const isOpen = isPanelOpen(mode);
   const [width, height] = useMemo(() => aspectToRatioPair(value), [value]);
 
   if (!isOpen) {
-    return <div className={styles.collapsed} aria-hidden />;
+    return (
+      <div className={styles.groupCompact}>
+        <div className={styles.ratioFieldsCompact}>
+          <div className={styles.compactField}>
+            <InputVal
+              field={{
+                value: width,
+                isActive: false,
+                onChange: (nextWidth) =>
+                  onChange(ratioPairToAspect(nextWidth, height)),
+              }}
+            />
+          </div>
+          <span className={styles.ratioSeparator} aria-hidden>
+            |
+          </span>
+          <div className={styles.compactField}>
+            <InputVal
+              field={{
+                value: height,
+                isActive: false,
+                onChange: (nextHeight) =>
+                  onChange(ratioPairToAspect(width, nextHeight)),
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

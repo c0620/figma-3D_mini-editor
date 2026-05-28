@@ -99,6 +99,12 @@
   text-overflow: ellipsis;
 }
 
+.colorPickerOnly {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 .colorLabel {
   margin: 0 0 4px;
   font-size: 13px;

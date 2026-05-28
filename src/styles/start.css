@@ -10,5 +10,5 @@
 .page--start .circle-bg,
 .page--start .circle-middle,
 .page--start .circle-top {
-  top: var(--padding-outer, 40px);
+  top: calc(var(--padding-outer, 40px) + 25px);
 }

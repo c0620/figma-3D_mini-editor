@@ -5,6 +5,7 @@ import type {
   SceneEntitySummary,
 } from "@/store/sceneEntityList";
 import { useSceneStore } from "@/store/sceneStore";
+import { usePanelCompact } from "../organisms/PanelScene";
 import meshIcon from "@/assets/images/icons/descriptive/mesh.svg";
 import ambientLightIcon from "@/assets/images/icons/descriptive/ambientLight.svg";
 import spotLightIcon from "@/assets/images/icons/descriptive/spotLight.svg";
@@ -39,17 +40,19 @@ export function GraphItem({
   isActive: boolean;
   onSelect: () => void;
 }) {
+  const compact = usePanelCompact();
   const icon = useEntityIcon(item);
   const changeVisibilityHandler = useHandlers().visibility;
   const changeLockHandler = useHandlers().lock;
   const deleteHandler = useHandlers().deletion;
 
   const isDimmed = item.locked || !item.visible;
-  const showActions = isActive || isDimmed;
+  const showActions = !compact && (isActive || isDimmed);
 
   const stopClick = (e: MouseEvent) => e.stopPropagation();
   const rowClass = [
     styles.row,
+    compact && styles.rowCompact,
     isActive && styles.rowActive,
     !isActive && isDimmed && styles.rowDimmed,
     !isActive && !isDimmed && styles.rowIdle,
@@ -65,11 +68,13 @@ export function GraphItem({
     .join(" ");
 
   return (
-    <div className={rowClass} onClick={onSelect}>
+    <div className={rowClass} onClick={onSelect} title={compact ? item.label : undefined}>
       <span className={styles.iconWrap}>
         <img className={styles.icon} src={icon} alt="" />
       </span>
-      <span className={styles.label}>{item.label}</span>
+      {!compact ? (
+        <span className={styles.label}>{item.label}</span>
+      ) : null}
       {showActions && (
         <div className={styles.actions}>
           <button

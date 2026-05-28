@@ -83,16 +83,29 @@ function HelpSidebar({
 function HelpFeatureList({
   items,
   t,
+  variant = "boxed",
 }: {
   items: { icon: string; textKey: TranslationKey }[];
   t: ReturnType<typeof useI18n>["t"];
+  variant?: "boxed" | "plain";
 }) {
+  const isPlain = variant === "plain";
+
   return (
-    <ul className={styles.featureList}>
+    <ul className={isPlain ? styles.actionList : styles.featureList}>
       {items.map((item) => (
-        <li key={item.textKey} className={styles.featureRow}>
-          <img className={styles.featureIcon} src={item.icon} alt="" />
-          <p className={styles.featureText}>{t(item.textKey)}</p>
+        <li
+          key={item.textKey}
+          className={isPlain ? styles.actionRow : styles.featureRow}
+        >
+          <img
+            className={isPlain ? styles.actionIcon : styles.featureIcon}
+            src={item.icon}
+            alt=""
+          />
+          <p className={isPlain ? styles.actionText : styles.featureText}>
+            {t(item.textKey)}
+          </p>
         </li>
       ))}
     </ul>
@@ -198,10 +211,18 @@ export function HelpModal({ onClose }: { onClose?: () => void }) {
                   <p className={styles.introText}>{t(section.introKey)}</p>
                 ) : null}
                 {section.features ? (
-                  <HelpFeatureList items={section.features} t={t} />
+                  <HelpFeatureList
+                    items={section.features}
+                    t={t}
+                    variant={section.id === "settings" ? "boxed" : "plain"}
+                  />
                 ) : null}
                 {section.actions ? (
-                  <HelpFeatureList items={section.actions} t={t} />
+                  <HelpFeatureList
+                    items={section.actions}
+                    t={t}
+                    variant="plain"
+                  />
                 ) : null}
                 {section.id === "shortcuts" ? (
                   <ul className={styles.shortcutList}>

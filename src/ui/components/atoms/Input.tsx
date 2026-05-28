@@ -100,7 +100,7 @@ export function InputColor({
 }: {
   color: string;
   onChange: (hex: string) => void;
-  layout?: "panel" | "compact";
+  layout?: "panel" | "compact" | "picker";
 }) {
   const { t } = useI18n();
   const [r, g, b] = decodeHexRgb(color);
@@ -108,6 +108,20 @@ export function InputColor({
   const handleChange = (hex: string) => {
     onChange(hex);
   };
+
+  if (layout === "picker") {
+    return (
+      <div className={styles.colorPickerOnly}>
+        <input
+          type="color"
+          className={`${styles.colorSwatch} ${styles.colorSwatchRound}`}
+          value={color}
+          onChange={(e) => handleChange(e.target.value)}
+          title={t("material.baseColor")}
+        />
+      </div>
+    );
+  }
 
   if (layout === "compact") {
     return (

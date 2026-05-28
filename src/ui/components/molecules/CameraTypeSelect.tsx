@@ -1,5 +1,6 @@
 import { useI18n } from "@/app/ApplicationKernelContext";
 import type { CameraState } from "@/types/scene";
+import { usePanelCompact } from "../organisms/PanelScene";
 import cameraPIcon from "@/assets/images/icons/descriptive/cameraP.svg";
 import cameraOIcon from "@/assets/images/icons/descriptive/cameraO.svg";
 import graphStyles from "../atoms/SceneGraph.module.css";
@@ -30,13 +31,19 @@ export function CameraTypeSelect({
   disabled?: boolean;
 }) {
   const { t } = useI18n();
+  const compact = usePanelCompact();
 
   return (
-    <div className={styles.list} role="listbox" aria-label={t("camera.type.title")}>
+    <div
+      className={compact ? `${styles.list} ${styles.listCompact}` : styles.list}
+      role="listbox"
+      aria-label={t("camera.type.title")}
+    >
       {OPTIONS.map((option) => {
         const selected = value === option.type;
         const optionClass = [
           styles.option,
+          compact ? styles.optionCompact : "",
           selected ? styles.optionActive : styles.optionIdle,
         ]
           .filter(Boolean)
@@ -54,6 +61,7 @@ export function CameraTypeSelect({
             type="button"
             role="option"
             aria-selected={selected}
+            aria-label={t(option.labelKey)}
             className={optionClass}
             disabled={disabled}
             onClick={() => onChange(option.type)}
@@ -61,7 +69,9 @@ export function CameraTypeSelect({
             <span className={iconWrapClass}>
               <img className={graphStyles.icon} src={option.icon} alt="" />
             </span>
-            <span className={styles.label}>{t(option.labelKey)}</span>
+            {!compact ? (
+              <span className={styles.label}>{t(option.labelKey)}</span>
+            ) : null}
           </button>
         );
       })}

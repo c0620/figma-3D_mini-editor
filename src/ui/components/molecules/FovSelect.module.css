@@ -25,6 +25,13 @@
   cursor: default;
 }
 
+.triggerCompact {
+  justify-content: center;
+  width: auto;
+  min-width: var(--editor-size-editor-toolbar-item);
+  padding: 0 6px;
+}
+
 .trigger:focus-visible {
   outline: none;
   border-color: var(--utils-color-edge);

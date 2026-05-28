@@ -1,11 +1,12 @@
-import { Environment, useHelper } from "@react-three/drei";
+import { useHelper } from "@react-three/drei";
 import { useLayoutEffect, useRef, type RefObject } from "react";
 import { SpotLightHelper } from "three";
 import type { Group, Object3D, SpotLight as ThreeSpotLight } from "three";
 
 import { useSceneStore } from "../../../store/sceneStore";
-import type { HdriPresetId, Light } from "../../../types/scene";
+import type { Light } from "../../../types/scene";
 import { useThree } from "@react-three/fiber";
+import { HdriEnvironment } from "./HdriEnvironment";
 import { SceneTransformGizmo } from "./SceneTransformGizmo";
 
 const SELECTION_COLOR = "#ff5900";
@@ -87,22 +88,6 @@ function SpotLightLocal({
       distance={light.distance}
       penumbra={light.penumbra}
       angle={light.angle}
-    />
-  );
-}
-
-function HdriEnvironment({
-  preset,
-  intensity,
-}: {
-  preset: HdriPresetId;
-  intensity: number;
-}) {
-  return (
-    <Environment
-      preset={preset}
-      background={false}
-      environmentIntensity={intensity}
     />
   );
 }

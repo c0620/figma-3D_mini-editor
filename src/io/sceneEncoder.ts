@@ -21,6 +21,7 @@ import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { withDefaultAmbientLight } from "../lights/lightDefaults";
 import { randomUUID } from "../lib/randomId";
 import type { SceneExportOptions } from "../types/export";
+import { createOffscreenRenderer } from "../render/createOffscreenRenderer";
 import { buildThreeSceneFromDomain } from "../render/domainSceneBuilder";
 import type { Material, Scene, SceneMesh } from "../types/scene";
 import { DEFAULT_CAMERA_STATE, TextureSlot } from "../types/scene";
@@ -311,19 +312,22 @@ async function buildDomainSceneFromThreeRoot(
   };
 }
 
-function beginSceneImport(): TextureUrlCache {
-  threeAssetRegistry.clear();
-  textureGpuPool.clear();
-  activeTextureCache?.dispose();
-  activeTextureCache = new TextureUrlCache();
-  return activeTextureCache;
+function beginSceneImport(mode: "replace" | "append"): TextureUrlCache {
+  if (mode === "replace") {
+    threeAssetRegistry.clear();
+    textureGpuPool.clear();
+    activeTextureCache?.dispose();
+    activeTextureCache = new TextureUrlCache();
+    return activeTextureCache;
+  }
+  return new TextureUrlCache();
 }
 
 async function threeObjectToDomainScene(
   root: Object3D | GLTF,
-  options: { syncTextures: boolean }
+  options: { syncTextures: boolean; mode: "replace" | "append" }
 ): Promise<Scene> {
-  const cache = beginSceneImport();
+  const cache = beginSceneImport(options.mode);
   const threeRoot = "scene" in root ? root.scene : root;
   return buildDomainSceneFromThreeRoot(threeRoot, cache, options);
 }
@@ -334,6 +338,17 @@ export async function importThreeObjectAsScene(
 ): Promise<Scene> {
   return threeObjectToDomainScene(root, {
     syncTextures: options?.syncTextures ?? true,
+    mode: "replace",
+  });
+}
+
+export async function importThreeObjectAsSceneAppend(
+  root: Object3D,
+  options?: { syncTextures?: boolean }
+): Promise<Scene> {
+  return threeObjectToDomainScene(root, {
+    syncTextures: options?.syncTextures ?? true,
+    mode: "append",
   });
 }
 
@@ -347,18 +362,24 @@ export class SceneEncoder {
       throw new Error("SceneEncoder.export: only GLB is supported");
     }
 
-    const built = await buildThreeSceneFromDomain(scene, {
-      includeCamera: options?.includeCamera ?? false,
-    });
-
+    const offscreenRenderer = createOffscreenRenderer();
     try {
-      const glb = await new GLTFExporter().parseAsync(built.root, {
-        binary: true,
-        embedImages: !(options?.includeTextures ?? false),
+      const built = await buildThreeSceneFromDomain(scene, {
+        includeCamera: options?.includeCamera ?? false,
+        renderRenderer: offscreenRenderer,
       });
-      return glb as ArrayBuffer;
+
+      try {
+        const glb = await new GLTFExporter().parseAsync(built.root, {
+          binary: true,
+          embedImages: !(options?.includeTextures ?? false),
+        });
+        return glb as ArrayBuffer;
+      } finally {
+        built.dispose();
+      }
     } finally {
-      built.dispose();
+      offscreenRenderer.dispose();
     }
   }
 
@@ -371,7 +392,7 @@ export class SceneEncoder {
       case "OBJ": {
         const text =
           typeof raw === "string" ? raw : new TextDecoder().decode(raw);
-        const cache = beginSceneImport();
+        const cache = beginSceneImport("replace");
         const manager = createLoadingManager(resources, cache);
         const group = await parseWithLoadingManager(manager, () =>
           parseObjGroup(text, resources, manager)
@@ -385,7 +406,7 @@ export class SceneEncoder {
           raw instanceof ArrayBuffer
             ? raw
             : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
-        const cache = beginSceneImport();
+        const cache = beginSceneImport("replace");
         const manager = new LoadingManager();
         const group = await parseWithLoadingManager(manager, () => {
           const loader = new FBXLoader(manager);
@@ -402,7 +423,10 @@ export class SceneEncoder {
             : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
         const loader = new GLTFLoader();
         const gltf = await loader.parseAsync(buffer, "");
-        return threeObjectToDomainScene(gltf, { syncTextures: false });
+        return threeObjectToDomainScene(gltf, {
+          syncTextures: false,
+          mode: "replace",
+        });
       }
       case "Figma":
         throw new Error("SceneEncoder.import: Figma is not implemented");

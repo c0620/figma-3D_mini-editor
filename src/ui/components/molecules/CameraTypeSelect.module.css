@@ -52,3 +52,14 @@
 .iconWrapActive {
   background: var(--common-color-common-accent);
 }
+
+.listCompact {
+  align-items: center;
+  padding: 4px;
+}
+
+.optionCompact {
+  justify-content: center;
+  width: auto;
+  padding: 4px;
+}

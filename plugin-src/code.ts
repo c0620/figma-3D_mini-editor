@@ -271,10 +271,6 @@ async function handleResolveColorVariable(msg: {
   respond(msg.requestId, true, { hex });
 }
 
-function pushVariablesChanged(): void {
-  figma.ui.postMessage({ type: "variables-changed" });
-}
-
 try {
   const uiOptions = { height: 900, title: "", width: 1600 };
   switch (figma.editorType) {
@@ -323,11 +319,6 @@ try {
       };
 
       figma.on("selectionchange", pushLinkedSelectionUpdate);
-      (
-        figma.variables as unknown as {
-          on(event: "change", handler: () => void): void;
-        }
-      ).on("change", pushVariablesChanged);
       break;
   }
 

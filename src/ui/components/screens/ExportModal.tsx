@@ -57,7 +57,15 @@ function SettingRow({
   );
 }
 
-export function ExportModal({ onClose }: { onClose?: () => void }) {
+export function ExportModal({
+  onClose,
+  onExportDismiss,
+  onExportComplete,
+}: {
+  onClose?: () => void;
+  onExportDismiss?: () => void;
+  onExportComplete?: (ok: boolean) => void;
+}) {
   const transfer = useTransfer();
   const scene = useSceneStore((s) => s.scene);
   const projectName = useSessionStore((s) => s.projectName);
@@ -151,52 +159,34 @@ export function ExportModal({ onClose }: { onClose?: () => void }) {
     setWidth(widthFromHeight(value, aspect));
   };
 
-  const [isExporting, setIsExporting] = useState(false);
-
-  const canExportLocal =
-    !!scene && (exportImage || exportScene) && !isExporting;
-  const canExportFigma = !!scene && !isExporting;
+  const canExportLocal = !!scene && (exportImage || exportScene);
+  const canExportFigma = !!scene;
   const canExport = exportType === "local" ? canExportLocal : canExportFigma;
 
   const handleExport = async () => {
-    if (exportType === "local") {
-      setIsExporting(true);
-      try {
-        await transfer.exportToDevice({
-          exportImage,
-          exportScene,
-          transparentBackground,
-          includeTextures,
-          includeCamera,
-          width,
-          height,
-        });
-        onClose?.();
-      } finally {
-        setIsExporting(false);
-      }
-      return;
-    }
+    if (!canExport) return;
 
-    setIsExporting(true);
-    try {
-      await transfer.exportToFigma({
-        width,
-        height,
-        transparentBackground,
-        linkedRender,
-      });
-      if (scene) {
-        const frames = await transfer.findFigmaSceneRenders(
-          scene.id,
-          projectName
-        );
-        setLinkedFrames(frames);
-      }
-      onClose?.();
-    } finally {
-      setIsExporting(false);
-    }
+    onExportDismiss?.();
+
+    const ok =
+      exportType === "local"
+        ? await transfer.exportToDevice({
+            exportImage,
+            exportScene,
+            transparentBackground,
+            includeTextures,
+            includeCamera,
+            width,
+            height,
+          })
+        : await transfer.exportToFigma({
+            width,
+            height,
+            transparentBackground,
+            linkedRender,
+          });
+
+    onExportComplete?.(ok);
   };
 
   let title: string;
@@ -254,9 +244,7 @@ export function ExportModal({ onClose }: { onClose?: () => void }) {
         <p>
           Продолжайте работу с ранее загруженной в Figma 3D-сценой без повторной
           настройки материалов и камеры. Вы можете импортировать сцену с любого
-          аккаунта и устройства. Для работы с данной функцией: Экспортируйте
-          сцену в Figma как связанный рендер Не удаляйте файлы текстур,
-          экспортированные вместе с рендером
+          аккаунта и устройства.
         </p>
       );
 
@@ -396,8 +384,11 @@ export function ExportModal({ onClose }: { onClose?: () => void }) {
         ? sceneStats.polygonCount.toLocaleString("ru-RU")
         : "—";
 
-  const dimensionsLabel =
-    !scene ? "—" : sceneStatsLoading && !sceneStats ? "…" : sceneStats?.dimensions ?? "—";
+  const dimensionsLabel = !scene
+    ? "—"
+    : sceneStatsLoading && !sceneStats
+      ? "…"
+      : (sceneStats?.dimensions ?? "—");
 
   const texturesLabel = !scene
     ? "—"

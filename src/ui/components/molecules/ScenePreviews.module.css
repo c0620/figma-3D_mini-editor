@@ -20,6 +20,11 @@
   box-sizing: border-box;
 }
 
+.thumbCompact {
+  justify-content: center;
+  padding: 6px;
+}
+
 .previewCircle {
   width: 32px;
   height: 32px;

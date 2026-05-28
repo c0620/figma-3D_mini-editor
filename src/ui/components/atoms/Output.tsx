@@ -1,5 +1,8 @@
 import { useContext, type ReactNode } from "react";
-import { PanelSceneModeContext } from "../organisms/PanelScene";
+import {
+  isPanelOpen,
+  PanelSceneModeContext,
+} from "../organisms/PanelScene";
 import styles from "./Output.module.css";
 
 export type ScrollPanelVariant = "graph" | "mats" | "textures";
@@ -41,20 +44,21 @@ export function ScrollPanel({
   fillAvailable?: boolean;
 }) {
   const mode = useContext(PanelSceneModeContext);
-  const isOpen = mode === "openL" || mode === "openR";
+  const isOpen = isPanelOpen(mode);
+  const isCompact = !isOpen;
 
   const fillClass =
-    fillAvailable && variant === "graph" && isOpen
+    fillAvailable && variant === "graph"
       ? "panel-scroll-clip--graph-fill"
       : "";
 
-  const clipClass = isOpen
-    ? `panel-scroll-clip panel-scroll-clip--${variant} ${fillClass}`.trim()
-    : `panel-scroll-clip panel-scroll-clip--${variant} panel-scroll-clip--collapsed`;
+  const compactClass = isCompact ? "panel-scroll-clip--compact" : "";
+  const clipClass =
+    `panel-scroll-clip panel-scroll-clip--${variant} ${fillClass} ${compactClass}`.trim();
 
-  const scrollClass = isOpen
-    ? `panel-scroll panel-scroll--${variant}`
-    : "panel-scroll panel-scroll--collapsed";
+  const scrollClass = isCompact
+    ? `panel-scroll panel-scroll--${variant} panel-scroll--compact`
+    : `panel-scroll panel-scroll--${variant}`;
 
   return (
     <div className={clipClass}>

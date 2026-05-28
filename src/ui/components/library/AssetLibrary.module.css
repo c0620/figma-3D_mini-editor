@@ -47,52 +47,154 @@
     color-mix(in srgb, var(--common-color-common-accent) 35%, transparent);
 }
 
+/* Asset card — Figma Molecule/Asset (135:20079), 4 per row in modal (Large) */
+[data-window-size="Large"] .grid {
+  --asset-card-padding: 16px;
+  --asset-card-gap: 16px;
+  --asset-card-meta-gap: 8px;
+  --asset-card-grid-gap: 40px;
+  --asset-card-tag-offset: 16px;
+  --asset-card-tag-height: 32px;
+  --asset-card-tag-padding-x: 16px;
+  --asset-font-title: 18px;
+  --asset-font-meta: 14px;
+  --asset-font-tag: 14px;
+  --asset-font-cta: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+[data-window-size="Small"] .grid {
+  --asset-card-padding: var(--margin-m);
+  --asset-card-gap: var(--margin-m);
+  --asset-card-meta-gap: var(--margin-s);
+  --asset-card-grid-gap: var(--margin-m);
+  --asset-card-tag-offset: var(--margin-m);
+  --asset-card-tag-height: var(--button-size-button-option-height);
+  --asset-card-tag-padding-x: 12px;
+  --asset-font-title: 16px;
+  --asset-font-meta: 13px;
+  --asset-font-tag: 13px;
+  --asset-font-cta: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--margin-m);
+  gap: var(--asset-card-grid-gap, var(--margin-xl));
   padding: var(--margin-m) 0;
 }
 
 .card {
-  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--margin-s);
-  padding: var(--margin-m);
+  align-items: center;
+  gap: var(--asset-card-gap, 16px);
+  width: 100%;
+  min-width: 0;
+  padding: 0 var(--asset-card-padding, 16px) var(--asset-card-padding, 16px);
   border-radius: var(--border-radius-m);
   background: var(--interactive-color-interactive-background-primary);
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: "NT Somic", system-ui, sans-serif;
+}
+
+.cardPreview {
+  position: relative;
+  width: calc(100% + 2 * var(--asset-card-padding, 16px));
+  margin-inline: calc(-1 * var(--asset-card-padding, 16px));
+  aspect-ratio: 350 / 280;
+  flex-shrink: 0;
+}
+
+.cardPreviewCanvas {
+  width: 100%;
+  height: 100%;
 }
 
 .cardTag {
   position: absolute;
-  top: var(--margin-m);
-  right: var(--margin-m);
+  top: var(--asset-card-tag-offset, 16px);
+  right: var(--asset-card-tag-offset, 16px);
   z-index: 1;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  line-height: 1.2;
-  color: var(--interactive-color-interactive-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--asset-card-tag-height, 32px);
+  padding: 0 var(--asset-card-tag-padding-x, 16px);
+  border: none;
+  border-radius: var(--border-radius-m);
+  font-family: inherit;
+  font-size: var(--asset-font-tag, 16px);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--common-color-common-text);
   background: var(--interactive-color-interactive-background-secondary);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--asset-card-meta-gap, 10px);
+  width: 100%;
+  text-align: center;
 }
 
 .cardTitle {
   margin: 0;
-  text-align: center;
-  font-family: "NT Somic", system-ui, sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.2;
+  width: 100%;
+  font-family: inherit;
+  font-size: var(--asset-font-title, 20px);
+  font-weight: 600;
+  line-height: normal;
   color: var(--common-color-common-text);
+}
+
+.cardMetaBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
 }
 
 .cardMeta {
   margin: 0;
+  width: 100%;
+  font-family: inherit;
+  font-size: var(--asset-font-meta, 16px);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--common-color-common-text);
+}
+
+.cardCta {
+  width: 100%;
+  min-height: var(--asset-card-tag-height, var(--button-size-button-main-mini-height));
+  padding: 0 var(--margin-m);
+  border: none;
+  border-radius: var(--border-radius-s);
+  background: var(--common-color-common-accent);
+  color: var(--common-color-common-white);
+  font-family: inherit;
+  font-size: var(--asset-font-cta, 16px);
+  font-weight: 700;
+  line-height: normal;
   text-align: center;
-  font-size: 12px;
-  line-height: 1.35;
-  color: var(--interactive-color-interactive-text-secondary);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.cardCta:hover:not(:disabled) {
+  background: var(--common-color-common-accent-fade);
+}
+
+.cardCta:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .empty {
@@ -106,6 +208,12 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .body {

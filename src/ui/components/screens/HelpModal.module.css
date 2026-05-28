@@ -10,52 +10,153 @@
   box-sizing: border-box;
 }
 
+/* Figma «справка» (141:37596) — H1, H3, T2, T3, scroll panels */
 .modal {
+  --help-text-body: var(--common-color-common-text);
+  --help-text-nav: var(--interactive-color-interactive-text-secondary);
+  --help-panel-content: var(--interactive-color-interactive-background-primary);
+  --help-panel-sidebar: var(--interactive-color-interactive-background-secondary);
+  --help-gap-block: var(--margin-m);
+  --help-gap-section: var(--margin-m);
+  --help-gap-feature: var(--margin-m);
+  --help-gap-action: var(--margin-s);
+  --help-sidebar-width: 300px;
+
+  font-family: "NT Somic", system-ui, sans-serif;
+
   width: min(100%, var(--window-size-modal-width));
   height: min(100%, var(--window-size-modal-height));
   max-height: min(100%, var(--window-size-modal-height));
   overflow: hidden;
-  background: var(--interactive-color-interactive-background-primary);
+  background: var(--editor-utils-color-panel-background, rgba(71, 71, 71, 0.33));
   border-radius: var(--border-radius-m);
   border: var(--border-weight) solid var(--utils-color-edge);
-  padding: var(--margin-l);
+  padding: var(--help-gap-block);
   display: flex;
   flex-direction: column;
-  gap: var(--margin-m);
+  gap: var(--help-gap-block);
   box-sizing: border-box;
+}
+
+[data-window-size="Large"] .modal {
+  --help-font-title: 32px;
+  --help-font-nav-group: 24px;
+  --help-font-nav-link: 20px;
+  --help-font-group: 32px;
+  --help-font-section: 24px;
+  --help-font-body: 20px;
+  --help-font-action: 16px;
+  --help-font-shortcut-name: 20px;
+  --help-font-shortcut-desc: 16px;
+  --help-font-shortcut-keys: 16px;
+  --help-gap-block: var(--margin-m);
+  --help-gap-section: var(--margin-m);
+  --help-gap-feature: var(--margin-m);
+  --help-gap-nav: var(--margin-xs);
+  --help-sidebar-width: 300px;
+  --help-icon-preview: 30px;
+  --help-icon-action: 20px;
+}
+
+[data-window-size="Small"] .modal {
+  --help-font-title: 20px;
+  --help-font-nav-group: 14px;
+  --help-font-nav-link: 13px;
+  --help-font-group: 20px;
+  --help-font-section: 14px;
+  --help-font-body: 13px;
+  --help-font-action: 12px;
+  --help-font-shortcut-name: 13px;
+  --help-font-shortcut-desc: 12px;
+  --help-font-shortcut-keys: 12px;
+  --help-gap-block: var(--margin-m);
+  --help-gap-section: var(--margin-m);
+  --help-gap-feature: var(--margin-s);
+  --help-gap-nav: var(--margin-xs);
+  --help-sidebar-width: 200px;
+  --help-icon-preview: 24px;
+  --help-icon-action: 16px;
+}
+
+[data-theme="Light"] .modal {
+  background: var(--interactive-color-interactive-background-primary);
+}
+
+.modal > header {
+  flex-shrink: 0;
+}
+
+.modal > header h2 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: var(--help-font-title);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--help-text-body);
+}
+
+.modal > header > div > button {
+  width: var(--inputs-size-preview-height);
+  height: var(--inputs-size-preview-height);
+  padding: 5px;
+  border: none;
+  border-radius: var(--border-radius-s);
+  background: transparent;
+}
+
+.modal > header > div > button:hover {
+  background: var(--help-panel-sidebar);
+}
+
+.modal > header > div > button img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0.9;
 }
 
 .body {
   flex: 1;
   min-height: 0;
   display: flex;
-  gap: var(--margin-m);
+  gap: var(--help-gap-block);
 }
 
 .sidebar {
-  flex: 0 0 260px;
-  padding: var(--margin-m);
-  background: var(--interactive-color-interactive-background-secondary);
+  flex: 0 0 var(--help-sidebar-width);
+  min-height: 0;
+  padding: var(--margin-l);
+  background: var(--help-panel-sidebar);
   border-radius: var(--border-radius-s);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: var(--margin-l);
   flex-shrink: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .navGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--margin-s);
+  gap: var(--help-gap-nav);
 }
 
 .navGroupTitle {
   margin: 0;
-  font-family: "NT Somic", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 1.3;
-  color: var(--common-color-common-text);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: var(--help-font-nav-group);
+  line-height: normal;
+  color: var(--help-text-nav);
 }
 
 .navList {
@@ -64,26 +165,30 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--help-gap-nav);
 }
 
 .navLink {
   display: block;
   width: 100%;
-  padding: 4px 0;
+  padding: 0;
   border: none;
   background: none;
   text-align: left;
-  font-family: "NT Somic", system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.35;
-  color: var(--interactive-color-interactive-text-secondary);
+  font-family: inherit;
+  font-size: var(--help-font-nav-link);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--help-text-nav);
   cursor: pointer;
 }
 
-.navLink:hover,
+.navLink:hover {
+  color: var(--help-text-body);
+}
+
 .navLinkActive {
-  color: var(--common-color-common-text);
+  color: var(--help-text-body);
 }
 
 .content {
@@ -91,12 +196,30 @@
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  padding-right: var(--margin-s);
+  padding: var(--margin-l);
+  background: var(--help-panel-content);
+  border-radius: var(--border-radius-s);
+  box-shadow: inset 0 -1px 10.5px 0
+    var(--interactive-color-interactive-background-primary);
+  scrollbar-width: thin;
+  scrollbar-color: var(--help-panel-sidebar) transparent;
+}
+
+.content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--help-panel-sidebar);
+  border-radius: 35px;
 }
 
 .section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--help-gap-section);
   scroll-margin-top: var(--margin-m);
-  margin-bottom: var(--margin-xl);
+  margin-bottom: var(--help-gap-section);
 }
 
 .section:last-child {
@@ -104,35 +227,31 @@
 }
 
 .groupTitle {
-  margin: 0 0 var(--margin-l);
-  font-family: "NT Somic", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 1.2;
-  color: var(--common-color-common-text);
+  margin: 0;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: var(--help-font-group);
+  line-height: normal;
+  color: var(--help-text-body);
 }
 
 .sectionTitle {
-  margin: 0 0 var(--margin-m);
-  font-family: "NT Somic", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1.3;
-  color: var(--common-color-common-text);
+  margin: 0;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: var(--help-font-section);
+  line-height: normal;
+  color: var(--help-text-body);
 }
 
-.bodyText {
-  margin: 0 0 var(--margin-m);
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--interactive-color-interactive-text-secondary);
-}
-
+.bodyText,
 .introText {
-  margin: 0 0 var(--margin-s);
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--interactive-color-interactive-text-secondary);
+  margin: 0;
+  font-family: inherit;
+  font-size: var(--help-font-body);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--help-text-body);
 }
 
 .featureList {
@@ -141,28 +260,69 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--margin-s);
+  gap: var(--help-gap-feature);
 }
 
 .featureRow {
   display: flex;
-  align-items: flex-start;
-  gap: var(--margin-s);
+  align-items: center;
+  gap: var(--help-gap-block);
 }
 
 .featureIcon {
-  width: 20px;
-  height: 20px;
+  width: var(--help-icon-preview);
+  height: var(--help-icon-preview);
   flex-shrink: 0;
-  margin-top: 2px;
-  opacity: 0.9;
+  padding: var(--margin-m);
+  box-sizing: border-box;
+  object-fit: contain;
+  background: var(--common-color-common-black);
+  border-radius: var(--border-radius-s);
 }
 
 .featureText {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--interactive-color-interactive-text-secondary);
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: var(--help-font-body);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--help-text-body);
+}
+
+.actionList {
+  margin: 0;
+  padding: 7px var(--margin-m) 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--help-gap-feature);
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: var(--help-gap-action);
+}
+
+.actionIcon {
+  width: var(--help-icon-action);
+  height: var(--help-icon-action);
+  flex-shrink: 0;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.actionText {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: var(--help-font-action);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--help-text-body);
 }
 
 .shortcutList {
@@ -171,14 +331,14 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--margin-m);
+  gap: var(--help-gap-feature);
 }
 
 .shortcutRow {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--margin-m);
+  gap: var(--help-gap-block);
 }
 
 .shortcutCopy {
@@ -187,25 +347,35 @@
 }
 
 .shortcutName {
-  margin: 0 0 4px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--common-color-common-text);
+  margin: 0 0 var(--margin-xs);
+  font-family: inherit;
+  font-size: var(--help-font-shortcut-name);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--help-text-body);
 }
 
 .shortcutDesc {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.35;
-  color: var(--interactive-color-interactive-text-secondary);
+  font-family: inherit;
+  font-size: var(--help-font-shortcut-desc);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--help-text-nav);
 }
 
 .shortcutKeys {
   flex-shrink: 0;
-  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--button-size-button-option-height);
+  padding: 0 var(--margin-m);
   border-radius: var(--border-radius-s);
-  background: var(--interactive-color-interactive-background-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--common-color-common-text);
+  background: var(--help-panel-sidebar);
+  font-family: inherit;
+  font-size: var(--help-font-shortcut-keys);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--help-text-body);
 }

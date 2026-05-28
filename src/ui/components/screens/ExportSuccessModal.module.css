@@ -1,0 +1,91 @@
+/* Figma «экспорт: успех» (135:20425) — Organism/Modal mini */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--utils-color-modal-fade);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--margin-l);
+  box-sizing: border-box;
+}
+
+.modal {
+  --export-success-size: 300px;
+  --export-success-font-title: 32px;
+  --export-success-font-body: 20px;
+  --export-success-font-cta: 16px;
+
+  width: min(100%, var(--export-success-size));
+  height: min(100%, var(--export-success-size));
+  max-width: var(--export-success-size);
+  max-height: var(--export-success-size);
+  padding: var(--margin-l);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--margin-m);
+  overflow: hidden;
+  background: var(--interactive-color-interactive-background-primary);
+  border-radius: var(--border-radius-m);
+  border: var(--border-weight) solid var(--utils-color-edge);
+  font-family: "NT Somic", system-ui, sans-serif;
+  text-align: center;
+}
+
+[data-window-size="Small"] .modal {
+  --export-success-size: 260px;
+  --export-success-font-title: 24px;
+  --export-success-font-body: 16px;
+  --export-success-font-cta: 14px;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--margin-m);
+  width: 100%;
+  color: var(--common-color-common-text);
+}
+
+.title {
+  margin: 0;
+  width: 100%;
+  font-size: var(--export-success-font-title);
+  font-weight: 600;
+  line-height: normal;
+}
+
+.body {
+  margin: 0;
+  width: 100%;
+  font-size: var(--export-success-font-body);
+  font-weight: 400;
+  line-height: normal;
+  white-space: pre-line;
+}
+
+.cta {
+  width: 100%;
+  min-height: var(--button-size-button-main-mini-height);
+  padding: 0 52px;
+  border: none;
+  border-radius: var(--border-radius-s);
+  background: var(--common-color-common-accent);
+  color: var(--common-color-common-white);
+  font-family: inherit;
+  font-size: var(--export-success-font-cta);
+  font-weight: 700;
+  line-height: normal;
+  text-align: center;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.cta:hover {
+  background: var(--common-color-common-accent-fade);
+}

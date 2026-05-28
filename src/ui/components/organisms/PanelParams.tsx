@@ -39,29 +39,84 @@ import { useFigmaColorVariableSync } from "@/figma/useFigmaColorVariableSync";
 import { OptionButton, PanelCtaButton } from "../atoms/Button";
 import { CameraTypeSelect } from "../molecules/CameraTypeSelect";
 import { ParamHelpPopover } from "../molecules/ParamHelpPopover";
+import {
+  CameraPresetIconButton,
+  CameraPresetIconGrid,
+} from "../molecules/CameraPresetIconButton";
+import { PanelSectionHeading } from "../molecules/PanelSectionHeading";
 import type { StandardCameraPresetId } from "@/types/scene";
 import { PanelModeToggle } from "../atoms/Navigation";
 import paramsStyles from "./PanelParams.module.css";
-import { PanelSceneModeContext, type PanelMode } from "./PanelScene";
+import compactStyles from "./PanelCompact.module.css";
+import {
+  isPanelOpen,
+  PanelSceneModeContext,
+  usePanelCompact,
+  type PanelMode,
+} from "./PanelScene";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
+import type { SpotLightingPresetId } from "@/lights/spotLightingPresets";
+import materialsIcon from "@/assets/images/icons/descriptive/materials.svg";
+import textureIcon from "@/assets/images/icons/descriptive/texture.svg";
+import cameraPIcon from "@/assets/images/icons/descriptive/cameraP.svg";
+import lensIcon from "@/assets/images/icons/descriptive/lens.svg";
+import lightingIcon from "@/assets/images/icons/descriptive/lighting.svg";
+import ambientLightIcon from "@/assets/images/icons/descriptive/ambientLight.svg";
+import spotLightIcon from "@/assets/images/icons/descriptive/spotLight.svg";
+import hdrIcon from "@/assets/images/icons/descriptive/hdr.svg";
+import softLightIcon from "@/assets/images/icons/descriptive/softLight.svg";
+import hardLightIcon from "@/assets/images/icons/descriptive/hardLight.svg";
+import flatLightIcon from "@/assets/images/icons/descriptive/flatLight.svg";
 
 const CAMERA_PRESET_ROWS: StandardCameraPresetId[][] = [
   ["top", "bottom", "left", "right"],
   ["front", "back"],
 ];
 
+const SPOT_PRESET_ICONS: Record<SpotLightingPresetId, string> = {
+  soft: softLightIcon,
+  hard: hardLightIcon,
+  flat: flatLightIcon,
+};
+
+function lightParamsIcon(type: LightType): string {
+  switch (type) {
+    case "Ambient":
+      return ambientLightIcon;
+    case "Spot":
+      return spotLightIcon;
+    case "HDRI":
+      return hdrIcon;
+  }
+}
+
 function ParamsPanelSectionHeader({
   titleKey,
   title,
   help,
+  iconSrc,
 }: {
   titleKey?: TranslationKey;
   title?: string;
   help?: { titleKey: TranslationKey; bodyKey: TranslationKey };
+  iconSrc?: string;
 }) {
   const { t } = useI18n();
-  const heading =
-    title ?? (titleKey != null ? t(titleKey) : "");
+  const compact = usePanelCompact();
+  const heading = title ?? (titleKey != null ? t(titleKey) : "");
+  if (compact) {
+    if (!iconSrc) return null;
+    return (
+      <div className={paramsStyles.cameraSectionHeader}>
+        <img
+          className={compactStyles.sectionIconHeader}
+          src={iconSrc}
+          alt=""
+          title={heading}
+        />
+      </div>
+    );
+  }
   return (
     <div className={paramsStyles.cameraSectionHeader}>
       {help ? (
@@ -78,7 +133,11 @@ const LIGHT_TYPE_LABEL_KEYS: Record<LightType, TranslationKey> = {
   HDRI: "light.type.hdri",
 };
 
-function formatLightParamsSectionTitle(template: string, type: LightType, t: (k: TranslationKey) => string): string {
+function formatLightParamsSectionTitle(
+  template: string,
+  type: LightType,
+  t: (k: TranslationKey) => string
+): string {
   return template.replace("{name}", t(LIGHT_TYPE_LABEL_KEYS[type]));
 }
 
@@ -92,9 +151,17 @@ function EditorParamsPanel({
   children: ReactNode;
 }) {
   const { t } = useI18n();
-  const isOpen = mode === "openR" || mode === "openL";
+  const isOpen = isPanelOpen(mode);
+  const containerClass = [
+    "panel-container",
+    "panel-container--editor",
+    !isOpen ? "panel-container--compact" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div className="panel-container panel-container--editor">
+    <div className={containerClass}>
       <div className="panel-header">
         <PanelModeToggle mode={mode} setMode={setMode} />
         {isOpen ? (
@@ -104,9 +171,7 @@ function EditorParamsPanel({
         ) : null}
       </div>
       <PanelSceneModeContext.Provider value={mode}>
-        {isOpen ? (
-          <div className={paramsStyles.panelParamsShell}>{children}</div>
-        ) : null}
+        <div className={paramsStyles.panelParamsShell}>{children}</div>
       </PanelSceneModeContext.Provider>
     </div>
   );
@@ -127,9 +192,8 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
 
   const activeMaterial = materials ? materials[activeMaterialIndex] : null;
   const textureActions = useTextureSlotActions(activeMaterial);
-  const [activeTextureName, setActiveTextureName] = useState<TextureSlot | null>(
-    null
-  );
+  const [activeTextureName, setActiveTextureName] =
+    useState<TextureSlot | null>(null);
 
   const visibleTextureSlots = useMemo(() => {
     if (!activeMaterial) return [];
@@ -160,13 +224,21 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
     [t]
   );
 
+  const open = isPanelOpen(mode);
+  const textureSlotsToShow = useMemo(() => {
+    if (open) return visibleTextureSlots;
+    if (activeTextureName == null) return [];
+    return visibleTextureSlots.filter((slot) => slot === activeTextureName);
+  }, [open, visibleTextureSlots, activeTextureName]);
+
   return (
     <EditorParamsPanel mode={mode} setMode={setMode}>
       <div className={paramsStyles.panelBody}>
         <div className="panel-section">
-          <p className="panel-editor-section-heading">
-            {t("panel.params.meshMaterials")}
-          </p>
+          <PanelSectionHeading
+            text={t("panel.params.meshMaterials")}
+            iconSrc={materialsIcon}
+          />
           <ScrollPanel variant="mats">
             <div className={paramsStyles.materialList}>
               {materials?.map((m, id) => (
@@ -183,12 +255,13 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
         {activeMaterial && (
           <div className={paramsStyles.paramStack}>
             <div className="panel-section">
-              <p className="panel-editor-section-heading">
-                {formatMaterialSectionTitle(
+              <PanelSectionHeading
+                text={formatMaterialSectionTitle(
                   t("panel.params.materialParams"),
                   activeMaterial.name
                 )}
-              </p>
+                iconSrc={materialsIcon}
+              />
               <div className={paramsStyles.paramRow2}>
                 <ObjectNumberInput
                   mode={mode}
@@ -203,7 +276,7 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
                       isActive: false,
                       value: activeMaterial.roughness,
                       min: 0,
-                      max: 1,
+                      max: 10,
                       step: 0.01,
                     },
                   ]}
@@ -251,7 +324,7 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
                 sliderType="default"
               />
               <InputColor
-                layout="panel"
+                layout={open ? "panel" : "picker"}
                 color={activeMaterial.baseColor}
                 onChange={(color) =>
                   materialEditing.execute({
@@ -260,32 +333,35 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
                   })
                 }
               />
-              <FigmaColorVariableSelect
-                value={activeMaterial.baseColorVariableId}
-                onSelect={(variableId, hex) =>
-                  materialEditing.execute({
-                    id: activeMaterial.id,
-                    changes: {
-                      baseColorVariableId: variableId,
-                      baseColor: hex,
-                    },
-                  })
-                }
-                onClear={() =>
-                  materialEditing.execute({
-                    id: activeMaterial.id,
-                    changes: { baseColorVariableId: null },
-                  })
-                }
-              />
+              {open ? (
+                <FigmaColorVariableSelect
+                  value={activeMaterial.baseColorVariableId}
+                  onSelect={(variableId, hex) =>
+                    materialEditing.execute({
+                      id: activeMaterial.id,
+                      changes: {
+                        baseColorVariableId: variableId,
+                        baseColor: hex,
+                      },
+                    })
+                  }
+                  onClear={() =>
+                    materialEditing.execute({
+                      id: activeMaterial.id,
+                      changes: { baseColorVariableId: null },
+                    })
+                  }
+                />
+              ) : null}
             </div>
             <div className="panel-section">
-              <p className="panel-editor-section-heading">
-                {formatMaterialSectionTitle(
+              <PanelSectionHeading
+                text={formatMaterialSectionTitle(
                   t("panel.params.materialTextures"),
                   activeMaterial.name
                 )}
-              </p>
+                iconSrc={textureIcon}
+              />
               <ScrollPanel variant="textures">
                 <input
                   ref={textureActions.fileInputRef}
@@ -295,7 +371,7 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
                   onChange={textureActions.onFileSelected}
                 />
                 <div className={paramsStyles.textureList}>
-                  {visibleTextureSlots.map((slot) => {
+                  {textureSlotsToShow.map((slot) => {
                     const stored = activeMaterial.textures[slot];
                     if (!stored) return null;
                     return (
@@ -308,8 +384,7 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
                         actionLabels={textureActionLabels}
                         actions={{
                           saveToDevice: textureActions.saveToDevice,
-                          openLoadFromDevice:
-                            textureActions.openLoadFromDevice,
+                          openLoadFromDevice: textureActions.openLoadFromDevice,
                           saveToFigma: textureActions.saveToFigma,
                           loadFromFigma: textureActions.loadFromFigma,
                           deleteSlot: (targetSlot) => {
@@ -317,8 +392,7 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
                             if (activeTextureName === targetSlot) {
                               const next = visibleTextureSlots.find(
                                 (s) =>
-                                  s !== targetSlot &&
-                                  activeMaterial.textures[s]
+                                  s !== targetSlot && activeMaterial.textures[s]
                               );
                               setActiveTextureName(next ?? null);
                             }
@@ -348,6 +422,7 @@ export function PanelCamera(_props: { camera: CameraState }) {
   if (!camera) return null;
 
   const locked = camera.locked;
+  const open = isPanelOpen(mode);
 
   const patch = (changes: CameraPatch) => {
     if (locked) return;
@@ -361,13 +436,16 @@ export function PanelCamera(_props: { camera: CameraState }) {
           <section className={paramsStyles.cameraSection}>
             <ParamsPanelSectionHeader
               titleKey="camera.type.title"
+              iconSrc={cameraPIcon}
               help={{
                 titleKey: "camera.help.type.title",
                 bodyKey: "camera.help.type.body",
               }}
             />
-            {locked ? (
-              <p className="panel-editor-muted-note">{t("panel.scene.locked")}</p>
+            {open && locked ? (
+              <p className="panel-editor-muted-note">
+                {t("panel.scene.locked")}
+              </p>
             ) : null}
             <CameraTypeSelect
               value={camera.type}
@@ -377,7 +455,10 @@ export function PanelCamera(_props: { camera: CameraState }) {
           </section>
 
           <section className={paramsStyles.cameraSection}>
-            <ParamsPanelSectionHeader titleKey="camera.params.title" />
+            <ParamsPanelSectionHeader
+              titleKey="camera.params.title"
+              iconSrc={lensIcon}
+            />
             <ObjectNumberInput
               mode={mode}
               label={t("camera.near")}
@@ -418,24 +499,30 @@ export function PanelCamera(_props: { camera: CameraState }) {
               value={camera.aspect}
               onChange={(value) => patch({ aspect: value })}
             />
-            <div className={paramsStyles.aspectPreviewBlock}>
-              <p className="panel-editor-field-label">{t("camera.renderArea")}</p>
-              <div className={paramsStyles.aspectPreviewRow}>
-                <Toggle
-                  checked={camera.aspectPreviewEnabled}
-                  disabled={locked}
-                  onChange={(checked) =>
-                    patch({ aspectPreviewEnabled: checked })
-                  }
-                />
-                <span className="panel-editor-field-label">
-                  {t("camera.aspectPreview.mode")}
-                </span>
+            {open ? (
+              <div className={paramsStyles.aspectPreviewBlock}>
+                <p className="panel-editor-field-label">
+                  {t("camera.renderArea")}
+                </p>
+                <div className={paramsStyles.aspectPreviewRow}>
+                  <Toggle
+                    checked={camera.aspectPreviewEnabled}
+                    disabled={locked}
+                    onChange={(checked) =>
+                      patch({ aspectPreviewEnabled: checked })
+                    }
+                  />
+                  <span className="panel-editor-field-label">
+                    {t("camera.aspectPreview.mode")}
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : null}
             {camera.type === "Perspective" ? (
               <div className={paramsStyles.fovBlock}>
-                <p className="panel-editor-field-label">{t("camera.fov")}</p>
+                {open ? (
+                  <p className="panel-editor-field-label">{t("camera.fov")}</p>
+                ) : null}
                 <FovSelect
                   value={camera.fov}
                   disabled={locked}
@@ -453,41 +540,68 @@ export function PanelCamera(_props: { camera: CameraState }) {
                 bodyKey: "camera.help.presets.body",
               }}
             />
-            <div className={paramsStyles.presetGrid}>
-              {CAMERA_PRESET_ROWS.map((row) => (
-                <div key={row.join("-")} className={paramsStyles.presetGridRow}>
-                  {row.map((preset) => (
+            {open ? (
+              <div className={paramsStyles.presetGrid}>
+                {CAMERA_PRESET_ROWS.map((row) => (
+                  <div
+                    key={row.join("-")}
+                    className={paramsStyles.presetGridRow}
+                  >
+                    {row.map((preset) => (
+                      <OptionButton
+                        key={preset}
+                        text={t(`camera.preset.${preset}`)}
+                        onClick={() =>
+                          patch(buildStandardCameraPresetPatch(camera, preset))
+                        }
+                      />
+                    ))}
+                  </div>
+                ))}
+                {camera.savedView ? (
+                  <div className={paramsStyles.presetGridRow}>
                     <OptionButton
-                      key={preset}
-                      text={t(`camera.preset.${preset}`)}
-                      onClick={() =>
-                        patch(buildStandardCameraPresetPatch(camera, preset))
-                      }
+                      text={t("camera.preset.saved")}
+                      onClick={() => {
+                        const savedPatch =
+                          buildApplySavedCameraViewPatch(camera);
+                        if (savedPatch) patch(savedPatch);
+                      }}
                     />
-                  ))}
-                </div>
-              ))}
-              {camera.savedView ? (
-                <div className={paramsStyles.presetGridRow}>
-                  <OptionButton
-                    text={t("camera.preset.saved")}
-                    onClick={() => {
-                      const savedPatch = buildApplySavedCameraViewPatch(camera);
-                      if (savedPatch) patch(savedPatch);
-                    }}
-                  />
-                </div>
-              ) : null}
-            </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <CameraPresetIconGrid
+                rows={CAMERA_PRESET_ROWS}
+                savedView={Boolean(camera.savedView)}
+                disabled={locked}
+                onPreset={(preset) =>
+                  patch(buildStandardCameraPresetPatch(camera, preset))
+                }
+                onSaved={() => {
+                  const savedPatch = buildApplySavedCameraViewPatch(camera);
+                  if (savedPatch) patch(savedPatch);
+                }}
+                onSaveCurrent={() => patch(buildSaveCameraViewPatch(camera))}
+                labels={{
+                  preset: (id) => t(`camera.preset.${id}`),
+                  saved: t("camera.preset.saved"),
+                  saveCurrent: t("camera.preset.saveCurrent"),
+                }}
+              />
+            )}
           </section>
         </div>
-        <div className={paramsStyles.panelCameraFooter}>
-          <PanelCtaButton
-            text={t("camera.preset.saveCurrent")}
-            disabled={locked}
-            onClick={() => patch(buildSaveCameraViewPatch(camera))}
-          />
-        </div>
+        {open ? (
+          <div className={paramsStyles.panelCameraFooter}>
+            <PanelCtaButton
+              text={t("camera.preset.saveCurrent")}
+              disabled={locked}
+              onClick={() => patch(buildSaveCameraViewPatch(camera))}
+            />
+          </div>
+        ) : null}
       </div>
     </EditorParamsPanel>
   );
@@ -502,6 +616,7 @@ export function PanelLight({ light }: { light: Light }) {
   const { t } = useI18n();
 
   const locked = liveLight.locked;
+  const open = isPanelOpen(mode);
 
   const patch = (changes: LightPatch) => {
     if (locked) return;
@@ -524,13 +639,16 @@ export function PanelLight({ light }: { light: Light }) {
           <section className={paramsStyles.cameraSection}>
             <ParamsPanelSectionHeader
               titleKey="light.type.title"
+              iconSrc={lightingIcon}
               help={{
                 titleKey: "light.help.type.title",
                 bodyKey: "light.help.type.body",
               }}
             />
-            {locked ? (
-              <p className="panel-editor-muted-note">{t("panel.scene.locked")}</p>
+            {open && locked ? (
+              <p className="panel-editor-muted-note">
+                {t("panel.scene.locked")}
+              </p>
             ) : null}
             <LightTypeSelect
               value={liveLight.type}
@@ -546,6 +664,7 @@ export function PanelLight({ light }: { light: Light }) {
                 liveLight.type,
                 t
               )}
+              iconSrc={lightParamsIcon(liveLight.type)}
             />
             {liveLight.type === "Ambient" && (
               <>
@@ -565,7 +684,7 @@ export function PanelLight({ light }: { light: Light }) {
                   ]}
                 />
                 <InputColor
-                  layout="panel"
+                  layout={open ? "panel" : "picker"}
                   color={liveLight.color}
                   onChange={(color) => patch({ color })}
                 />
@@ -578,7 +697,11 @@ export function PanelLight({ light }: { light: Light }) {
                   mode={mode}
                   label={t("light.intensity")}
                   sliderType="default"
-                  fields={[intensityField(liveLight.intensity, (value) => patch({ intensity: value }))]}
+                  fields={[
+                    intensityField(liveLight.intensity, (value) =>
+                      patch({ intensity: value })
+                    ),
+                  ]}
                 />
                 <ObjectNumberInput
                   mode={mode}
@@ -629,18 +752,22 @@ export function PanelLight({ light }: { light: Light }) {
                     ]}
                   />
                 </div>
-                <div>
-                  <p className="panel-editor-field-label">{t("light.target")}</p>
-                  <button
-                    type="button"
-                    className={paramsStyles.lightTargetPlaceholder}
-                    disabled
-                  >
-                    {t("light.target.placeholder")}
-                  </button>
-                </div>
+                {open ? (
+                  <div>
+                    <p className="panel-editor-field-label">
+                      {t("light.target")}
+                    </p>
+                    <button
+                      type="button"
+                      className={paramsStyles.lightTargetPlaceholder}
+                      disabled
+                    >
+                      {t("light.target.placeholder")}
+                    </button>
+                  </div>
+                ) : null}
                 <InputColor
-                  layout="panel"
+                  layout={open ? "panel" : "picker"}
                   color={liveLight.color}
                   onChange={(color) => patch({ color })}
                 />
@@ -672,6 +799,7 @@ export function PanelLight({ light }: { light: Light }) {
             <section className={paramsStyles.cameraSection}>
               <ParamsPanelSectionHeader
                 titleKey="light.hdriPreset.title"
+                iconSrc={hdrIcon}
                 help={{
                   titleKey: "light.help.hdri.title",
                   bodyKey: "light.help.hdri.body",
@@ -691,26 +819,46 @@ export function PanelLight({ light }: { light: Light }) {
             <section className={paramsStyles.cameraSection}>
               <ParamsPanelSectionHeader
                 titleKey="light.presets.title"
+                iconSrc={softLightIcon}
                 help={{
                   titleKey: "light.help.presets.title",
                   bodyKey: "light.help.presets.body",
                 }}
               />
-              <div className={paramsStyles.presetGrid}>
-                {SPOT_LIGHTING_PRESET_ROWS.map((row) => (
-                  <div key={row.join("-")} className={paramsStyles.presetGridRow}>
-                    {row.map((preset) => (
-                      <OptionButton
-                        key={preset}
-                        text={t(`light.preset.${preset}`)}
-                        onClick={() =>
-                          patch(buildSpotLightingPresetPatch(preset))
-                        }
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
+              {open ? (
+                <div className={paramsStyles.presetGrid}>
+                  {SPOT_LIGHTING_PRESET_ROWS.map((row) => (
+                    <div
+                      key={row.join("-")}
+                      className={paramsStyles.presetGridRow}
+                    >
+                      {row.map((preset) => (
+                        <OptionButton
+                          key={preset}
+                          text={t(`light.preset.${preset}`)}
+                          onClick={() =>
+                            patch(buildSpotLightingPresetPatch(preset))
+                          }
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={compactStyles.presetIconGrid}>
+                  {SPOT_LIGHTING_PRESET_ROWS.flat().map((preset) => (
+                    <CameraPresetIconButton
+                      key={preset}
+                      icon={SPOT_PRESET_ICONS[preset]}
+                      title={t(`light.preset.${preset}`)}
+                      disabled={locked}
+                      onClick={() =>
+                        patch(buildSpotLightingPresetPatch(preset))
+                      }
+                    />
+                  ))}
+                </div>
+              )}
             </section>
           </div>
         ) : null}

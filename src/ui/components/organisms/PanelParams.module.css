@@ -63,6 +63,46 @@
   min-height: 0;
 }
 
+:global(.panel-container--compact) .paramRow2 {
+  grid-template-columns: 1fr;
+}
+
+:global(.panel-container--compact) .materialList,
+:global(.panel-container--compact) .textureList {
+  align-items: center;
+  width: 100%;
+}
+
+:global(.panel-container--compact) .panelParamsShell {
+  flex: 1;
+  min-height: 0;
+}
+
+:global(.panel-container--compact) .panelBody,
+:global(.panel-container--compact) .panelCameraBody,
+:global(.panel-container--compact) .panelLightBody,
+:global(.panel-container--compact) .panelCameraRoot,
+:global(.panel-container--compact) .panelLightRoot {
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+
+:global(.panel-container--compact) .cameraSection {
+  align-items: center;
+  width: 100%;
+}
+
+:global(.panel-container--compact) .cameraSectionHeader {
+  justify-content: center;
+  width: 100%;
+}
+
+:global(.panel-container--compact) .paramStack {
+  align-items: center;
+  width: 100%;
+}
+
 .panelCameraRoot,
 .panelLightRoot {
   display: flex;
@@ -70,6 +110,36 @@
   flex: 1;
   min-height: 0;
   gap: var(--margin-m);
+}
+
+.panelCameraRoot {
+  font-family: "NT Somic", system-ui, sans-serif;
+}
+
+[data-window-size="Large"] .panelCameraRoot {
+  --camera-font-panel-title: 24px;
+  --camera-font-section: 20px;
+  --camera-font-field: 16px;
+  --camera-font-list-item: 16px;
+  --camera-font-label-sm: 14px;
+  --camera-font-preset: 16px;
+  --camera-font-cta: 16px;
+  --camera-gap-body: 20px;
+  --camera-gap-section: 10px;
+  --camera-gap-field: 8px;
+}
+
+[data-window-size="Small"] .panelCameraRoot {
+  --camera-font-panel-title: 18px;
+  --camera-font-section: 14px;
+  --camera-font-field: 13px;
+  --camera-font-list-item: 13px;
+  --camera-font-label-sm: 12px;
+  --camera-font-preset: 13px;
+  --camera-font-cta: 14px;
+  --camera-gap-body: var(--margin-m);
+  --camera-gap-section: var(--margin-s);
+  --camera-gap-field: 6px;
 }
 
 .panelCameraBody,
@@ -80,6 +150,10 @@
   min-height: 0;
   overflow-y: auto;
   gap: var(--margin-m);
+}
+
+.panelCameraBody {
+  gap: var(--camera-gap-body, var(--margin-m));
 }
 
 .panelCameraFooter,
@@ -107,7 +181,7 @@
 .cameraSection {
   display: flex;
   flex-direction: column;
-  gap: var(--margin-s);
+  gap: var(--camera-gap-section, var(--margin-s));
 }
 
 .cameraSectionHeader {
@@ -119,6 +193,100 @@
 
 .cameraSectionHeader h3 {
   min-width: 0;
+}
+
+/* Figma: Organism/Panel right — camera typography (node 135:19826) */
+.panelCameraRoot :global(.panel-header-title h2) {
+  font-size: var(--camera-font-panel-title, 24px);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--common-color-common-text);
+}
+
+.panelCameraRoot :global(.panel-editor-section-title) {
+  font-size: var(--camera-font-section, 20px);
+  font-weight: 600;
+  line-height: normal;
+  color: var(--common-color-common-text);
+}
+
+.panelCameraRoot :global(.panel-editor-field-label),
+.panelCameraRoot :global(.panel-editor-muted-note) {
+  font-size: var(--camera-font-field, 16px);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--common-color-common-text);
+}
+
+.panelCameraRoot [class*="EditorInput_label"] {
+  font-size: var(--camera-font-field, 16px);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--common-color-common-text);
+}
+
+.panelCameraRoot [class*="EditorInput_labelActive"] {
+  color: var(--common-color-common-accent);
+}
+
+.panelCameraRoot [class*="EditorInput_group"] {
+  gap: var(--camera-gap-field, 8px);
+}
+
+.panelCameraRoot [class*="EditorInput_ratioSeparator"] {
+  font-size: var(--camera-font-field, 16px);
+  line-height: normal;
+}
+
+.panelCameraRoot [class*="Input_valInput"] {
+  font-size: var(--camera-font-field, 16px);
+  font-weight: 400;
+  line-height: normal;
+}
+
+.panelCameraRoot [class*="CameraTypeSelect_option"] {
+  font-size: var(--camera-font-list-item, 16px);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.panelCameraRoot [class*="CameraTypeSelect_optionActive"] {
+  color: var(--common-color-common-text);
+  font-weight: 600;
+}
+
+.panelCameraRoot [class*="CameraTypeSelect_optionActive"] [class*="CameraTypeSelect_label"] {
+  color: var(--common-color-common-text);
+  font-weight: 600;
+}
+
+.panelCameraRoot .presetGridRow [class*="optionButton"] {
+  font-size: var(--camera-font-preset, 16px);
+  font-weight: 400;
+  line-height: normal;
+  color: var(--interactive-color-interactive-text-secondary);
+  height: var(--button-size-button-mode-height);
+  border-radius: 10px;
+}
+
+.panelCameraRoot .panelCameraFooter [class*="panelCtaButton"] {
+  font-size: var(--camera-font-cta, 16px);
+  font-weight: 700;
+  line-height: normal;
+  min-height: var(--button-size-button-main-mini-height);
+}
+
+.panelCameraRoot .aspectPreviewRow :global(.panel-editor-field-label) {
+  font-size: var(--camera-font-label-sm, 14px);
+  font-weight: 400;
+  line-height: normal;
+}
+
+.panelCameraRoot .cameraSectionHeader [class*="ParamHelpPopover_trigger"] img {
+  width: 22px;
+  height: 22px;
+  opacity: 0.85;
 }
 
 .aspectPreviewBlock {

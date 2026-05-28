@@ -6,6 +6,7 @@ import {
   lensIcon,
 } from "@/camera/fovPresets";
 import { useI18n } from "@/app/ApplicationKernelContext";
+import { usePanelCompact } from "../organisms/PanelScene";
 import styles from "./FovSelect.module.css";
 
 export function FovSelect({
@@ -18,6 +19,7 @@ export function FovSelect({
   disabled?: boolean;
 }) {
   const { t } = useI18n();
+  const compact = usePanelCompact();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -40,10 +42,11 @@ export function FovSelect({
     <div className={styles.root} ref={rootRef}>
       <button
         type="button"
-        className={styles.trigger}
+        className={compact ? `${styles.trigger} ${styles.triggerCompact}` : styles.trigger}
         disabled={disabled}
         aria-expanded={open}
         aria-haspopup="listbox"
+        aria-label={t(activePreset.labelKey)}
         onClick={() => setOpen((prev) => !prev)}
       >
         <img
@@ -51,10 +54,14 @@ export function FovSelect({
           src={activePreset?.icon ?? lensIcon}
           alt=""
         />
-        <span className={styles.triggerLabel}>
-          {t(activePreset.labelKey)}
-        </span>
-        <span className={styles.chevron} aria-hidden />
+        {!compact ? (
+          <>
+            <span className={styles.triggerLabel}>
+              {t(activePreset.labelKey)}
+            </span>
+            <span className={styles.chevron} aria-hidden />
+          </>
+        ) : null}
       </button>
 
       {open ? (
@@ -74,7 +81,7 @@ export function FovSelect({
                   }}
                 >
                   <img className={styles.optionIcon} src={preset.icon} alt="" />
-                  <span>{t(preset.labelKey)}</span>
+                  {!compact ? <span>{t(preset.labelKey)}</span> : null}
                 </button>
               </li>
             );

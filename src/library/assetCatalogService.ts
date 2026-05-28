@@ -2,9 +2,14 @@ import { Mesh } from "three";
 
 import type { Asset, AssetTag } from "../types/assets";
 import type { Scene } from "../types/scene";
-import { importThreeObjectAsScene } from "../io/sceneEncoder";
+import {
+  importThreeObjectAsScene,
+  importThreeObjectAsSceneAppend,
+} from "../io/sceneEncoder";
 import { SceneStorage } from "../store/sceneStorage";
+import { useSceneStore } from "../store/sceneStore";
 import { useSessionStore } from "../store/sessionStore";
+import { remapSceneFragmentIds } from "../lib/sceneFragmentMerge";
 import { LIBRARY_ASSETS } from "./assetCatalog";
 import { createPrimitiveObject3D } from "./primitiveSceneFactory";
 
@@ -25,14 +30,21 @@ export class AssetCatalogService {
     return this.assets.find((a) => a.id === assetId);
   }
 
-  async buildSceneForAsset(assetId: string, meshName: string): Promise<Scene> {
+  private async buildSceneFragmentForAsset(
+    assetId: string,
+    meshName: string,
+    append: boolean
+  ): Promise<Scene> {
     const asset = this.getAsset(assetId);
     if (!asset) {
       throw new Error(`AssetCatalogService: unknown asset "${assetId}"`);
     }
     const root = createPrimitiveObject3D(asset.primitiveKind, meshName);
     try {
-      return await importThreeObjectAsScene(root, { syncTextures: true });
+      const importScene = append
+        ? importThreeObjectAsSceneAppend
+        : importThreeObjectAsScene;
+      return await importScene(root, { syncTextures: true });
     } finally {
       root.traverse((child) => {
         if (child instanceof Mesh) {
@@ -48,6 +60,10 @@ export class AssetCatalogService {
     }
   }
 
+  async buildSceneForAsset(assetId: string, meshName: string): Promise<Scene> {
+    return this.buildSceneFragmentForAsset(assetId, meshName, false);
+  }
+
   async loadAssetToScene(assetId: string, projectName: string): Promise<Scene> {
     const scene = await this.buildSceneForAsset(assetId, projectName);
     this.scene.load(scene);
@@ -57,5 +73,35 @@ export class AssetCatalogService {
       useSessionStore.getState().setActiveObjectId(meshId);
     }
     return scene;
+  }
+
+  async appendAssetToScene(
+    assetId: string,
+    meshName: string
+  ): Promise<string | null> {
+    const current = useSceneStore.getState().scene;
+    if (!current) {
+      await this.loadAssetToScene(assetId, meshName);
+      return useSessionStore.getState().activeObjectId;
+    }
+
+    const fragment = remapSceneFragmentIds(
+      await this.buildSceneFragmentForAsset(assetId, meshName, true)
+    );
+    const meshId = fragment.meshes[0]?.id ?? null;
+
+    useSceneStore.setState({
+      scene: {
+        ...current,
+        meshes: [...current.meshes, ...fragment.meshes],
+        materials: { ...current.materials, ...fragment.materials },
+      },
+    });
+
+    if (meshId) {
+      useSessionStore.getState().setActiveObjectId(meshId);
+    }
+
+    return meshId;
   }
 }

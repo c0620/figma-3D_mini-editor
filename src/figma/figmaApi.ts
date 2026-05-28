@@ -1,7 +1,9 @@
 import { randomUUID } from "../lib/randomId";
 import type { FigmaPluginResponse } from "./figmaMessages";
 
-const REQUEST_TIMEOUT_MS = 30_000;
+const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
+
+export const EXPORT_RENDER_FRAME_TIMEOUT_MS = 120_000;
 
 type PendingRequest = {
   resolve: (value: unknown) => void;
@@ -26,16 +28,20 @@ export class FigmaAPI {
     parent.postMessage({ pluginMessage: message }, "*");
   }
 
-  request<T>(message: Record<string, unknown>): Promise<T> {
+  request<T>(
+    message: Record<string, unknown>,
+    options?: { timeoutMs?: number }
+  ): Promise<T> {
     this.attachListener();
 
     const requestId = randomUUID();
+    const timeoutMs = options?.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
 
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(requestId);
         reject(new Error("Figma plugin request timed out"));
-      }, REQUEST_TIMEOUT_MS);
+      }, timeoutMs);
 
       this.pending.set(requestId, {
         resolve: (value) => resolve(value as T),

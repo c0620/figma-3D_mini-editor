@@ -1,8 +1,6 @@
 import { useI18n } from "@/app/ApplicationKernelContext";
 import type { Asset, AssetTag } from "@/types/assets";
 import type { TranslationKey } from "@/i18n/en";
-import { ActionButton } from "../atoms/Button";
-import buttonStyles from "../atoms/Button.module.css";
 import { AssetPreviewCanvas } from "./AssetPreviewCanvas";
 import styles from "./AssetLibrary.module.css";
 
@@ -30,17 +28,28 @@ export function AssetCard({
 
   return (
     <article className={styles.card}>
-      <span className={styles.cardTag}>{t(TAG_LABEL_KEYS[primaryTag])}</span>
-      <AssetPreviewCanvas kind={asset.primitiveKind} />
-      <h3 className={styles.cardTitle}>{t(asset.nameKey)}</h3>
-      <p className={styles.cardMeta}>{t("library.proceduralSize")}</p>
-      <p className={styles.cardMeta}>{polygons}</p>
-      <ActionButton
-        text={t("library.addToScene")}
+      <div className={styles.cardPreview}>
+        <span className={styles.cardTag}>{t(TAG_LABEL_KEYS[primaryTag])}</span>
+        <AssetPreviewCanvas
+          kind={asset.primitiveKind}
+          className={styles.cardPreviewCanvas}
+        />
+      </div>
+      <div className={styles.cardBody}>
+        <h3 className={styles.cardTitle}>{t(asset.nameKey)}</h3>
+        <div className={styles.cardMetaBlock}>
+          <p className={styles.cardMeta}>{t("library.proceduralSize")}</p>
+          <p className={styles.cardMeta}>{polygons}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        className={styles.cardCta}
         onClick={onAdd}
         disabled={loading}
-        className={buttonStyles.actionButtonModal}
-      />
+      >
+        {t("library.addToScene")}
+      </button>
     </article>
   );
 }

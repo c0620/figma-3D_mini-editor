@@ -2,6 +2,7 @@ import type { MouseEvent } from "react";
 
 import { EditorIconButton } from "../atoms/Button";
 import type { TextureSlot } from "@/types/scene";
+import { usePanelCompact } from "../organisms/PanelScene";
 import saveTextureLocalIcon from "@/assets/images/icons/descriptive/saveTextureLocal.svg";
 import pickLocalIcon from "@/assets/images/icons/descriptive/pickLocal.svg";
 import saveTextureFigmaIcon from "@/assets/images/icons/descriptive/saveTextureFigma.svg";
@@ -42,28 +43,34 @@ export function TextureSlotRow({
   actions: TextureSlotRowActions;
   onSelect: () => void;
 }) {
+  const compact = usePanelCompact();
+  const showAsActive = isActive || compact;
+
   const rowClass = [
     styles.row,
-    isActive ? styles.rowActiveLayout : styles.rowCompact,
+    compact ? styles.rowPanelCompact : showAsActive ? styles.rowActiveLayout : styles.rowCompact,
   ]
     .filter(Boolean)
     .join(" ");
 
   const previewClass = [
     styles.preview,
-    isActive ? styles.previewLarge : styles.previewCompact,
-    isActive ? styles.previewActive : "",
+    compact ? styles.previewCompact : showAsActive ? styles.previewLarge : styles.previewCompact,
+    showAsActive ? styles.previewActive : "",
   ]
     .filter(Boolean)
     .join(" ");
 
-  const metaClass = [styles.meta, isActive ? "" : styles.metaCompact]
+  const metaClass = [
+    styles.meta,
+    compact ? styles.metaPanelCompact : showAsActive ? "" : styles.metaCompact,
+  ]
     .filter(Boolean)
     .join(" ");
 
   const labelClass = [
     styles.label,
-    isActive ? styles.labelActive : "",
+    showAsActive ? styles.labelActive : "",
   ].join(" ");
 
   const stop = (event: MouseEvent) => {
@@ -74,9 +81,12 @@ export function TextureSlotRow({
     <div className={rowClass} onClick={onSelect} role="button" tabIndex={0}>
       <img className={previewClass} src={url} alt="" />
       <div className={metaClass}>
-        <p className={labelClass}>{label}</p>
-        {isActive ? (
-          <div className={styles.actions} onClick={stop}>
+        {!compact ? <p className={labelClass}>{label}</p> : null}
+        {showAsActive ? (
+          <div
+            className={compact ? styles.actionsCompact : styles.actions}
+            onClick={stop}
+          >
             <EditorIconButton
               className={styles.actionBtn}
               src={saveTextureLocalIcon}

@@ -180,9 +180,6 @@
     const hex = await resolveColorVariableHex(msg.variableId);
     respond(msg.requestId, true, { hex });
   }
-  function pushVariablesChanged() {
-    figma.ui.postMessage({ type: "variables-changed" });
-  }
   try {
     const uiOptions = { height: 900, title: "", width: 1600 };
     switch (figma.editorType) {
@@ -229,7 +226,6 @@
           }
         };
         figma.on("selectionchange", pushLinkedSelectionUpdate);
-        figma.variables.on("change", pushVariablesChanged);
         break;
     }
     figma.showUI(__html__, uiOptions);

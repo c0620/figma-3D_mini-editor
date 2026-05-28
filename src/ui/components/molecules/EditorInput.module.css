@@ -41,6 +41,27 @@
   display: none;
 }
 
+.groupCompact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  align-items: center;
+}
+
+.compactField {
+  width: 100%;
+  min-width: 0;
+}
+
+.ratioFieldsCompact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
 .controlRow {
   display: flex;
   gap: 8px;

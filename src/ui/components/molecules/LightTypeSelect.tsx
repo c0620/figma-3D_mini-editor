@@ -1,5 +1,6 @@
 import { useI18n } from "@/app/ApplicationKernelContext";
 import type { LightType } from "@/types/scene";
+import { usePanelCompact } from "../organisms/PanelScene";
 import ambientLightIcon from "@/assets/images/icons/descriptive/ambientLight.svg";
 import spotLightIcon from "@/assets/images/icons/descriptive/spotLight.svg";
 import hdriLightIcon from "@/assets/images/icons/descriptive/hdr.svg";
@@ -26,13 +27,19 @@ export function LightTypeSelect({
   disabled?: boolean;
 }) {
   const { t } = useI18n();
+  const compact = usePanelCompact();
 
   return (
-    <div className={styles.list} role="listbox" aria-label={t("light.type.title")}>
+    <div
+      className={compact ? `${styles.list} ${styles.listCompact}` : styles.list}
+      role="listbox"
+      aria-label={t("light.type.title")}
+    >
       {OPTIONS.map((option) => {
         const selected = value === option.type;
         const optionClass = [
           styles.option,
+          compact ? styles.optionCompact : "",
           selected ? styles.optionActive : styles.optionIdle,
         ]
           .filter(Boolean)
@@ -50,6 +57,7 @@ export function LightTypeSelect({
             type="button"
             role="option"
             aria-selected={selected}
+            aria-label={t(option.labelKey)}
             className={optionClass}
             disabled={disabled}
             onClick={() => onChange(option.type)}
@@ -57,7 +65,9 @@ export function LightTypeSelect({
             <span className={iconWrapClass}>
               <img className={graphStyles.icon} src={option.icon} alt="" />
             </span>
-            <span className={styles.label}>{t(option.labelKey)}</span>
+            {!compact ? (
+              <span className={styles.label}>{t(option.labelKey)}</span>
+            ) : null}
           </button>
         );
       })}

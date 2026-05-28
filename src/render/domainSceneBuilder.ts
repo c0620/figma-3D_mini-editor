@@ -1,12 +1,10 @@
 import {
   AmbientLight,
   Color,
-  EquirectangularReflectionMapping,
   Group,
   Mesh,
   OrthographicCamera,
   PerspectiveCamera,
-  PMREMGenerator,
   Scene as ThreeScene,
   SpotLight,
   WebGLRenderer,
@@ -14,9 +12,8 @@ import {
   type MeshStandardMaterial,
   type Texture,
 } from "three";
-import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 
-import { getHdriPresetUrl } from "../lights/hdriPresets";
+import { loadHdriEnvironmentMap } from "../lights/hdriEnvironmentLoader";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
 import {
   activeZoom,
@@ -29,9 +26,11 @@ import {
   buildMeshStandardMaterialFromDomain,
   disposeMeshStandardMaterial,
 } from "./domainMaterialBuilder";
+import { applyEnvironmentToMaterials } from "./prepareRendererTextures";
 
 export interface DomainSceneBuildOptions {
   includeCamera: boolean;
+  renderRenderer: WebGLRenderer;
 }
 
 export interface BuiltThreeScene {
@@ -89,19 +88,6 @@ export function createRenderCameraFromDomainState(
   return createCameraFromDomainState(state, projectionAspect);
 }
 
-async function loadHdriEnvironment(
-  presetId: Light["hdriPreset"],
-  pmrem: PMREMGenerator,
-  rgbeLoader: RGBELoader
-): Promise<Texture> {
-  const url = getHdriPresetUrl(presetId);
-  const hdrTexture = await rgbeLoader.loadAsync(url);
-  hdrTexture.mapping = EquirectangularReflectionMapping;
-  const envMap = pmrem.fromEquirectangular(hdrTexture).texture;
-  hdrTexture.dispose();
-  return envMap;
-}
-
 function addSpotLight(root: ThreeScene, light: Light): void {
   const group = new Group();
   const [px, py, pz] = light.transform.position;
@@ -133,8 +119,6 @@ export async function buildThreeSceneFromDomain(
   const root = new ThreeScene();
   const disposableGeometries: BufferGeometry[] = [];
   const disposableMaterials: MeshStandardMaterial[] = [];
-  let pmrem: PMREMGenerator | null = null;
-  let hdriRenderer: WebGLRenderer | null = null;
   let envMap: Texture | null = null;
 
   if (scene.environment.backgroundColor) {
@@ -147,15 +131,9 @@ export async function buildThreeSceneFromDomain(
   const hdriLight = visibleLights.find((l) => l.type === "HDRI");
 
   if (hdriLight) {
-    hdriRenderer = new WebGLRenderer({ antialias: false, alpha: true });
-    hdriRenderer.setSize(16, 16);
-    pmrem = new PMREMGenerator(hdriRenderer);
-    pmrem.compileEquirectangularShader();
-    const rgbeLoader = new RGBELoader();
-    envMap = await loadHdriEnvironment(
-      hdriLight.hdriPreset,
-      pmrem,
-      rgbeLoader
+    envMap = await loadHdriEnvironmentMap(
+      options.renderRenderer,
+      hdriLight.hdriPreset
     );
     root.environment = envMap;
     root.environmentIntensity = hdriLight.intensity;
@@ -228,6 +206,10 @@ export async function buildThreeSceneFromDomain(
     root.add(threeMesh);
   }
 
+  if (envMap) {
+    applyEnvironmentToMaterials(root, envMap);
+  }
+
   if (options.includeCamera) {
     const exportCamera = createCameraFromDomainState(
       scene.camera,
@@ -246,8 +228,6 @@ export async function buildThreeSceneFromDomain(
         disposeMeshStandardMaterial(material, TEXTURE_DISPOSE_OPTS);
       }
       envMap?.dispose();
-      pmrem?.dispose();
-      hdriRenderer?.dispose();
     },
   };
 }

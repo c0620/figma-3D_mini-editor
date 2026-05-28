@@ -1,5 +1,6 @@
 import { Mesh } from "three";
 
+import { createOffscreenRenderer } from "@/render/createOffscreenRenderer";
 import { buildThreeSceneFromDomain } from "@/render/domainSceneBuilder";
 import { TextureSlot, type Scene } from "@/types/scene";
 
@@ -59,22 +60,28 @@ export function formatSceneDimensions(scene: Scene): string {
 
 export async function countScenePolygons(scene: Scene): Promise<number> {
   let count = 0;
-  const built = await buildThreeSceneFromDomain(scene, {
-    includeCamera: false,
-  });
+  const offscreenRenderer = createOffscreenRenderer();
   try {
-    built.root.traverse((obj) => {
-      if (!(obj instanceof Mesh)) return;
-      const geometry = obj.geometry;
-      if (!geometry) return;
-      if (geometry.index) {
-        count += geometry.index.count / 3;
-      } else if (geometry.attributes.position) {
-        count += geometry.attributes.position.count / 3;
-      }
+    const built = await buildThreeSceneFromDomain(scene, {
+      includeCamera: false,
+      renderRenderer: offscreenRenderer,
     });
+    try {
+      built.root.traverse((obj) => {
+        if (!(obj instanceof Mesh)) return;
+        const geometry = obj.geometry;
+        if (!geometry) return;
+        if (geometry.index) {
+          count += geometry.index.count / 3;
+        } else if (geometry.attributes.position) {
+          count += geometry.attributes.position.count / 3;
+        }
+      });
+    } finally {
+      built.dispose();
+    }
   } finally {
-    built.dispose();
+    offscreenRenderer.dispose();
   }
 
   return Math.round(count) || scene.meshes.length;

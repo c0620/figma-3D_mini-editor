@@ -3,6 +3,7 @@ import { materialPreviewCacheKey } from "@/services/previewService";
 import type { HdriPresetId } from "@/types/scene";
 import type { Material } from "@/types/scene";
 import { useEffect, useMemo, useState } from "react";
+import { usePanelCompact } from "../organisms/PanelScene";
 import styles from "./ScenePreviews.module.css";
 
 export function HdriPreviewThumb({
@@ -39,6 +40,7 @@ export function HdriPreviewThumb({
   const thumbClass = isActive
     ? `${styles.hdriThumb} ${styles.hdriThumbActive}`
     : styles.hdriThumb;
+  const compact = usePanelCompact();
 
   return (
     <div className={thumbClass} onClick={onClick}>
@@ -47,13 +49,15 @@ export function HdriPreviewThumb({
       ) : (
         <div className={styles.previewPlaceholder} />
       )}
-      <p
-        className={
-          isActive ? `${styles.thumbLabel} ${styles.thumbLabelActive}` : styles.thumbLabel
-        }
-      >
-        {label}
-      </p>
+      {!compact ? (
+        <p
+          className={
+            isActive ? `${styles.thumbLabel} ${styles.thumbLabelActive}` : styles.thumbLabel
+          }
+        >
+          {label}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -91,9 +95,13 @@ export function MaterialPreviewThumb({
     };
   }, [preview, material, materialKey]);
 
-  const thumbClass = isActive
-    ? `${styles.thumb} ${styles.thumbActive}`
-    : styles.thumb;
+  const compact = usePanelCompact();
+  const thumbClass = [
+    isActive ? `${styles.thumb} ${styles.thumbActive}` : styles.thumb,
+    compact ? styles.thumbCompact : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const labelClass = isActive
     ? `${styles.thumbLabel} ${styles.thumbLabelActive}`
     : styles.thumbLabel;
@@ -105,7 +113,7 @@ export function MaterialPreviewThumb({
       ) : (
         <div className={styles.previewPlaceholder} />
       )}
-      <p className={labelClass}>{material.name}</p>
+      {!compact ? <p className={labelClass}>{material.name}</p> : null}
     </div>
   );
 }

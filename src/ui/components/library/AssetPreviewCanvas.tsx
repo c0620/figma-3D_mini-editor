@@ -79,15 +79,23 @@ function PreviewMesh({ kind }: { kind: PrimitiveKind }) {
   }
 }
 
-export function AssetPreviewCanvas({ kind }: { kind: PrimitiveKind }) {
+export function AssetPreviewCanvas({
+  kind,
+  className,
+}: {
+  kind: PrimitiveKind;
+  className?: string;
+}) {
+  const rootClass = [styles.root, className].filter(Boolean).join(" ");
+
   return (
-    <div className={styles.root}>
+    <div className={rootClass}>
       <Canvas
         camera={{ position: [2.2, 1.6, 2.2], fov: 42 }}
         gl={{ antialias: true, alpha: true }}
         dpr={[1, 2]}
       >
-        <color attach="background" args={["#1a1a1a"]} />
+        <color attach="background" args={["#222222"]} />
         <ambientLight intensity={0.45} />
         <directionalLight position={[4, 6, 5]} intensity={1.1} />
         <PreviewMesh kind={kind} />

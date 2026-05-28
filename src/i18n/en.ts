@@ -129,6 +129,12 @@ const en = {
   "notify.error.export": "Failed to export scene",
   "notify.error.generic": "An error occurred",
 
+  // --- Export success ---
+  "export.success.title": "Success!",
+  "export.success.body":
+    "Export finished. You can continue working on the project,\nstart a new one,\nor close the plugin",
+  "export.success.cta": "Back to project",
+
   // --- Screens ---
   "screen.start.title": "3D Scene Editor",
   "screen.start.newScene": "New scene",

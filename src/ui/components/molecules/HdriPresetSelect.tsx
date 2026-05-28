@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useI18n, usePreview } from "@/app/ApplicationKernelContext";
 import { HDRI_PRESETS } from "@/lights/hdriPresets";
 import type { HdriPresetId } from "@/types/scene";
+import { usePanelCompact } from "../organisms/PanelScene";
 import graphStyles from "../atoms/SceneGraph.module.css";
 import styles from "./CameraTypeSelect.module.css";
 import hdriStyles from "./HdriPresetSelect.module.css";
@@ -61,10 +62,11 @@ export function HdriPresetSelect({
   disabled?: boolean;
 }) {
   const { t } = useI18n();
+  const compact = usePanelCompact();
 
   return (
     <div
-      className={styles.list}
+      className={compact ? `${styles.list} ${styles.listCompact}` : styles.list}
       role="listbox"
       aria-label={t("light.hdriPreset.title")}
     >
@@ -72,6 +74,7 @@ export function HdriPresetSelect({
         const selected = value === preset.id;
         const optionClass = [
           styles.option,
+          compact ? styles.optionCompact : "",
           selected ? styles.optionActive : styles.optionIdle,
         ]
           .filter(Boolean)
@@ -83,12 +86,15 @@ export function HdriPresetSelect({
             type="button"
             role="option"
             aria-selected={selected}
+            aria-label={t(preset.labelKey)}
             className={optionClass}
             disabled={disabled}
             onClick={() => onChange(preset.id)}
           >
             <HdriPresetIcon presetId={preset.id} active={selected} />
-            <span className={styles.label}>{t(preset.labelKey)}</span>
+            {!compact ? (
+              <span className={styles.label}>{t(preset.labelKey)}</span>
+            ) : null}
           </button>
         );
       })}

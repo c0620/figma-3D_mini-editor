@@ -1,8 +1,26 @@
-import { BoxGeometry } from "three";
-import { describe, expect, it } from "vitest";
+import { BoxGeometry, type WebGLRenderer } from "three";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { SceneEncoder } from "./sceneEncoder";
+import { createOffscreenRenderer } from "../render/createOffscreenRenderer";
 import { buildThreeSceneFromDomain } from "../render/domainSceneBuilder";
+
+vi.mock("../render/createOffscreenRenderer", () => ({
+  createOffscreenRenderer: vi.fn(() => ({
+    setSize: vi.fn(),
+    dispose: vi.fn(),
+    initTexture: vi.fn(),
+  })) as unknown as () => WebGLRenderer,
+}));
+
+beforeAll(() => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    fillStyle: "",
+    fillRect: vi.fn(),
+    drawImage: vi.fn(),
+    putImageData: vi.fn(),
+  } as unknown as CanvasRenderingContext2D);
+});
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
 import { withDefaultAmbientLight } from "../lights/lightDefaults";
 import {
@@ -66,14 +84,20 @@ function createTestScene(): Scene {
 describe("buildThreeSceneFromDomain", () => {
   it("builds a three scene with mesh and ambient light", async () => {
     const scene = createTestScene();
-    const built = await buildThreeSceneFromDomain(scene, {
-      includeCamera: true,
-    });
+    const offscreenRenderer = createOffscreenRenderer();
+    try {
+      const built = await buildThreeSceneFromDomain(scene, {
+        includeCamera: true,
+        renderRenderer: offscreenRenderer,
+      });
 
-    expect(built.root.children.length).toBeGreaterThanOrEqual(2);
+      expect(built.root.children.length).toBeGreaterThanOrEqual(2);
 
-    built.dispose();
-    threeAssetRegistry.clear();
+      built.dispose();
+    } finally {
+      offscreenRenderer.dispose();
+      threeAssetRegistry.clear();
+    }
   });
 });
 

@@ -55,6 +55,12 @@
   filter: grayscale(1) brightness(0.72);
 }
 
+.rowCompact {
+  justify-content: center;
+  padding: 4px;
+  gap: 0;
+}
+
 .label {
   flex: 1;
   min-width: 0;

@@ -11,7 +11,7 @@ import type {
   RestoredLinkedScene,
   VariablesChangedMessage,
 } from "./figmaMessages";
-import { FigmaAPI } from "./figmaApi";
+import { EXPORT_RENDER_FRAME_TIMEOUT_MS, FigmaAPI } from "./figmaApi";
 
 export interface CreateRenderFrameParams {
   name: string;
@@ -70,14 +70,17 @@ export class FigmaHandler {
   }
 
   async createRenderFrame(params: CreateRenderFrameParams): Promise<string> {
-    const response = await this.api.request<ExportRenderFrameResponse>({
-      type: "export-render-frame",
-      name: params.name,
-      width: params.width,
-      height: params.height,
-      pngBytes: Array.from(params.pngBytes),
-      linked: params.linked,
-    });
+    const response = await this.api.request<ExportRenderFrameResponse>(
+      {
+        type: "export-render-frame",
+        name: params.name,
+        width: params.width,
+        height: params.height,
+        pngBytes: Array.from(params.pngBytes),
+        linked: params.linked,
+      },
+      { timeoutMs: EXPORT_RENDER_FRAME_TIMEOUT_MS }
+    );
 
     return response.frameId;
   }

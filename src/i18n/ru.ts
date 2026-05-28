@@ -29,7 +29,8 @@ const ru: TranslationBundle = {
   "texture.action.loadFigma": "Загрузить из фрейма Figma",
   "texture.action.delete": "Удалить текстуру",
   "texture.notify.saveFailed": "Не удалось скачать текстуру",
-  "texture.notify.noLinkedFrame": "Выберите на холсте фрейм со связанным рендером",
+  "texture.notify.noLinkedFrame":
+    "Выберите на холсте фрейм со связанным рендером",
   "texture.notify.figmaExportPending": "Экспорт во фрейм Figma пока недоступен",
   "texture.notify.figmaImportPending": "Импорт из фрейма Figma пока недоступен",
   "texture.notify.figmaImportFailed": "Не удалось загрузить текстуру из Figma",
@@ -126,6 +127,12 @@ const ru: TranslationBundle = {
   "notify.error.export": "Не удалось экспортировать сцену",
   "notify.error.generic": "Произошла ошибка",
 
+  // --- Export success ---
+  "export.success.title": "Успех!",
+  "export.success.body":
+    "Экспорт завершён. Можете продолжить работу с проектом,\nначать новый\nили закрыть плагин",
+  "export.success.cta": "К проекту",
+
   // --- Screens ---
   "screen.start.title": "Редактор 3D-сцен",
   "screen.start.newScene": "Новая сцена",
@@ -201,7 +208,8 @@ const ru: TranslationBundle = {
   "help.section.interface.title": "Интерфейс плагина",
   "help.section.interface.body":
     "Рабочая область состоит из 3D-вьюпорта, боковых панелей и панелей инструментов. Дерево сцены показывает все объекты; панель параметров отображает свойства выбранного элемента.",
-  "help.section.interface.intro": "Верхняя панель отвечает за всю сцену сразу. Здесь можно:",
+  "help.section.interface.intro":
+    "Верхняя панель отвечает за всю сцену сразу. Здесь можно:",
   "help.section.interface.action1": "Очистить сцену",
   "help.section.interface.action2": "Изменить цвет фона",
   "help.section.interface.action3": "Включить или выключить тени",
@@ -229,7 +237,8 @@ const ru: TranslationBundle = {
   "help.section.toolMeshes.title": "Меши",
   "help.section.toolMeshes.body":
     "Импортируйте модели GLB, FBX или OBJ с устройства или из библиотеки ассетов. Выберите меш в дереве сцены или вьюпорте, чтобы редактировать трансформ, видимость и материалы.",
-  "help.section.toolMeshes.item1": "Перемещение, поворот и масштаб инструментами gizmo (G / R / S)",
+  "help.section.toolMeshes.item1":
+    "Перемещение, поворот и масштаб инструментами gizmo (G / R / S)",
   "help.section.toolMeshes.item2":
     "Настройка цвета, metalness и roughness материала в панели параметров",
   "help.section.toolTextures.title": "Текстуры",
@@ -243,7 +252,8 @@ const ru: TranslationBundle = {
     "Переключайте перспективу и ортографию. Используйте пресеты ракурса, FOV, соотношение сторон и zoom. Aspect влияет на разрешение экспорта.",
 
   "help.section.shortcuts.title": "Горячие клавиши",
-  "help.section.shortcuts.intro": "Сочетания для трансформации и редактирования во вьюпорте:",
+  "help.section.shortcuts.intro":
+    "Сочетания для трансформации и редактирования во вьюпорте:",
 
   // --- Common ---
   "common.undo": "Отменить",

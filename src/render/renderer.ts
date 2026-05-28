@@ -1,10 +1,16 @@
 import type { Scene } from "../types/scene";
 import type { RenderOptions, RenderResult } from "../types/render";
 import {
+  ACESFilmicToneMapping,
+  Color,
+  SRGBColorSpace,
+  WebGLRenderer,
+} from "three";
+import {
   buildThreeSceneFromDomain,
   createRenderCameraFromDomainState,
 } from "./domainSceneBuilder";
-import { Color, WebGLRenderer } from "three";
+import { prepareTexturesForRenderer } from "./prepareRendererTextures";
 
 export class Renderer {
   async renderScene(
@@ -13,9 +19,6 @@ export class Renderer {
     options: RenderOptions
   ): Promise<RenderResult> {
     const startedAt = performance.now();
-    const built = await buildThreeSceneFromDomain(scene, {
-      includeCamera: false,
-    });
 
     const renderer = new WebGLRenderer({
       canvas,
@@ -25,6 +28,16 @@ export class Renderer {
     });
     renderer.setSize(options.width, options.height, false);
     renderer.setPixelRatio(1);
+    renderer.toneMapping = ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1;
+    renderer.outputColorSpace = SRGBColorSpace;
+
+    const built = await buildThreeSceneFromDomain(scene, {
+      includeCamera: false,
+      renderRenderer: renderer,
+    });
+
+    prepareTexturesForRenderer(built.root, renderer);
 
     if (options.transparentBackground) {
       renderer.setClearColor(0x000000, 0);
