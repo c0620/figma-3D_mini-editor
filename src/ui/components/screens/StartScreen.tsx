@@ -9,10 +9,8 @@ export default function StartScreen() {
     <div className="page page_start">
       <PluginTools />
       <div>
-        <h1 className="titleStart" style={{ marginBottom: "var(--margin-s)" }}>
-          3D: мини-редактор
-        </h1>
-        <div className="textStart">
+        <h1 className="titleStart">3D: мини-редактор</h1>
+        <div className="textStart" style={{ marginBottom: "var(--margin-xl)" }}>
           Переносите собственные или готовые модели, <br /> создавайте и
           редактируйте рендеры прямо в Figma
         </div>

@@ -10,10 +10,12 @@ import type {
   FigmaExportOptions,
   SceneExportOptions,
 } from "../types/export";
+import type { ImportPreviewData, PreparedImport } from "../types/import";
 import { NotificationService } from "../store/notificationService";
 import { SceneAnalyzer } from "../render/sceneAnalyzer";
 import { RenderService } from "../render/renderService";
 import { AssetCatalogService } from "../library/assetCatalogService";
+import { ImportPreviewService } from "./importPreviewService";
 import { SceneImportExportService } from "./sceneImportExportService";
 import type { SceneImportResources } from "./sceneImportExportService";
 import { TextureFigmaService } from "./textureFigmaService";
@@ -31,6 +33,10 @@ export class SceneTransferFacade {
   analyzer: SceneAnalyzer;
   notifications: NotificationService;
   assetCatalog: AssetCatalogService;
+  importPreview: ImportPreviewService;
+
+  private preparedImport: PreparedImport | null = null;
+  private preparedPreviewUrl: string | null = null;
 
   constructor(
     sceneIo: SceneImportExportService,
@@ -39,7 +45,8 @@ export class SceneTransferFacade {
     renderService: RenderService,
     analyzer: SceneAnalyzer,
     notifications: NotificationService,
-    assetCatalog: AssetCatalogService
+    assetCatalog: AssetCatalogService,
+    importPreview: ImportPreviewService
   ) {
     this.sceneIo = sceneIo;
     this.textureFigma = textureFigma;
@@ -48,7 +55,86 @@ export class SceneTransferFacade {
     this.analyzer = analyzer;
     this.notifications = notifications;
     this.assetCatalog = assetCatalog;
+    this.importPreview = importPreview;
   }
+
+  readonly clearPreparedImport = (): void => {
+    if (this.preparedPreviewUrl) {
+      URL.revokeObjectURL(this.preparedPreviewUrl);
+      this.preparedPreviewUrl = null;
+    }
+    this.preparedImport = null;
+  };
+
+  readonly prepareDeviceImportPreview = async (
+    type: SceneFileType,
+    input: ArrayBuffer | File,
+    resources?: SceneImportResources,
+    fileName?: string
+  ): Promise<ImportPreviewData> => {
+    this.clearPreparedImport();
+
+    const buffer = input instanceof File ? await input.arrayBuffer() : input;
+    const name =
+      fileName ?? (input instanceof File ? input.name : `scene.${type.toLowerCase()}`);
+
+    const { preview, prepared } = await this.importPreview.prepareFromDevice(
+      type,
+      buffer,
+      resources,
+      name
+    );
+
+    this.preparedImport = prepared;
+    this.preparedPreviewUrl = preview.previewUrl;
+    return preview;
+  };
+
+  readonly prepareFigmaImportPreview = async (
+    frame: LinkedSelectionSummary
+  ): Promise<ImportPreviewData> => {
+    if (!isFigmaPlugin()) {
+      throw new Error("Импорт из Figma доступен только внутри плагина Figma");
+    }
+
+    this.clearPreparedImport();
+
+    const { preview, prepared } =
+      await this.importPreview.prepareFromFigma(frame);
+
+    this.preparedImport = prepared;
+    this.preparedPreviewUrl = preview.previewUrl;
+    return preview;
+  };
+
+  readonly commitPreparedImport = async (): Promise<void> => {
+    const prepared = this.preparedImport;
+    if (!prepared) {
+      throw new Error("Нет подготовленной сцены для импорта");
+    }
+
+    try {
+      this.sceneIo.scene.load(prepared.scene);
+
+      if (prepared.kind === "figma") {
+        this.sceneIo.scene.patchCamera(
+          normalizeCameraState(prepared.restored.camera)
+        );
+        useSessionStore.getState().setProjectName(prepared.restored.projectName);
+      } else {
+        const baseName = prepared.fileName.replace(/\.[^.]+$/, "");
+        useSessionStore.getState().setProjectName(baseName);
+      }
+
+      this.notifications.pushSuccess("Сцена импортирована");
+      this.clearPreparedImport();
+    } catch (error) {
+      const reason =
+        error instanceof Error ? error.message : "Неизвестная ошибка импорта";
+      this.notifications.pushError("Не удалось импортировать сцену", reason);
+      throw error;
+    }
+  };
 
   readonly exportSceneToFigmaLinked = async (
     options: FigmaExportOptions

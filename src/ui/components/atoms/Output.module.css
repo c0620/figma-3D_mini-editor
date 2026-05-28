@@ -1,0 +1,7 @@
+.textBlock {
+  background-color: var(--interactive-color-interactive-background-primary);
+  padding: var(--margin-l);
+  border-radius: var(--border-radius-m);
+  display: flex;
+  gap: var(--margin-l);
+}

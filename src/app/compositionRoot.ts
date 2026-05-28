@@ -24,6 +24,7 @@ import { SceneEncoder } from "../io/sceneEncoder";
 import { SceneImportExportService } from "../io/sceneImportExportService";
 import { SceneNamingService } from "../io/sceneNamingService";
 import { ScenePersistenceService } from "../io/scenePersistenceService";
+import { ImportPreviewService } from "../io/importPreviewService";
 import { SceneTransferFacade } from "../io/sceneTransferFacade";
 import { TextureFigmaService } from "../io/textureFigmaService";
 import { AssetCatalogService } from "../library/assetCatalogService";
@@ -150,6 +151,11 @@ export function buildKernel(): AppKernel {
   );
   const persistence = new ScenePersistenceService(figmaHandler, naming);
   const assetCatalog = new AssetCatalogService(sceneStorage);
+  const importPreview = new ImportPreviewService(
+    encoder,
+    renderer,
+    persistence
+  );
   const transfer = new SceneTransferFacade(
     sceneIo,
     textureFigma,
@@ -157,7 +163,8 @@ export function buildKernel(): AppKernel {
     renderService,
     analyzer,
     notifications,
-    assetCatalog
+    assetCatalog,
+    importPreview
   );
 
   // --- UX services ---

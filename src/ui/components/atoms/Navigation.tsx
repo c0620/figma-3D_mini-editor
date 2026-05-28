@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { NavLinkButton, OptionButton } from "./Button";
 import type { PanelMode } from "../organisms/PanelScene";
+import styles from "@/ui/components/atoms/Navigation.module.css";
 import arrowL from "@/assets/images/icons/descriptive/arrowL.svg";
 import arrowR from "@/assets/images/icons/descriptive/arrowR.svg";
 
@@ -43,9 +44,9 @@ export function PanelModeToggle({
 
 export function NavTitle({ title, to }: { title: string; to: string }) {
   return (
-    <div>
+    <div className={styles.navTitle}>
       <NavLinkButton to={to} />
-      {title}
+      <h1 className={styles.navTitleText}>{title}</h1>
     </div>
   );
 }

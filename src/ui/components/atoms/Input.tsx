@@ -5,27 +5,10 @@ import {
   type KeyboardEvent,
 } from "react";
 
-import type { SceneFileType } from "@/io/sceneTransferFacade";
-import type { SceneImportResources } from "@/io/sceneTransferFacade";
-import type { LinkedSelectionSummary } from "@/figma/figmaMessages";
-import { useSessionStore } from "@/store/sessionStore";
 import type { InputField } from "../molecules/EditorInput";
+import { useSessionStore } from "@/store/sessionStore";
 
-const MODEL_EXT: Record<string, SceneFileType> = {
-  obj: "OBJ",
-  fbx: "FBX",
-  glb: "GLB",
-};
-
-const TEXTURE_EXT = /\.(png|jpe?g|webp|tga|bmp)$/i;
-
-/** Промежуточный ввод: "0.", ".5", "-", "" */
 const DECIMAL_DRAFT = /^-?(\d*\.?\d*|\.\d*)?$/;
-
-function fileExtension(name: string): string {
-  const idx = name.lastIndexOf(".");
-  return idx >= 0 ? name.slice(idx + 1).toLowerCase() : "";
-}
 
 function isCompleteNumber(text: string): boolean {
   if (text === "" || text === "-" || text === "." || text === "-.")
@@ -246,90 +229,7 @@ export function SliderCentered() {
   return <div>c slider</div>;
 }
 
-export function PreviewIcon() {}
-
 export function PreviewColor() {}
 
-export function FileInput({
-  onUpload,
-  error = null,
-  success = true,
-}: {
-  onUpload: (
-    type: SceneFileType,
-    file: File,
-    resources?: SceneImportResources
-  ) => void | Promise<void>;
-  error?: string | null;
-  success?: boolean;
-}) {
-  void error;
-  void success;
-
-  const handleFileChange = async (
-    event: ChangeEvent<HTMLInputElement>
-  ): Promise<void> => {
-    const list = event.target.files;
-    if (!list?.length) return;
-
-    const files = Array.from(list);
-    const modelFile = files.find((f) => MODEL_EXT[fileExtension(f.name)]);
-    if (!modelFile) return;
-
-    const type = MODEL_EXT[fileExtension(modelFile.name)]!;
-    const mtlFile = files.find((f) => fileExtension(f.name) === "mtl");
-
-    let resources: SceneImportResources | undefined;
-    if (
-      type === "OBJ" &&
-      (mtlFile || files.some((f) => TEXTURE_EXT.test(f.name)))
-    ) {
-      resources = { textureFiles: {} };
-      if (mtlFile) resources.mtlText = await mtlFile.text();
-      for (const f of files) {
-        if (TEXTURE_EXT.test(f.name)) {
-          resources.textureFiles![f.name] = await f.arrayBuffer();
-        }
-      }
-    }
-
-    await onUpload(type, modelFile, resources);
-  };
-
-  return (
-    <label>
-      <input type="file" multiple onChange={handleFileChange} />
-    </label>
-  );
-}
-
-export function FigmaInput({
-  selectedFrame = null,
-  error = null,
-  loading = false,
-}: {
-  selectedFrame?: LinkedSelectionSummary | null;
-  error?: string | null;
-  loading?: boolean;
-}) {
-  if (error) {
-    return <div>{error}</div>;
-  }
-
-  if (loading) {
-    return <div>Загрузка связанного рендера...</div>;
-  }
-
-  if (selectedFrame) {
-    return (
-      <div>
-        <p>Выбран фрейм: {selectedFrame.frameName}</p>
-        <p>Проект: {selectedFrame.projectName}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div>Выберите на canvas фрейм со связанным рендером</div>
-  );
-}
+export { FileInput } from "../molecules/import/FileInput";
+export { FigmaInput } from "../molecules/import/FigmaInput";

@@ -1,0 +1,35 @@
+.navLinkButton {
+  height: var(--button-size-button-main-max-height);
+  width: var(--button-size-button-main-max-height);
+  background-color: var(--common-color-common-black);
+  border-radius: var(--border-radius-s);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.actionButtonDis {
+  background-color: var(--interactive-color-interactive-background-tertiary);
+  color: var(--interactive-color-interactive-text-secondary);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 36px;
+  border-radius: var(--border-radius-m);
+  height: var(--button-size-button-main-max-height);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.actionButton {
+  background-color: var(--common-color-common-accent);
+  color: var(--common-color-common-white);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 36px;
+  border-radius: var(--border-radius-m);
+  height: var(--button-size-button-main-max-height);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

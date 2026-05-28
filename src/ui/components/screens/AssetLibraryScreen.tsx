@@ -1,7 +1,9 @@
+import { NavTitle } from "../atoms/Navigation";
+
 export default function AssetLibraryScreen() {
   return (
     <div className="page">
-      <h1>Asset Library</h1>
+      <NavTitle title="Библиотека ассетов" to={"/"} />
     </div>
   );
 }

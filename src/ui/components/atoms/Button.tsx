@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
+import styles from "./Button.module.css";
+import arrowL from "@/assets/images/icons/descriptive/arrowL.svg";
 
 export function MainButton({
   text,
@@ -29,9 +31,8 @@ export function ActionButton({
 }) {
   return (
     <div
+      className={disabled ? styles.actionButtonDis : styles.actionButton}
       style={{
-        backgroundColor: "black",
-        opacity: disabled ? 0.4 : 1,
         pointerEvents: disabled ? "none" : "auto",
       }}
       onClick={disabled ? undefined : onClick}
@@ -43,9 +44,9 @@ export function ActionButton({
 
 export function NavLinkButton({ to }: { to: string }) {
   return (
-    <div>
-      <Link to={to}>arrow</Link>
-    </div>
+    <Link className={styles.navLinkButton} to={to}>
+      <img src={arrowL}></img>
+    </Link>
   );
 }
 
@@ -118,7 +119,10 @@ export function ToolButton({
         backgroundColor: "black",
         width: "40px",
         height: "40px",
-        padding: "0px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexShrink: 0,
       }}
     >
       <img src={src} style={{ width: "20px", height: "20px" }} />

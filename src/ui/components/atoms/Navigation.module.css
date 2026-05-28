@@ -1,0 +1,9 @@
+.navTitle {
+  display: flex;
+  justify-content: space-between;
+}
+
+.navTitleText {
+  width: 100%;
+  text-align: center;
+}

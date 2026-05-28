@@ -41,6 +41,7 @@ import type { CameraPatch } from "@/store/sceneStore";
 import type { CameraEditingHandler } from "@/handlers/cameraEditingHandler";
 import { sceneCameraEntityId } from "@/store/sceneEntityList";
 import { SceneTransformGizmo } from "./SceneTransformGizmo";
+import styles from "./SceneViewport.module.css";
 
 const ZOOM_EPSILON = 1e-4;
 const DEFAULT_VIEWPORT_CLEAR_COLOR = 0x111111;
@@ -365,12 +366,7 @@ function SceneCameraSync({ state }: { state: CameraState }) {
       | ThreePerspectiveCamera
       | ThreeOrthographicCamera;
 
-    applyCameraProjection(
-      threeCamera,
-      state,
-      size.width,
-      size.height
-    );
+    applyCameraProjection(threeCamera, state, size.width, size.height);
 
     if (!controls) return;
 
@@ -525,14 +521,15 @@ export function SceneCanvas() {
   const meshes = useSceneStore((s) => s.scene?.meshes);
   const camera = useSceneStore((s) => s.scene?.camera);
   const sceneId = useSceneStore((s) => s.scene?.id);
-  const backgroundColor =
-    useSceneStore((s) => s.scene?.environment.backgroundColor ?? null);
+  const backgroundColor = useSceneStore(
+    (s) => s.scene?.environment.backgroundColor ?? null
+  );
   const activeId = useSessionStore((s) => s.activeObjectId);
 
   if (!meshes || !camera || !sceneId) return null;
 
   return (
-    <div className="canvas" style={{ width: "100%", height: "100%" }}>
+    <div className={styles.canvas}>
       <Canvas>
         <SceneBackground color={backgroundColor} />
         <SceneCameraRig state={camera} sceneId={sceneId} activeId={activeId} />
