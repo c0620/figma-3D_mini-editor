@@ -4,6 +4,7 @@ import type { PanelMode } from "../organisms/PanelScene";
 import styles from "@/ui/components/atoms/Navigation.module.css";
 import arrowL from "@/assets/images/icons/descriptive/arrowL.svg";
 import arrowR from "@/assets/images/icons/descriptive/arrowR.svg";
+import closeX from "@/assets/images/icons/descriptive/closeX.svg";
 
 export function PanelModeToggle({
   mode,
@@ -12,8 +13,8 @@ export function PanelModeToggle({
   mode: PanelMode;
   setMode: Dispatch<SetStateAction<PanelMode>>;
 }) {
-  var action: PanelMode;
-  var arrow: string;
+  let action: PanelMode;
+  let arrow: string;
   switch (mode) {
     case "openL":
       action = "closeL";
@@ -30,14 +31,16 @@ export function PanelModeToggle({
     case "closeR":
       action = "openR";
       arrow = arrowL;
+      break;
   }
   return (
     <button
-      onClick={() => {
-        mode == "openL" || mode == "openR" ? setMode(action) : setMode(action);
-      }}
+      type="button"
+      className="panel-collapse-btn"
+      onClick={() => setMode(action)}
+      aria-label="Toggle panel"
     >
-      <img src={arrow} />
+      <img src={arrow} alt="" />
     </button>
   );
 }
@@ -48,6 +51,34 @@ export function NavTitle({ title, to }: { title: string; to: string }) {
       <NavLinkButton to={to} />
       <h1 className={styles.navTitleText}>{title}</h1>
     </div>
+  );
+}
+
+export function NavModalHeader({
+  title,
+  titleId,
+  onClose,
+}: {
+  title: string;
+  titleId?: string;
+  onClose: () => void;
+}) {
+  return (
+    <header className={styles.modalHeader}>
+      <h2 id={titleId} className={styles.modalTitle}>
+        {title}
+      </h2>
+      <div className={styles.modalHeaderActions}>
+        <button
+          type="button"
+          className={styles.modalClose}
+          onClick={onClose}
+          aria-label="Close"
+        >
+          <img src={closeX} alt="" />
+        </button>
+      </div>
+    </header>
   );
 }
 
@@ -63,10 +94,19 @@ export function NavModal({
   onClose: () => void;
 }) {
   return (
-    <div>
-      <p>{title}</p>{" "}
-      <OptionButton onClick={switchMode} text={switchText}></OptionButton>
-      <img onClick={onClose}></img>
-    </div>
+    <header className={styles.modalHeader}>
+      <h2 className={styles.modalTitle}>{title}</h2>
+      <div className={styles.modalHeaderActions}>
+        <OptionButton onClick={switchMode} text={switchText} />
+        <button
+          type="button"
+          className={styles.modalClose}
+          onClick={onClose}
+          aria-label="Close"
+        >
+          <img src={closeX} alt="" />
+        </button>
+      </div>
+    </header>
   );
 }

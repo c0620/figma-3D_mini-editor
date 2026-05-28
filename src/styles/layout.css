@@ -5,7 +5,7 @@ html {
   height: 100%;
   margin: 0 auto;
   border: 1px grey solid;
-  border-radius: 30px;
+  /* border-radius: 30px; */
 }
 
 body {
@@ -50,4 +50,17 @@ body {
 .page_fill {
   width: 100%;
   height: 100%;
+}
+
+/* Extend layer into body padding gutter only (not past body border) */
+
+.page--start .background-start,
+.page--editor .page_fill {
+  position: absolute;
+  top: calc(-1 * var(--padding-outer, 40px));
+  right: calc(-1 * var(--padding-outer, 40px));
+  bottom: calc(-1 * var(--padding-outer, 40px));
+  left: calc(-1 * var(--padding-outer, 40px));
+  width: auto;
+  height: auto;
 }

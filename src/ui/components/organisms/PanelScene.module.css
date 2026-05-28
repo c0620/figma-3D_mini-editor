@@ -1,0 +1,17 @@
+.editingHeading {
+  margin: 0;
+  /* font-size: 14px;
+  font-weight: 500; */
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.editingName {
+  color: var(--common-color-common-text);
+  font-weight: 600;
+}
+
+.lockedNotice {
+  opacity: 0.85;
+  font-size: 13px;
+  color: var(--interactive-color-interactive-text-tertiary);
+}

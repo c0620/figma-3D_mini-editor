@@ -194,6 +194,87 @@ async function handleRestoreLinkedScene(msg: {
   });
 }
 
+function rgbaChannelToByte(channel: number): number {
+  return Math.round(Math.min(255, Math.max(0, channel * 255)));
+}
+
+function rgbaToHex(color: RGB): string {
+  const r = rgbaChannelToByte(color.r);
+  const g = rgbaChannelToByte(color.g);
+  const b = rgbaChannelToByte(color.b);
+  return (
+    "#" +
+    r.toString(16).padStart(2, "0") +
+    g.toString(16).padStart(2, "0") +
+    b.toString(16).padStart(2, "0")
+  );
+}
+
+async function resolveColorVariableHex(variableId: string): Promise<string> {
+  const variable = await figma.variables.getVariableByIdAsync(variableId);
+  if (!variable || variable.resolvedType !== "COLOR") {
+    throw new Error("Переменная не найдена или не является цветом");
+  }
+
+  const collection = await figma.variables.getVariableCollectionByIdAsync(
+    variable.variableCollectionId
+  );
+  if (!collection) {
+    throw new Error("Коллекция переменных не найдена");
+  }
+
+  const modeId = collection.defaultModeId;
+  const value = variable.valuesByMode[modeId];
+  if (!value || typeof value !== "object" || !("r" in value)) {
+    throw new Error("Значение цвета не задано для текущего режима");
+  }
+
+  return rgbaToHex(value as RGB);
+}
+
+async function handleListColorVariables(msg: {
+  requestId: string;
+}): Promise<void> {
+  const variables = await figma.variables.getLocalVariablesAsync("COLOR");
+  const collectionNames = new Map<string, string>();
+  const summaries: {
+    id: string;
+    name: string;
+    collectionName: string;
+  }[] = [];
+
+  for (const variable of variables) {
+    let collectionName = collectionNames.get(variable.variableCollectionId);
+    if (!collectionName) {
+      const collection = await figma.variables.getVariableCollectionByIdAsync(
+        variable.variableCollectionId
+      );
+      collectionName = collection?.name ?? "Collection";
+      collectionNames.set(variable.variableCollectionId, collectionName);
+    }
+
+    summaries.push({
+      id: variable.id,
+      name: variable.name,
+      collectionName,
+    });
+  }
+
+  respond(msg.requestId, true, { variables: summaries });
+}
+
+async function handleResolveColorVariable(msg: {
+  requestId: string;
+  variableId: string;
+}): Promise<void> {
+  const hex = await resolveColorVariableHex(msg.variableId);
+  respond(msg.requestId, true, { hex });
+}
+
+function pushVariablesChanged(): void {
+  figma.ui.postMessage({ type: "variables-changed" });
+}
+
 try {
   const uiOptions = { height: 900, title: "", width: 1600 };
   switch (figma.editorType) {
@@ -214,6 +295,12 @@ try {
               break;
             case "restore-linked-scene":
               await handleRestoreLinkedScene(msg);
+              break;
+            case "list-color-variables":
+              await handleListColorVariables(msg);
+              break;
+            case "resolve-color-variable":
+              await handleResolveColorVariable(msg);
               break;
             case "cancel":
               figma.closePlugin();
@@ -236,6 +323,11 @@ try {
       };
 
       figma.on("selectionchange", pushLinkedSelectionUpdate);
+      (
+        figma.variables as unknown as {
+          on(event: "change", handler: () => void): void;
+        }
+      ).on("change", pushVariablesChanged);
       break;
   }
 

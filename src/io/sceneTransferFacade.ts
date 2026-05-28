@@ -316,4 +316,19 @@ export class SceneTransferFacade {
     const data = input instanceof File ? await input.arrayBuffer() : input;
     await this.sceneIo.importFromDevice(type, data, resources);
   };
+
+  readonly loadLibraryAsset = async (
+    assetId: string,
+    projectName: string
+  ): Promise<void> => {
+    try {
+      await this.assetCatalog.loadAssetToScene(assetId, projectName);
+      this.notifications.pushSuccess("Сцена импортирована");
+    } catch (error) {
+      const reason =
+        error instanceof Error ? error.message : "Неизвестная ошибка импорта";
+      this.notifications.pushError("Не удалось импортировать сцену", reason);
+      throw error;
+    }
+  };
 }

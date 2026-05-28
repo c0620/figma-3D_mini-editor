@@ -1,0 +1,211 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--utils-color-modal-fade);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--margin-l);
+  box-sizing: border-box;
+}
+
+.modal {
+  width: min(100%, var(--window-size-modal-width));
+  height: min(100%, var(--window-size-modal-height));
+  max-height: min(100%, var(--window-size-modal-height));
+  overflow: hidden;
+  background: var(--interactive-color-interactive-background-primary);
+  border-radius: var(--border-radius-m);
+  border: var(--border-weight) solid var(--utils-color-edge);
+  padding: var(--margin-l);
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+  box-sizing: border-box;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: var(--margin-m);
+}
+
+.sidebar {
+  flex: 0 0 260px;
+  padding: var(--margin-m);
+  background: var(--interactive-color-interactive-background-secondary);
+  border-radius: var(--border-radius-s);
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-l);
+  flex-shrink: 0;
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-s);
+}
+
+.navGroupTitle {
+  margin: 0;
+  font-family: "NT Somic", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--common-color-common-text);
+}
+
+.navList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navLink {
+  display: block;
+  width: 100%;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font-family: "NT Somic", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--interactive-color-interactive-text-secondary);
+  cursor: pointer;
+}
+
+.navLink:hover,
+.navLinkActive {
+  color: var(--common-color-common-text);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: var(--margin-s);
+}
+
+.section {
+  scroll-margin-top: var(--margin-m);
+  margin-bottom: var(--margin-xl);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.groupTitle {
+  margin: 0 0 var(--margin-l);
+  font-family: "NT Somic", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--common-color-common-text);
+}
+
+.sectionTitle {
+  margin: 0 0 var(--margin-m);
+  font-family: "NT Somic", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--common-color-common-text);
+}
+
+.bodyText {
+  margin: 0 0 var(--margin-m);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.introText {
+  margin: 0 0 var(--margin-s);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.featureList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-s);
+}
+
+.featureRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--margin-s);
+}
+
+.featureIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.featureText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.shortcutList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+}
+
+.shortcutRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--margin-m);
+}
+
+.shortcutCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.shortcutName {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--common-color-common-text);
+}
+
+.shortcutDesc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.shortcutKeys {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: var(--border-radius-s);
+  background: var(--interactive-color-interactive-background-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--common-color-common-text);
+}

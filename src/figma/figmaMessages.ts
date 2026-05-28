@@ -70,3 +70,21 @@ export interface LinkedSelectionUpdateMessage {
   type: "linked-selection-update";
   frame: LinkedSelectionSummary | null;
 }
+
+export interface FigmaColorVariableSummary {
+  id: string;
+  name: string;
+  collectionName: string;
+}
+
+export interface ListColorVariablesResponse {
+  variables: FigmaColorVariableSummary[];
+}
+
+export interface ResolveColorVariableResponse {
+  hex: string;
+}
+
+export interface VariablesChangedMessage {
+  type: "variables-changed";
+}

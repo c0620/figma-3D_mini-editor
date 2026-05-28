@@ -2,7 +2,7 @@ import { downloadBlob, sanitizeExportBasename } from "../lib/download";
 import type { Scene } from "../types/scene";
 import { TextureSlot } from "../types/scene";
 
-const TEXTURE_SLOTS = [
+export const TEXTURE_SLOT_ORDER = [
   TextureSlot.BaseColor,
   TextureSlot.Normal,
   TextureSlot.Roughness,
@@ -32,7 +32,7 @@ export async function downloadSceneTextures(
       material.id
     );
 
-    for (const slot of TEXTURE_SLOTS) {
+    for (const slot of TEXTURE_SLOT_ORDER) {
       const stored = material.textures[slot];
       if (!stored?.url || seen.has(stored.url)) continue;
 

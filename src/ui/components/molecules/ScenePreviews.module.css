@@ -1,0 +1,111 @@
+.thumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--margin-s);
+  padding: 8px 10px;
+  border-radius: var(--border-radius-s);
+  cursor: pointer;
+  background: var(--interactive-color-interactive-background-primary);
+  border: 1px solid transparent;
+}
+
+.thumb:hover {
+  border-color: var(--utils-color-edge);
+}
+
+.thumbActive {
+  border-color: var(--common-color-common-accent);
+  background: color-mix(
+    in srgb,
+    var(--common-color-common-accent) 10%,
+    var(--interactive-color-interactive-background-primary)
+  );
+}
+
+.thumbActive::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--common-color-common-accent);
+  border-radius: 2px;
+}
+
+.previewCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--utils-color-edge);
+}
+
+.previewPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--interactive-color-interactive-background-secondary);
+  flex-shrink: 0;
+}
+
+.thumbLabel {
+  margin: 0;
+  font-size: 13px;
+  color: var(--interactive-color-interactive-text-secondary);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thumbLabelActive {
+  color: var(--common-color-common-text);
+}
+
+.hdriThumb {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--margin-s);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: var(--border-radius-s);
+  border: 1px solid transparent;
+  background: var(--interactive-color-interactive-background-primary);
+  min-width: 0;
+}
+
+.hdriThumbActive {
+  border-color: var(--common-color-common-accent);
+  background: color-mix(
+    in srgb,
+    var(--common-color-common-accent) 10%,
+    var(--interactive-color-interactive-background-primary)
+  );
+}
+
+.hdriImg {
+  width: 72px;
+  height: 44px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.hdriThumb .previewPlaceholder {
+  width: 72px;
+  height: 44px;
+  border-radius: 6px;
+}
+
+.hdriThumb .thumbLabel {
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.25;
+}
+

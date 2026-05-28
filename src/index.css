@@ -4,7 +4,10 @@
 @import url("./styles/margins.css");
 @import url("./styles/fonts.css");
 @import url("./styles/panels.css");
+@import url("./styles/editor.css");
 @import url("./styles/layout.css");
+@import url("./styles/start.css");
+@import url("./styles/library.css");
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -85,6 +88,7 @@ button:focus-visible {
   cursor: pointer;
 }
 
+/* On start page, offset is in start.css (.page--start) */
 .background-start {
   width: 100%;
   height: 100%;

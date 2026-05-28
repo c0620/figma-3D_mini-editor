@@ -109,6 +109,7 @@ export interface AppHandlers {
 
 export interface AppKernel {
   handlers: AppHandlers;
+  figma: FigmaHandler;
   undo(): void;
   redo(): void;
   listSceneEntities(): SceneEntitySummary[];
@@ -247,6 +248,7 @@ export function buildKernel(): AppKernel {
 
   return {
     handlers,
+    figma: figmaHandler,
     undo: () => bus.undo(),
     redo: () => bus.redo(),
     listSceneEntities: () =>

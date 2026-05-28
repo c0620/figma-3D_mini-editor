@@ -1,0 +1,98 @@
+.row {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  gap: var(--margin-s);
+  padding: 6px 8px;
+  border-radius: var(--border-radius-s);
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: var(--interactive-color-interactive-background-primary);
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.row:hover {
+  border-color: var(--utils-color-edge);
+}
+
+.rowActive {
+  border-color: var(--common-color-common-accent);
+  background: color-mix(
+    in srgb,
+    var(--common-color-common-accent) 10%,
+    var(--interactive-color-interactive-background-primary)
+  );
+}
+
+.rowActive::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--common-color-common-accent);
+  border-radius: 2px;
+}
+
+.rowCompact {
+  align-items: center;
+  min-height: var(--inputs-size-input-height);
+  padding: 0 8px;
+}
+
+.rowActiveLayout {
+  align-items: flex-start;
+}
+
+.preview {
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--utils-color-edge);
+}
+
+.previewCompact {
+  width: 24px;
+  height: 24px;
+}
+
+.previewLarge {
+  width: 72px;
+  height: 72px;
+}
+
+.meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.metaCompact {
+  justify-content: center;
+  padding-top: 0;
+  gap: 0;
+}
+
+.label {
+  margin: 0;
+  font-size: 13px;
+  color: var(--interactive-color-interactive-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labelActive {
+  color: var(--common-color-common-text);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}

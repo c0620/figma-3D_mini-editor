@@ -1,0 +1,71 @@
+.panelBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  gap: var(--margin-s);
+}
+
+.paramStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-s);
+}
+
+.paramRow2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--margin-s);
+  min-width: 0;
+}
+
+.paramRow2 > * {
+  min-width: 0;
+}
+
+.materialList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.textureList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.presetRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--margin-s);
+}
+
+.fovBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fovLabel {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.hdriRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--margin-s);
+  align-items: stretch;
+}

@@ -1,4 +1,5 @@
 import type { ImportPreviewData } from "@/types/import";
+import { formatTextureCountRu } from "@/lib/sceneMeta";
 import { PreviewIcon } from "../../atoms/Output";
 import poly from "@/assets/images/icons/descriptive/poly.svg";
 import size from "@/assets/images/icons/descriptive/sceneSize.svg";
@@ -9,16 +10,6 @@ function formatFileSize(bytes?: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatTextureCount(count: number): string {
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${count} текстура`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) {
-    return `${count} текстуры`;
-  }
-  return `${count} текстур`;
 }
 
 function DeviceImportPreviewPanel({ preview }: { preview: ImportPreviewData }) {
@@ -40,7 +31,7 @@ function DeviceImportPreviewPanel({ preview }: { preview: ImportPreviewData }) {
           </div>
           <div className="import-preview-panel__stat t1">
             <PreviewIcon src={texturesP} />{" "}
-            {formatTextureCount(sceneMeta.textureCount)}
+            {formatTextureCountRu(sceneMeta.textureCount)}
           </div>
         </div>
       </div>

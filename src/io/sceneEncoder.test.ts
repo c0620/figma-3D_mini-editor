@@ -24,6 +24,7 @@ function createTestScene(): Scene {
   const material: Material = {
     id: materialId,
     baseColor: "#ff5533",
+    baseColorVariableId: null,
     roughness: 0.5,
     metalness: 0.1,
     emissive: "#000000",

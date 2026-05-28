@@ -1,0 +1,105 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-s);
+  padding: 6px 8px;
+  border-radius: var(--border-radius-s);
+  cursor: pointer;
+  color: var(--interactive-color-interactive-text-secondary);
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.row:hover {
+  background: color-mix(
+    in srgb,
+    var(--interactive-color-interactive-background-secondary) 50%,
+    transparent
+  );
+}
+
+.rowActive .label {
+  color: var(--common-color-common-white);
+}
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: var(--border-radius-s);
+}
+
+.rowActive .iconWrap {
+  background: var(--common-color-common-accent);
+}
+
+.rowIdle .iconWrap {
+  background: var(--interactive-color-interactive-background-primary);
+}
+
+.rowDimmed .iconWrap {
+  background: transparent;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.rowDimmed .icon {
+  opacity: 0.85;
+  filter: grayscale(1) brightness(0.72);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.actionBtnOnBlack {
+  background: var(--common-color-common-black);
+}
+
+.actionBtnOnBlack:hover {
+  background: var(--interactive-color-interactive-background-secondary);
+}
+
+.actionBtnOnPrimary {
+  background: var(--interactive-color-interactive-background-primary);
+}
+
+.actionBtnOnPrimary:hover {
+  background: var(--interactive-color-interactive-background-secondary);
+}
+
+.actionBtn img {
+  width: 16px;
+  height: 16px;
+  display: block;
+}

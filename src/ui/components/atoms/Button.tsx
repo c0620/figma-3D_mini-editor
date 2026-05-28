@@ -24,14 +24,19 @@ export function ActionButton({
   onClick,
   text,
   disabled = false,
+  className,
 }: {
   onClick: () => void;
   text: string;
   disabled?: boolean;
+  className?: string;
 }) {
+  const base = disabled ? styles.actionButtonDis : styles.actionButton;
+  const classes = [base, className].filter(Boolean).join(" ");
+
   return (
     <div
-      className={disabled ? styles.actionButtonDis : styles.actionButton}
+      className={classes}
       style={{
         pointerEvents: disabled ? "none" : "auto",
       }}
@@ -45,7 +50,7 @@ export function ActionButton({
 export function NavLinkButton({ to }: { to: string }) {
   return (
     <Link className={styles.navLinkButton} to={to}>
-      <img src={arrowL}></img>
+      <img src={arrowL} alt="" />
     </Link>
   );
 }
@@ -57,7 +62,11 @@ export function OptionButton({
   text: string;
   onClick: () => void;
 }) {
-  return <div onClick={onClick}>{text}</div>;
+  return (
+    <button type="button" className={styles.optionButton} onClick={onClick}>
+      {text}
+    </button>
+  );
 }
 
 export function ActionButtonIcon({
@@ -69,11 +78,51 @@ export function ActionButtonIcon({
 }) {
   return (
     <div onClick={onClick} style={{ backgroundColor: "black" }}>
-      <img src={src}></img>
+      <img src={src} alt="" />
     </div>
   );
 }
 
+export function EditorIconButton({
+  src,
+  onClick,
+  active = false,
+  disabled = false,
+  title,
+  children,
+  className,
+}: {
+  src: string;
+  onClick?: () => void;
+  active?: boolean;
+  disabled?: boolean;
+  title?: string;
+  children?: ReactNode;
+  className?: string;
+}) {
+  const classes = [
+    styles.editorIconButton,
+    active ? styles.editorIconButtonActive : "",
+    className ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <button
+      type="button"
+      className={classes}
+      title={title}
+      disabled={disabled}
+      onClick={disabled ? undefined : onClick}
+    >
+      <img src={src} alt="" />
+      {children}
+    </button>
+  );
+}
+
+/** @deprecated Use EditorIconButton with a real icon src */
 export function PanelButton({
   url,
   onClick,
@@ -90,18 +139,36 @@ export function PanelButton({
   label?: string;
 }) {
   return (
-    <div
-      onClick={disabled || !onClick ? undefined : onClick}
-      style={{
-        opacity: disabled ? 0.4 : 1,
-        pointerEvents: disabled ? "none" : "auto",
-        backgroundColor: active ? "rgba(255, 89, 0, 0.35)" : undefined,
-        outline: active ? "1px solid #ff5900" : undefined,
-      }}
+    <EditorIconButton
+      src={url}
+      onClick={onClick}
+      active={active}
+      disabled={disabled}
+      title={label ?? url}
     >
-      <img src={url} /> {label ?? url}
       {children}
-    </div>
+    </EditorIconButton>
+  );
+}
+
+export function PanelCtaButton({
+  text,
+  onClick,
+  disabled = false,
+}: {
+  text: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={styles.panelCtaButton}
+      disabled={disabled}
+      onClick={disabled ? undefined : onClick}
+    >
+      {text}
+    </button>
   );
 }
 
@@ -113,19 +180,8 @@ export function ToolButton({
   onClick: () => void;
 }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        backgroundColor: "black",
-        width: "40px",
-        height: "40px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexShrink: 0,
-      }}
-    >
-      <img src={src} style={{ width: "20px", height: "20px" }} />
+    <button type="button" className={styles.editorIconButton} onClick={onClick}>
+      <img src={src} alt="" />
     </button>
   );
 }

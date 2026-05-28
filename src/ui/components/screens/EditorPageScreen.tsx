@@ -1,4 +1,3 @@
-import { NavLink } from "react-router";
 import { SceneCanvas } from "../viewport/SceneViewport";
 import { PanelScene } from "../organisms/PanelScene";
 import { PanelMesh, PanelLight, PanelCamera } from "../organisms/PanelParams";
@@ -6,7 +5,6 @@ import { useActiveObject } from "@/app/ApplicationKernelContext";
 import { PanelBottom, PanelTop } from "../organisms/EditorTools";
 import { ExportModal } from "./ExportModal";
 import { useState } from "react";
-
 export default function EditorPage() {
   const activeObj = useActiveObject();
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -24,36 +22,21 @@ export default function EditorPage() {
   }
 
   return (
-    <div className="page">
+    <div className="page page--editor">
       {isExportOpen && (
         <ExportModal onClose={() => setIsExportOpen(false)} />
       )}
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          top: "10%",
-          display: "flex",
-          justifyContent: "space-between",
-          userSelect: "none",
-        }}
-      >
+      <div className="editor-overlay editor-side-panels">
         <PanelScene activeObj={activeObj} />
         {panelParams}
       </div>
-      <div
-        style={{
-          position: "absolute",
-          height: "100%",
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <PanelTop openModal={(val: boolean) => setIsExportOpen(val)} />
-        <PanelBottom activeObj={activeObj} />
+      <div className="editor-overlay editor-toolbar-layer">
+        <div className="editor-toolbar-row editor-toolbar-row--top">
+          <PanelTop openModal={(val: boolean) => setIsExportOpen(val)} />
+        </div>
+        <div className="editor-toolbar-row editor-toolbar-row--bottom">
+          <PanelBottom activeObj={activeObj} />
+        </div>
       </div>
       <div className="page_fill">
         <SceneCanvas />

@@ -1,0 +1,14 @@
+/* Start page: decorative circles bleed into body padding only */
+
+.page--start .background-start {
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.page--start .circle-blur,
+.page--start .circle-bg,
+.page--start .circle-middle,
+.page--start .circle-top {
+  top: var(--padding-outer, 40px);
+}

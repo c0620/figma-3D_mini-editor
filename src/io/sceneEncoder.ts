@@ -98,6 +98,7 @@ function buildDomainMaterialFromThree(
   return {
     id: m.uuid,
     baseColor: hasBaseMap ? "#ffffff" : color,
+    baseColorVariableId: null,
     roughness: typeof std.roughness === "number" ? std.roughness : 1,
     metalness: typeof std.metalness === "number" ? std.metalness : 0,
     emissive: hasEmissiveMap ? "#ffffff" : emissive,
@@ -325,6 +326,15 @@ async function threeObjectToDomainScene(
   const cache = beginSceneImport();
   const threeRoot = "scene" in root ? root.scene : root;
   return buildDomainSceneFromThreeRoot(threeRoot, cache, options);
+}
+
+export async function importThreeObjectAsScene(
+  root: Object3D,
+  options?: { syncTextures?: boolean }
+): Promise<Scene> {
+  return threeObjectToDomainScene(root, {
+    syncTextures: options?.syncTextures ?? true,
+  });
 }
 
 export class SceneEncoder {

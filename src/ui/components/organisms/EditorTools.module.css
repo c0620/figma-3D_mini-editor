@@ -1,0 +1,45 @@
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-m);
+}
+
+.topBarMain {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-m);
+  min-width: 0;
+}
+
+.topBarProjectName {
+  flex: 1;
+  min-width: 120px;
+  max-width: none;
+}
+
+.topBarExportShell {
+  padding: 3px;
+  border-radius: var(--border-radius-m);
+  background: linear-gradient(
+    135deg,
+    var(--common-color-common-accent),
+    var(--common-color-common-accent-light),
+    #ffc800
+  );
+  box-shadow: 0 0 20px
+    color-mix(in srgb, var(--common-color-common-accent) 45%, transparent);
+}
+
+.topBarExportShell .tools-container {
+  border: none;
+}
+
+.bgControl {
+  position: relative;
+}
+
+.bottomBar {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-m);
+}

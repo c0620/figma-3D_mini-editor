@@ -1,0 +1,13 @@
+.root {
+  width: 100%;
+  height: 140px;
+  border-radius: var(--border-radius-s);
+  overflow: hidden;
+  background: var(--interactive-color-interactive-background-toggle);
+}
+
+.root canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}

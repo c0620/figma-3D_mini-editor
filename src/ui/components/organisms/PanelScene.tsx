@@ -1,4 +1,6 @@
-import { ActionButton } from "../atoms/Button";
+import { PanelCtaButton } from "../atoms/Button";
+import { useSessionStore } from "@/store/sessionStore";
+import panelStyles from "./PanelScene.module.css";
 import { ScrollPanel } from "../atoms/Output";
 import { GraphItem } from "../atoms/SceneGraph";
 import { PanelModeToggle } from "../atoms/Navigation";
@@ -92,12 +94,13 @@ function buildAxisFields(
     axisIdx: 0 | 1 | 2,
     value: number
   ) => void,
-  locked: boolean
+  locked: boolean,
+  highlight: boolean
 ): InputField[] {
   return ([0, 1, 2] as const).map((i) => ({
     label: AXIS[i],
     value: tuple[i],
-    isActive: false,
+    isActive: highlight,
     onChange: (value: number) => {
       if (!locked) onAxis(key, i, value);
     },
@@ -107,6 +110,7 @@ function buildAxisFields(
 export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
   const [mode, setMode] = useState<PanelMode>("openL");
   const scene = useSceneStore((s) => s.scene);
+  const transformToolMode = useSessionStore((s) => s.transformToolMode);
   const { t } = useI18n();
 
   const sceneItems = useSceneEntities();
@@ -181,7 +185,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
     return (
       <>
         {locked ? (
-          <div style={{ opacity: 0.85, marginBottom: 8 }}>
+          <div className={panelStyles.lockedNotice}>
             {t("panel.scene.locked")}
           </div>
         ) : null}
@@ -194,7 +198,8 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
               dim,
               transform[dim],
               applyTransformDimension,
-              locked
+              locked,
+              dim === "scale" && transformToolMode === "scale"
             )}
             sliderType={null}
           />
@@ -208,6 +213,9 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
               {
                 value: activeZoom(scene.camera),
                 isActive: false,
+                min: 0.01,
+                max: scene.camera.type === "Perspective" ? 10 : 100,
+                step: 0.01,
                 onChange: (value) => {
                   if (!locked) {
                     cameraHandler.execute(
@@ -231,21 +239,25 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
     applyTransformDimension,
     t,
     cameraHandler,
+    transformToolMode,
   ]);
 
+  const isOpen = mode === "openL" || mode === "openR";
+
   return (
-    <div
-      style={{
-        background: "rgba(71, 71, 71, 0.33)",
-        backdropFilter: "blur(24px)",
-        userSelect: "none",
-        zIndex: 10,
-      }}
-    >
-      <div>
+    <div className="panel-container panel-container--editor">
+      <div className="panel-header">
         <PanelModeToggle mode={mode} setMode={setMode} />
-        <PanelSceneModeContext.Provider value={mode}>
-          <ScrollPanel>
+        {isOpen ? (
+          <div className="panel-header-title">
+            <h2>{t("panel.scene.title")}</h2>
+          </div>
+        ) : null}
+      </div>
+      <h3>{t("panel.scene.content")}</h3>
+      <PanelSceneModeContext.Provider value={mode}>
+        <div className="panel-scene-body">
+          <ScrollPanel variant="graph" fillAvailable={activeObj == null}>
             {sceneItems.map((item) => (
               <GraphItem
                 key={item.id}
@@ -259,30 +271,36 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
               />
             ))}
           </ScrollPanel>
-          <ActionButton
-            onClick={() => console.log("add obj")}
-            text={t("panel.scene.addObject")}
-          />
-          <ActionButton
-            onClick={() => {
-              const id = randomUUID();
-              lightAddition.execute(createDefaultLight({ id }));
-              selection.execute({ id });
-            }}
-            text={t("panel.scene.addLight")}
-          />
-
-          {activeObj && (
-            <div>
-              <div>
-                {t("panel.scene.editing")}{" "}
-                <strong>{activeEntityEditorHeading(activeObj, t)}</strong>{" "}
-              </div>
-              <div>{transformPanels}</div>
+          {isOpen ? (
+            <div className="panel-actions">
+              <PanelCtaButton
+                text={t("panel.scene.addObject")}
+                onClick={() => console.log("add obj")}
+              />
+              <PanelCtaButton
+                text={t("panel.scene.addLight")}
+                onClick={() => {
+                  const id = randomUUID();
+                  lightAddition.execute(createDefaultLight({ id }));
+                  selection.execute({ id });
+                }}
+              />
             </div>
-          )}
-        </PanelSceneModeContext.Provider>
-      </div>
+          ) : null}
+
+          {activeObj && isOpen ? (
+            <div className="panel-section">
+              <h3 className={panelStyles.editingHeading}>
+                {t("panel.scene.editing")}{" "}
+                <span className={panelStyles.editingName}>
+                  {activeEntityEditorHeading(activeObj, t)}
+                </span>
+              </h3>
+              {transformPanels}
+            </div>
+          ) : null}
+        </div>
+      </PanelSceneModeContext.Provider>
     </div>
   );
 }

@@ -1,8 +1,10 @@
-import { Mesh } from "three";
-
 import { base64ToUint8Array } from "@/lib/base64";
+import {
+  countScenePolygons,
+  countSceneTextures,
+  formatSceneDimensions,
+} from "@/lib/sceneMeta";
 import type { LinkedSelectionSummary } from "@/figma/figmaMessages";
-import { buildThreeSceneFromDomain } from "@/render/domainSceneBuilder";
 import { Renderer } from "@/render/renderer";
 import type {
   ImportFrameMeta,
@@ -116,16 +118,10 @@ export class ImportPreviewService {
     scene: Scene,
     fileSizeBytes?: number
   ): Promise<ImportSceneMeta> {
-    const textureUrls = new Set<string>();
-    for (const material of Object.values(scene.materials)) {
-      for (const slot of Object.values(TextureSlot)) {
-        const tex = material.textures[slot];
-        if (tex?.url) textureUrls.add(tex.url);
-      }
-    }
+    const textureCount = countSceneTextures(scene);
 
     const warnings: string[] = [];
-    if (textureUrls.size === 0) {
+    if (textureCount === 0) {
       warnings.push("текстуры не найдены");
     }
 
@@ -135,63 +131,13 @@ export class ImportPreviewService {
         : "Готово к импорту";
 
     return {
-      polygonCount: await this.countPolygons(scene),
+      polygonCount: await countScenePolygons(scene),
       meshCount: scene.meshes.length,
-      textureCount: textureUrls.size,
-      dimensions: this.formatDimensions(scene),
+      textureCount,
+      dimensions: formatSceneDimensions(scene),
       fileSizeBytes,
       statusMessage,
     };
-  }
-
-  private async countPolygons(scene: Scene): Promise<number> {
-    let count = 0;
-    const built = await buildThreeSceneFromDomain(scene, {
-      includeCamera: false,
-    });
-    try {
-      built.root.traverse((obj) => {
-        if (!(obj instanceof Mesh)) return;
-        const geometry = obj.geometry;
-        if (!geometry) return;
-        if (geometry.index) {
-          count += geometry.index.count / 3;
-        } else if (geometry.attributes.position) {
-          count += geometry.attributes.position.count / 3;
-        }
-      });
-    } finally {
-      built.dispose();
-    }
-
-    return Math.round(count) || scene.meshes.length;
-  }
-
-  private formatDimensions(scene: Scene): string {
-    if (!scene.meshes.length) return "—";
-
-    let minX = Infinity;
-    let minY = Infinity;
-    let minZ = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-    let maxZ = -Infinity;
-
-    for (const mesh of scene.meshes) {
-      const [x, y, z] = mesh.transform.position;
-      const [sx, sy, sz] = mesh.transform.scale;
-      minX = Math.min(minX, x - sx / 2);
-      minY = Math.min(minY, y - sy / 2);
-      minZ = Math.min(minZ, z - sz / 2);
-      maxX = Math.max(maxX, x + sx / 2);
-      maxY = Math.max(maxY, y + sy / 2);
-      maxZ = Math.max(maxZ, z + sz / 2);
-    }
-
-    const w = Math.max(1, Math.round(maxX - minX));
-    const h = Math.max(1, Math.round(maxY - minY));
-    const d = Math.max(1, Math.round(maxZ - minZ));
-    return `${w}×${h}×${d}`;
   }
 
   private extractTextures(scene: Scene): ImportTexturePreview[] {

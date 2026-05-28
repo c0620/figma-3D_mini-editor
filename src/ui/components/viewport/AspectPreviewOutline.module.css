@@ -1,0 +1,13 @@
+.root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.outline {
+  position: absolute;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 2px solid var(--common-color-common-accent);
+}

@@ -41,6 +41,8 @@ import type { CameraPatch } from "@/store/sceneStore";
 import type { CameraEditingHandler } from "@/handlers/cameraEditingHandler";
 import { sceneCameraEntityId } from "@/store/sceneEntityList";
 import { SceneTransformGizmo } from "./SceneTransformGizmo";
+import { AspectPreviewOutline } from "./AspectPreviewOutline";
+import { computeAspectRect } from "@/camera/aspectPreviewRect";
 import styles from "./SceneViewport.module.css";
 
 const ZOOM_EPSILON = 1e-4;
@@ -162,7 +164,7 @@ function SceneObjectMesh({
             attach={materialIDs.length === 1 ? "material" : `material-${index}`}
           />
         ))}
-        {isActive && <Outlines thickness={3} color="orange" />}
+        {isActive && <Outlines thickness={3} color="#ff5900" />}
       </mesh>
       <SceneTransformGizmo
         entityId={object.id}
@@ -173,28 +175,6 @@ function SceneObjectMesh({
       />
     </>
   );
-}
-
-function computeAspectRect(
-  canvasWidth: number,
-  canvasHeight: number,
-  targetAspect: number
-): { x: number; y: number; width: number; height: number } {
-  let width = canvasWidth;
-  let height = canvasHeight;
-
-  if (width / height > targetAspect) {
-    width = height * targetAspect;
-  } else {
-    height = width / targetAspect;
-  }
-
-  return {
-    x: (canvasWidth - width) / 2,
-    y: (canvasHeight - height) / 2,
-    width,
-    height,
-  };
 }
 
 function getProjectionAspect(
@@ -542,6 +522,10 @@ export function SceneCanvas() {
           />
         ))}
       </Canvas>
+      <AspectPreviewOutline
+        enabled={camera.aspectPreviewEnabled}
+        aspect={camera.aspect}
+      />
     </div>
   );
 }

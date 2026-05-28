@@ -1,11 +1,15 @@
 import type {
   ExportRenderFrameResponse,
   FindLinkedFramesResponse,
+  FigmaColorVariableSummary,
   GetLinkedSelectionResponse,
   LinkedRenderPayload,
   LinkedSelectionSummary,
   LinkedSelectionUpdateMessage,
+  ListColorVariablesResponse,
+  ResolveColorVariableResponse,
   RestoredLinkedScene,
+  VariablesChangedMessage,
 } from "./figmaMessages";
 import { FigmaAPI } from "./figmaApi";
 
@@ -104,5 +108,32 @@ export class FigmaHandler {
       type: "restore-linked-scene",
       frameId,
     });
+  }
+
+  async listColorVariables(): Promise<FigmaColorVariableSummary[]> {
+    const response = await this.api.request<ListColorVariablesResponse>({
+      type: "list-color-variables",
+    });
+    return response.variables;
+  }
+
+  async resolveColorVariable(variableId: string): Promise<string> {
+    const response = await this.api.request<ResolveColorVariableResponse>({
+      type: "resolve-color-variable",
+      variableId,
+    });
+    return response.hex;
+  }
+
+  subscribeVariableChanges(listener: () => void): () => void {
+    const handler = (event: MessageEvent) => {
+      const msg = event.data?.pluginMessage as VariablesChangedMessage | undefined;
+      if (msg?.type === "variables-changed") {
+        listener();
+      }
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
   }
 }

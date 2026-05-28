@@ -6,7 +6,7 @@ import { PluginTools } from "../organisms/PluginTools";
 
 export default function StartScreen() {
   return (
-    <div className="page page_start">
+    <div className="page page_start page--start">
       <PluginTools />
       <div>
         <h1 className="titleStart">3D: мини-редактор</h1>

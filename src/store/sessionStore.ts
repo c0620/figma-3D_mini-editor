@@ -20,6 +20,7 @@ export interface UiState {
   locale: Locale;
   colorTheme: ColorTheme;
   windowSize: windowSize;
+  helpModalOpen: boolean;
 }
 
 interface UiActions {
@@ -33,6 +34,7 @@ interface UiActions {
   setColorTheme(theme: ColorTheme): void;
   toggleColorTheme(): void;
   toggleWindowSize(): void;
+  setHelpModalOpen: (open: boolean) => void;
 }
 
 export const useSessionStore = create<UiState & UiActions>((set) => ({
@@ -45,6 +47,7 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
   locale: "ru" as Locale,
   colorTheme: "Dark",
   windowSize: "Large",
+  helpModalOpen: false,
 
   setActiveObjectId: (id) => set({ activeObjectId: id }),
   setTransformToolMode: (mode) => {
@@ -76,4 +79,5 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
     })),
   toggleWindowSize: () =>
     set((s) => ({ windowSize: s.windowSize === "Large" ? "Small" : "Large" })),
+  setHelpModalOpen: (open) => set({ helpModalOpen: open }),
 }));

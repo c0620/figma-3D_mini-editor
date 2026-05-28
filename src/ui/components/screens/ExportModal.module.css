@@ -1,0 +1,223 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--utils-color-modal-fade);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--margin-l);
+  box-sizing: border-box;
+}
+
+.modal {
+  width: min(100%, var(--window-size-modal-width));
+  height: min(100%, var(--window-size-modal-height));
+  max-height: min(100%, var(--window-size-modal-height));
+  overflow: hidden;
+  background: var(--interactive-color-interactive-background-primary);
+  border-radius: var(--border-radius-m);
+  border: var(--border-weight) solid var(--utils-color-edge);
+  padding: var(--margin-l);
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+  box-sizing: border-box;
+}
+
+.modalScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+}
+
+.modal[data-export-type="figma"] .sceneBar {
+  display: none;
+}
+
+.infoBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--margin-s);
+  padding: var(--margin-m);
+  background: var(--interactive-color-interactive-background-secondary);
+  border-radius: var(--border-radius-s);
+}
+
+.infoBanner img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+.infoBanner p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.sceneBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-s);
+}
+
+.sceneBarTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.sceneStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--margin-m);
+}
+
+.sceneStatItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.sceneStatIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: block;
+  opacity: 0.85;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--margin-m);
+  min-height: 0;
+}
+
+@media (max-width: 640px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+  padding: var(--margin-m);
+  background: var(--interactive-color-interactive-background-secondary);
+  border-radius: var(--border-radius-s);
+  min-width: 0;
+}
+
+.columnTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.columnBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+}
+
+.settingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--margin-m);
+}
+
+.settingCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.settingTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--common-color-common-text);
+}
+
+.settingHint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.isDimmed {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.resolutionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-s);
+}
+
+.resolutionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--margin-m);
+}
+
+.resolutionInputs {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.axisField {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 72px;
+  min-width: 0;
+}
+
+.axisLabel {
+  font-size: 11px;
+  color: var(--interactive-color-interactive-text-tertiary);
+  text-transform: lowercase;
+}
+
+.framesList {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 13px;
+  color: var(--common-color-common-text);
+}
+
+.framesEmpty {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.framesEmpty strong {
+  color: var(--common-color-common-text);
+  font-weight: 600;
+}
+
+.footer {
+  margin-top: auto;
+  flex-shrink: 0;
+}

@@ -7,3 +7,54 @@
   width: 100%;
   text-align: center;
 }
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--margin-m);
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-family: "NT Somic", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.2;
+  color: var(--common-color-common-text);
+}
+
+.modalHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-s);
+  flex-shrink: 0;
+}
+
+.modalClose {
+  flex-shrink: 0;
+  width: var(--button-size-button-option-height);
+  height: var(--button-size-button-option-height);
+  padding: 0;
+  border: none;
+  border-radius: var(--border-radius-s);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.modalClose:hover {
+  background: var(--interactive-color-interactive-background-secondary);
+}
+
+.modalClose img {
+  width: 16px;
+  height: 16px;
+  display: block;
+  opacity: 0.9;
+}

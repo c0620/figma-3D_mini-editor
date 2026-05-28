@@ -44,6 +44,10 @@ export function useHandlers(): AppHandlers {
   return useKernel().handlers;
 }
 
+export function useFigma() {
+  return useKernel().figma;
+}
+
 export function useHistory() {
   const { undo, redo } = useKernel();
   return { undo, redo };

@@ -3,7 +3,7 @@ import { materialPreviewCacheKey } from "@/services/previewService";
 import type { HdriPresetId } from "@/types/scene";
 import type { Material } from "@/types/scene";
 import { useEffect, useMemo, useState } from "react";
-import { ActionButton, ActionButtonIcon } from "../atoms/Button";
+import styles from "./ScenePreviews.module.css";
 
 export function HdriPreviewThumb({
   presetId,
@@ -36,43 +36,20 @@ export function HdriPreviewThumb({
     };
   }, [preview, presetId]);
 
+  const thumbClass = isActive
+    ? `${styles.hdriThumb} ${styles.hdriThumbActive}`
+    : styles.hdriThumb;
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 4,
-        cursor: "pointer",
-      }}
-      onClick={onClick}
-    >
+    <div className={thumbClass} onClick={onClick}>
       {src ? (
-        <img
-          src={src}
-          width={30}
-          height={30}
-          alt=""
-          style={{
-            display: "block",
-            objectFit: "cover",
-            ...(isActive ? { outline: "1px solid orange" } : {}),
-          }}
-        />
+        <img className={styles.hdriImg} src={src} alt="" />
       ) : (
-        <div
-          style={{
-            width: 30,
-            height: 30,
-            background: "rgba(255, 255, 255, 0.15)",
-          }}
-        />
+        <div className={styles.previewPlaceholder} />
       )}
       <p
-        style={
-          isActive
-            ? { color: "orange", margin: 0, fontSize: 12 }
-            : { color: "white", margin: 0, fontSize: 12 }
+        className={
+          isActive ? `${styles.thumbLabel} ${styles.thumbLabelActive}` : styles.thumbLabel
         }
       >
         {label}
@@ -114,58 +91,22 @@ export function MaterialPreviewThumb({
     };
   }, [preview, material, materialKey]);
 
+  const thumbClass = isActive
+    ? `${styles.thumb} ${styles.thumbActive}`
+    : styles.thumb;
+  const labelClass = isActive
+    ? `${styles.thumbLabel} ${styles.thumbLabelActive}`
+    : styles.thumbLabel;
+
   return (
-    <div
-      style={{
-        display: "flex",
-      }}
-      onClick={onClick}
-    >
-      <p style={isActive ? { color: "orange" } : { color: "white" }}>
-        {material.name}
-      </p>
+    <div className={thumbClass} onClick={onClick}>
       {src ? (
-        <img
-          src={src}
-          width={30}
-          height={30}
-          alt=""
-          style={{ display: "block", objectFit: "cover" }}
-        />
-      ) : null}
+        <img className={styles.previewCircle} src={src} alt="" />
+      ) : (
+        <div className={styles.previewPlaceholder} />
+      )}
+      <p className={labelClass}>{material.name}</p>
     </div>
   );
 }
 
-export function TexturePreviewThumb({
-  isActive,
-  name,
-  materialID: _materialID,
-  url,
-  onClick,
-}: {
-  isActive: boolean;
-  name: string;
-  materialID: string;
-  url: string;
-  onClick: () => void;
-}) {
-  return (
-    <div
-      onClick={onClick}
-      style={isActive ? { border: "1px orange solid" } : {}}
-    >
-      <img src={url} style={{ width: "40px", height: "40px" }}></img>
-      <p>{name}</p>
-      {isActive && (
-        <div style={{ display: "flex" }}>
-          <ActionButtonIcon onClick={() => console.log("click")} src="none" />
-          <ActionButtonIcon onClick={() => console.log("click")} src="none" />
-          <ActionButtonIcon onClick={() => console.log("click")} src="none" />
-          <ActionButtonIcon onClick={() => console.log("click")} src="none" />
-          <ActionButtonIcon onClick={() => console.log("click")} src="none" />
-        </div>
-      )}
-    </div>
-  );
-}

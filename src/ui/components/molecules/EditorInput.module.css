@@ -1,0 +1,80 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.labelActive {
+  color: var(--common-color-common-accent);
+}
+
+.axisRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.axisField {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.axisLabel {
+  font-size: 11px;
+  color: var(--interactive-color-interactive-text-tertiary);
+  text-transform: uppercase;
+}
+
+.collapsed {
+  display: none;
+}
+
+.controlRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.controlInput {
+  flex: 0 0 80px;
+  min-width: 0;
+}
+
+.controlInputCompact {
+  flex: 0 0 56px;
+}
+
+.controlSlider {
+  flex: 1;
+  min-width: 0;
+}
+
+.ratioFields {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.ratioField {
+  width: 56px;
+  min-width: 0;
+}
+
+.ratioSeparator {
+  color: var(--interactive-color-interactive-text-tertiary);
+  font-size: 13px;
+  line-height: 1;
+  user-select: none;
+}

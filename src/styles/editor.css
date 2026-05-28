@@ -1,0 +1,83 @@
+/* 3D viewport: bleeds into body padding, under panels */
+.page--editor .page_fill {
+  z-index: 0;
+  pointer-events: none;
+}
+
+.page--editor .page_fill > * {
+  pointer-events: auto;
+}
+
+.editor-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.editor-overlay > * {
+  pointer-events: auto;
+}
+
+.editor-side-panels {
+  position: absolute;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--margin-m);
+  user-select: none;
+  z-index: 12;
+}
+
+.editor-toolbar-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 11;
+}
+
+/* Rows span full width for layout only — clicks pass through empty areas */
+
+.editor-toolbar-layer > * {
+  pointer-events: none;
+}
+
+.editor-toolbar-layer .tools-container {
+  pointer-events: auto;
+}
+
+.editor-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-s);
+  width: fit-content;
+  max-width: 100%;
+  justify-content: center;
+}
+
+.editor-toolbar-row--top {
+  justify-content: center;
+}
+
+.editor-toolbar-row--bottom {
+  justify-content: center;
+  gap: var(--margin-m);
+}
+
+.is-active-accent {
+  color: var(--common-color-common-accent);
+}
+
+.accent-bar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--common-color-common-accent);
+  border-radius: 2px;
+}

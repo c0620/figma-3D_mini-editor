@@ -6,7 +6,15 @@ import {
 } from "react";
 
 import type { InputField } from "../molecules/EditorInput";
+import { useI18n } from "@/app/ApplicationKernelContext";
 import { useSessionStore } from "@/store/sessionStore";
+import {
+  aspectToCenteredSlider,
+  ASPECT_CENTERED_SLIDER_MAX,
+  ASPECT_CENTERED_SLIDER_MIN,
+  centeredSliderToAspect,
+} from "@/camera/aspectRatio";
+import styles from "./Input.module.css";
 
 const DECIMAL_DRAFT = /^-?(\d*\.?\d*|\.\d*)?$/;
 
@@ -55,92 +63,103 @@ export function InputVal({ field }: { field: InputField }) {
     }
   };
 
+  const inputClass = field.isActive
+    ? `${styles.valInput} ${styles.valInputActive}`
+    : styles.valInput;
+
   return (
-    <>
-      {field.label ? <label>{field.label}</label> : null}
-      <input
-        type="text"
-        step="1"
-        style={field.isActive ? { color: "orange" } : { color: "white" }}
-        onChange={handleChange}
-        onFocus={() => setFocused(true)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        value={draft}
-      />
-    </>
+    <input
+      type="text"
+      step="1"
+      className={inputClass}
+      onChange={handleChange}
+      onFocus={() => setFocused(true)}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      value={draft}
+    />
   );
 }
 
 // export function InputMultipleText() {}
 
+function decodeHexRgb(hex: string): [number, number, number] {
+  const normalized = hex.startsWith("#") ? hex.slice(1) : hex;
+  if (normalized.length < 6) return [0, 0, 0];
+  return [
+    parseInt(normalized.slice(0, 2), 16) || 0,
+    parseInt(normalized.slice(2, 4), 16) || 0,
+    parseInt(normalized.slice(4, 6), 16) || 0,
+  ];
+}
+
 export function InputColor({
   color,
   onChange,
+  layout = "panel",
 }: {
   color: string;
   onChange: (hex: string) => void;
+  layout?: "panel" | "compact";
 }) {
-  function decodeHEX(value: string, channel: "R" | "G" | "B"): number {
-    switch (channel) {
-      case "R":
-        return parseInt(value.slice(1, 3), 16);
-      case "G":
-        return parseInt(value.slice(3, 5), 16);
-      case "B":
-        return parseInt(value.slice(5), 16);
-    }
-  }
+  const { t } = useI18n();
+  const [r, g, b] = decodeHexRgb(color);
 
-  function codeHEX(value: number, channel: "R" | "G" | "B") {
-    let hex = value.toString(16);
-    hex = hex.length == 1 ? `0${hex}` : hex;
-    switch (channel) {
-      case "R":
-        return "#" + hex + color.slice(3);
-      case "G":
-        return color.slice(0, 3) + hex + color.slice(5);
-      case "B":
-        return color.slice(0, 5) + hex;
-    }
+  const handleChange = (hex: string) => {
+    onChange(hex);
+  };
+
+  if (layout === "compact") {
+    return (
+      <div className={styles.colorRow}>
+        <input
+          type="color"
+          className={`${styles.colorSwatch} ${styles.colorSwatchRound}`}
+          value={color}
+          onChange={(e) => handleChange(e.target.value)}
+        />
+        <input
+          type="text"
+          className={`${styles.valInput} ${styles.colorHex}`}
+          value={color}
+          onChange={(e) => handleChange(e.target.value)}
+        />
+      </div>
+    );
   }
 
   return (
-    <>
-      <input
-        type="color"
-        value={color}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <input
-        type="text"
-        value={color}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <div>
-        RGB:
+    <div className={styles.colorBlock}>
+      <p className={styles.colorLabel}>{t("material.baseColor")}</p>
+      <div className={styles.colorRow}>
         <input
-          type="number"
-          value={decodeHEX(color, "R")}
-          min={0}
-          onChange={(e) => onChange(codeHEX(+e.target.value, "R"))}
+          type="color"
+          className={`${styles.colorSwatch} ${styles.colorSwatchRound}`}
+          value={color}
+          onChange={(e) => handleChange(e.target.value)}
         />
         <input
-          type="number"
-          value={decodeHEX(color, "G")}
-          onChange={(e) => onChange(codeHEX(+e.target.value, "G"))}
+          type="text"
+          className={`${styles.valInput} ${styles.colorHex}`}
+          value={color}
+          onChange={(e) => handleChange(e.target.value)}
         />
-        <input
-          type="number"
-          value={decodeHEX(color, "B")}
-          onChange={(e) => onChange(codeHEX(+e.target.value, "B"))}
-        />
+        <span className={styles.colorRgbText}>
+          {t("material.baseColor.rgb")}: {r} {g} {b}
+        </span>
       </div>
-    </>
+    </div>
   );
 }
 
-export function InputProjectName() {
+export function InputProjectName({
+  className,
+  toolbar = false,
+}: {
+  className?: string;
+  toolbar?: boolean;
+}) {
+  const { t } = useI18n();
   const projectName = useSessionStore((s) => s.projectName);
   const setProjectName = useSessionStore((s) => s.setProjectName);
   const [draft, setDraft] = useState(projectName);
@@ -159,8 +178,18 @@ export function InputProjectName() {
     }
   };
 
+  const inputClass = [
+    styles.projectName,
+    toolbar ? styles.projectNameToolbar : "",
+    className ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <input
+      className={inputClass}
+      placeholder={t("input.projectName.placeholder")}
       value={draft}
       onChange={(e: ChangeEvent<HTMLInputElement>) => setDraft(e.target.value)}
       onBlur={commit}
@@ -181,12 +210,20 @@ export function Toggle({
   disabled?: boolean;
 }) {
   return (
-    <input
-      type="checkbox"
-      checked={checked}
-      disabled={disabled}
-      onChange={(e) => onChange(e.target.checked)}
-    />
+    <label
+      className={
+        disabled ? `${styles.toggle} ${styles.toggleDisabled}` : styles.toggle
+      }
+    >
+      <input
+        type="checkbox"
+        className={styles.toggleInput}
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <span className={styles.toggleTrack} aria-hidden />
+    </label>
   );
 }
 
@@ -221,12 +258,100 @@ export function SelectIcon({
 
 export function SelectColor() {}
 
-export function Slider() {
-  return <div>slider</div>;
+function resolveSliderBounds(field: InputField) {
+  const step = field.step ?? 0.01;
+  let min = field.min ?? 0;
+  let max = field.max ?? 1;
+  if (field.value < min) min = field.value;
+  if (field.value > max) max = field.value;
+  if (min === max) max = min + step;
+  return { min, max, step };
 }
 
-export function SliderCentered() {
-  return <div>c slider</div>;
+function RangeSlider({
+  field,
+  centered = false,
+  inline = false,
+}: {
+  field: InputField;
+  centered?: boolean;
+  inline?: boolean;
+}) {
+  const { min, max, step } = resolveSliderBounds(field);
+  const trackClass = [
+    centered ? styles.sliderTrackCentered : styles.sliderTrack,
+    inline ? styles.sliderTrackInline : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <div className={trackClass}>
+      <input
+        type="range"
+        className={styles.sliderInput}
+        min={min}
+        max={max}
+        step={step}
+        value={field.value}
+        onChange={(e) => field.onChange(Number(e.target.value))}
+      />
+    </div>
+  );
+}
+
+export function Slider({
+  field,
+  inline = false,
+}: {
+  field: InputField;
+  inline?: boolean;
+}) {
+  return <RangeSlider field={field} inline={inline} />;
+}
+
+export function SliderCentered({
+  field,
+  inline = false,
+}: {
+  field: InputField;
+  inline?: boolean;
+}) {
+  return <RangeSlider field={field} centered inline={inline} />;
+}
+
+export function AspectCenteredSlider({
+  aspect,
+  onChange,
+  inline = true,
+}: {
+  aspect: number;
+  onChange: (aspect: number) => void;
+  inline?: boolean;
+}) {
+  const position = aspectToCenteredSlider(aspect);
+  const trackClass = [
+    styles.sliderTrackCentered,
+    inline ? styles.sliderTrackInline : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <div className={trackClass}>
+      <input
+        type="range"
+        className={styles.sliderInput}
+        min={ASPECT_CENTERED_SLIDER_MIN}
+        max={ASPECT_CENTERED_SLIDER_MAX}
+        step={0.01}
+        value={position}
+        onChange={(e) =>
+          onChange(centeredSliderToAspect(Number(e.target.value)))
+        }
+      />
+    </div>
+  );
 }
 
 export function PreviewColor() {}

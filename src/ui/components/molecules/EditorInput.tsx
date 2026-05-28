@@ -1,11 +1,20 @@
-import { InputVal, Slider, SliderCentered } from "../atoms/Input";
+import { AspectCenteredSlider, InputVal, Slider, SliderCentered } from "../atoms/Input";
 import type { PanelMode } from "../organisms/PanelScene";
+import {
+  aspectToRatioPair,
+  ratioPairToAspect,
+} from "@/camera/aspectRatio";
+import { useMemo } from "react";
+import styles from "./EditorInput.module.css";
 
 export type InputField = {
   onChange: (value: number) => void;
   value: number;
   isActive: boolean;
   label?: string;
+  min?: number;
+  max?: number;
+  step?: number;
 };
 
 export function ObjectNumberInput({
@@ -13,38 +22,133 @@ export function ObjectNumberInput({
   fields,
   label,
   sliderType,
+  sliderLayout = "inline",
+  inputWidth = "default",
+  highlight = false,
 }: {
   mode: PanelMode;
   fields: Array<InputField>;
   label: string;
   sliderType: "default" | "centered" | null;
+  sliderLayout?: "below" | "inline";
+  inputWidth?: "default" | "compact";
+  highlight?: boolean;
 }) {
-  const inputs = fields.map((field) => <InputVal field={field} />);
-  const slider = sliderType ? (
-    sliderType === "default" ? (
-      <Slider />
-    ) : (
-      <SliderCentered />
-    )
-  ) : (
-    ""
-  );
-  if (mode == "openR" || mode == "openL") {
+  const isOpen = mode === "openR" || mode === "openL";
+  if (!isOpen) {
+    return <div className={styles.collapsed} aria-hidden />;
+  }
+
+  const labelClass = highlight
+    ? `${styles.label} ${styles.labelActive}`
+    : styles.label;
+
+  const singleField = fields.length === 1 ? fields[0] : null;
+  const inline =
+    sliderLayout === "inline" && singleField != null && sliderType != null;
+
+  const slider =
+    sliderType === "default" && singleField ? (
+      <Slider field={singleField} inline={inline} />
+    ) : sliderType === "centered" && singleField ? (
+      <SliderCentered field={singleField} inline={inline} />
+    ) : null;
+
+  const inputClass =
+    inputWidth === "compact"
+      ? `${styles.controlInput} ${styles.controlInputCompact}`
+      : styles.controlInput;
+
+  if (inline) {
     return (
-      <div>
-        {label} {inputs} {slider}
+      <div className={styles.group}>
+        <p className={labelClass}>{label}</p>
+        <div className={styles.controlRow}>
+          <div className={inputClass}>
+            <InputVal field={singleField!} />
+          </div>
+          <div className={styles.controlSlider}>{slider}</div>
+        </div>
       </div>
     );
-  } else {
-    return <div>narrow</div>;
   }
+
+  return (
+    <div className={styles.group}>
+      <p className={labelClass}>{label}</p>
+      <div className={styles.axisRow}>
+        {fields.map((field, i) => (
+          <div key={field.label ?? i} className={styles.axisField}>
+            {field.label ? (
+              <span className={styles.axisLabel}>{field.label}</span>
+            ) : null}
+            <InputVal field={field} />
+          </div>
+        ))}
+      </div>
+      {slider}
+    </div>
+  );
+}
+
+export function ObjectRatioInput({
+  mode,
+  label,
+  value,
+  onChange,
+}: {
+  mode: PanelMode;
+  label: string;
+  value: number;
+  onChange: (aspect: number) => void;
+}) {
+  const isOpen = mode === "openR" || mode === "openL";
+  const [width, height] = useMemo(() => aspectToRatioPair(value), [value]);
+
+  if (!isOpen) {
+    return <div className={styles.collapsed} aria-hidden />;
+  }
+
+  return (
+    <div className={styles.group}>
+      <p className={styles.label}>{label}</p>
+      <div className={styles.controlRow}>
+        <div className={styles.ratioFields}>
+          <div className={styles.ratioField}>
+            <InputVal
+              field={{
+                value: width,
+                isActive: false,
+                onChange: (nextWidth) =>
+                  onChange(ratioPairToAspect(nextWidth, height)),
+              }}
+            />
+          </div>
+          <span className={styles.ratioSeparator} aria-hidden>
+            |
+          </span>
+          <div className={styles.ratioField}>
+            <InputVal
+              field={{
+                value: height,
+                isActive: false,
+                onChange: (nextHeight) =>
+                  onChange(ratioPairToAspect(width, nextHeight)),
+              }}
+            />
+          </div>
+        </div>
+        <div className={styles.controlSlider}>
+          <AspectCenteredSlider aspect={value} onChange={onChange} inline />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function ObjectColorInput() {
   return <div>Object Color Input</div>;
 }
-
-export function ObjectRatioInput() {}
 
 export function MeshMaterialSelect() {}
 

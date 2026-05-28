@@ -16,6 +16,8 @@ export interface StoredTexture {
 export interface Material {
   id: string;
   baseColor: string;
+  /** Figma COLOR variable id when baseColor is driven by a variable. */
+  baseColorVariableId: string | null;
   roughness: number;
   metalness: number;
   emissive: string;

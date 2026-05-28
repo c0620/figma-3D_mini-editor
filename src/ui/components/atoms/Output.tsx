@@ -1,6 +1,8 @@
-import { useContext } from "react";
+import { useContext, type ReactNode } from "react";
 import { PanelSceneModeContext } from "../organisms/PanelScene";
 import styles from "./Output.module.css";
+
+export type ScrollPanelVariant = "graph" | "mats" | "textures";
 
 export function TextBlock({
   text,
@@ -13,13 +15,13 @@ export function TextBlock({
 }) {
   return (
     <div className={styles.textBlock}>
-      {iconSrc && <img src={iconSrc} />}
+      {iconSrc && <img src={iconSrc} alt="" />}
       <div className="t1">
         {text}{" "}
         {textListItems && (
           <ul>
             {textListItems.map((item) => (
-              <li>• {item}</li>
+              <li key={item}>• {item}</li>
             ))}
           </ul>
         )}
@@ -27,19 +29,40 @@ export function TextBlock({
     </div>
   );
 }
-export function ScrollPanel({ children }: { children: any }) {
+
+export function ScrollPanel({
+  variant,
+  children,
+  fillAvailable = false,
+}: {
+  variant: ScrollPanelVariant;
+  children: ReactNode;
+  /** When true (graph only), clip grows to fill remaining panel height */
+  fillAvailable?: boolean;
+}) {
   const mode = useContext(PanelSceneModeContext);
-  if (mode == "openL" || mode == "openR") {
-    return (
-      <div style={{ backgroundColor: "rgba(34, 34, 34, 1)" }}>
-        Open {children}
-      </div>
-    );
-  } else {
-    return <div>Close {children}</div>;
-  }
+  const isOpen = mode === "openL" || mode === "openR";
+
+  const fillClass =
+    fillAvailable && variant === "graph" && isOpen
+      ? "panel-scroll-clip--graph-fill"
+      : "";
+
+  const clipClass = isOpen
+    ? `panel-scroll-clip panel-scroll-clip--${variant} ${fillClass}`.trim()
+    : `panel-scroll-clip panel-scroll-clip--${variant} panel-scroll-clip--collapsed`;
+
+  const scrollClass = isOpen
+    ? `panel-scroll panel-scroll--${variant}`
+    : "panel-scroll panel-scroll--collapsed";
+
+  return (
+    <div className={clipClass}>
+      <div className={scrollClass}>{children}</div>
+    </div>
+  );
 }
 
 export function PreviewIcon({ src }: { src: string }) {
-  return <img src={src}></img>;
+  return <img src={src} alt="" />;
 }

@@ -32,7 +32,12 @@ export type CameraPatch = Partial<Omit<CameraState, "transform">> & {
 export type MaterialPatch = Partial<
   Pick<
     Material,
-    "baseColor" | "roughness" | "metalness" | "emissive" | "emissiveIntensity"
+    | "baseColor"
+    | "baseColorVariableId"
+    | "roughness"
+    | "metalness"
+    | "emissive"
+    | "emissiveIntensity"
   > & {
     textures?: Partial<Material["textures"]>;
   }
@@ -64,6 +69,15 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
         camera: normalizeCameraState(scene.camera),
         lights: withDefaultAmbientLight(
           scene.lights.map((light) => normalizeLight(light))
+        ),
+        materials: Object.fromEntries(
+          Object.entries(scene.materials).map(([id, material]) => [
+            id,
+            {
+              ...material,
+              baseColorVariableId: material.baseColorVariableId ?? null,
+            },
+          ])
         ),
       },
     }),

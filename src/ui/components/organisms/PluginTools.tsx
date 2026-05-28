@@ -28,7 +28,10 @@ export function PluginTools({}) {
         <ToolButton src={windowD} onClick={toggleWindowSize} />
       </div>
       <div className="tools-container">
-        <ToolButton src={help} onClick={() => console.log("")} />
+        <ToolButton
+          src={help}
+          onClick={() => useSessionStore.getState().setHelpModalOpen(true)}
+        />
       </div>
     </div>
   );

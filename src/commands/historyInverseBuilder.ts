@@ -159,6 +159,7 @@ export class HistoryInverseBuilder {
 
     const scalarKeys = [
       "baseColor",
+      "baseColorVariableId",
       "roughness",
       "metalness",
       "emissive",
@@ -170,6 +171,9 @@ export class HistoryInverseBuilder {
         switch (key) {
           case "baseColor":
             inverse.baseColor = material.baseColor;
+            break;
+          case "baseColorVariableId":
+            inverse.baseColorVariableId = material.baseColorVariableId;
             break;
           case "roughness":
             inverse.roughness = material.roughness;

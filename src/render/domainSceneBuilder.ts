@@ -190,6 +190,7 @@ export async function buildThreeSceneFromDomain(
           const fallback = await buildMeshStandardMaterialFromDomain({
             id: materialId,
             baseColor: "#cccccc",
+            baseColorVariableId: null,
             roughness: 1,
             metalness: 0,
             emissive: "#000000",

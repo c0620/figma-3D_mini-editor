@@ -28,91 +28,169 @@ import {
 } from "@/lights/spotLightPresets";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  HdriPreviewThumb,
-  MaterialPreviewThumb,
-  TexturePreviewThumb,
-} from "../molecules/ScenePreviews";
-import { ObjectNumberInput } from "../molecules/EditorInput";
-import type { PanelMode } from "./PanelScene";
+import { HdriPreviewThumb, MaterialPreviewThumb } from "../molecules/ScenePreviews";
+import { TextureSlotRow } from "../molecules/TextureSlotRow";
+import { TEXTURE_SLOT_ORDER } from "@/io/textureExportHelper";
+import { TEXTURE_SLOT_LABEL_KEYS } from "@/lib/textureSlotLabels";
+import { useTextureSlotActions } from "@/ui/hooks/useTextureSlotActions";
+import { ObjectNumberInput, ObjectRatioInput } from "../molecules/EditorInput";
+import { FigmaColorVariableSelect } from "../molecules/FigmaColorVariableSelect";
+import { FovSelect } from "../molecules/FovSelect";
 import { InputColor } from "../atoms/Input";
+import { useFigmaColorVariableSync } from "@/figma/useFigmaColorVariableSync";
 import { ActionButton } from "../atoms/Button";
 import { PanelModeToggle } from "../atoms/Navigation";
+import paramsStyles from "./PanelParams.module.css";
+import { PanelSceneModeContext, type PanelMode } from "./PanelScene";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
+
+function EditorParamsPanel({
+  mode,
+  setMode,
+  children,
+}: {
+  mode: PanelMode;
+  setMode: Dispatch<SetStateAction<PanelMode>>;
+  children: ReactNode;
+}) {
+  const { t } = useI18n();
+  const isOpen = mode === "openR" || mode === "openL";
+  return (
+    <div className="panel-container panel-container--editor">
+      <div className="panel-header">
+        <PanelModeToggle mode={mode} setMode={setMode} />
+        {isOpen ? (
+          <div className="panel-header-title">
+            <h2>{t("panel.params.title")}</h2>
+          </div>
+        ) : null}
+      </div>
+      <PanelSceneModeContext.Provider value={mode}>
+        {isOpen ? children : null}
+      </PanelSceneModeContext.Provider>
+    </div>
+  );
+}
+
+function formatMaterialSectionTitle(template: string, name: string): string {
+  return template.replace("{name}", name);
+}
 
 export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
   void mesh;
+  const { t } = useI18n();
   const materials = useActiveMeshMaterials();
   const [activeMaterialIndex, setActiveMaterialIndex] = useState(0);
   const [mode, setMode] = useState<PanelMode>("openR");
   const { materialEditing } = useHandlers();
+  useFigmaColorVariableSync();
 
   const activeMaterial = materials ? materials[activeMaterialIndex] : null;
-  const activeTextures = activeMaterial ? activeMaterial.textures : null;
-  const [activeTextureName, setActiveTextureName] = useState(
-    activeTextures
-      ? Object.entries(activeTextures).find(([, val]) => val != null)?.[0]
-      : null
+  const textureActions = useTextureSlotActions(activeMaterial);
+  const [activeTextureName, setActiveTextureName] = useState<TextureSlot | null>(
+    null
+  );
+
+  const visibleTextureSlots = useMemo(() => {
+    if (!activeMaterial) return [];
+    return TEXTURE_SLOT_ORDER.filter((slot) => activeMaterial.textures[slot]);
+  }, [activeMaterial]);
+
+  useEffect(() => {
+    if (!activeMaterial || visibleTextureSlots.length === 0) {
+      setActiveTextureName(null);
+      return;
+    }
+    if (
+      activeTextureName == null ||
+      !activeMaterial.textures[activeTextureName]
+    ) {
+      setActiveTextureName(visibleTextureSlots[0]);
+    }
+  }, [activeMaterial, activeTextureName, visibleTextureSlots]);
+
+  const textureActionLabels = useMemo(
+    () => ({
+      saveDevice: t("texture.action.saveDevice"),
+      loadDevice: t("texture.action.loadDevice"),
+      saveFigma: t("texture.action.saveFigma"),
+      loadFigma: t("texture.action.loadFigma"),
+      delete: t("texture.action.delete"),
+    }),
+    [t]
   );
 
   return (
-    <div
-      style={{
-        background: "rgba(255, 255, 255, 0.1)",
-        backdropFilter: "blur(24px)",
-        userSelect: "none",
-        zIndex: 10,
-      }}
-    >
-      <div>
-        <p>Материалы меша</p>
-        <ScrollPanel>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {materials?.map((m, id) => (
-              <MaterialPreviewThumb
-                key={m.id}
-                material={m}
-                isActive={id === activeMaterialIndex}
-                onClick={() => setActiveMaterialIndex(id)}
-              />
-            ))}
-          </div>
-        </ScrollPanel>
+    <EditorParamsPanel mode={mode} setMode={setMode}>
+      <div className={paramsStyles.panelBody}>
+        <div className="panel-section">
+          <p className={paramsStyles.sectionTitle}>
+            {t("panel.params.meshMaterials")}
+          </p>
+          <ScrollPanel variant="mats">
+            <div className={paramsStyles.materialList}>
+              {materials?.map((m, id) => (
+                <MaterialPreviewThumb
+                  key={m.id}
+                  material={m}
+                  isActive={id === activeMaterialIndex}
+                  onClick={() => setActiveMaterialIndex(id)}
+                />
+              ))}
+            </div>
+          </ScrollPanel>
+        </div>
         {activeMaterial && (
-          <>
-            <div>
-              <p>Параметры {activeMaterial.name}</p>
-              <ObjectNumberInput
-                mode={mode}
-                fields={[
-                  {
-                    onChange: (field) =>
-                      materialEditing.execute({
-                        id: activeMaterial.id,
-                        changes: { roughness: field },
-                      }),
-                    isActive: false,
-                    value: activeMaterial.roughness,
-                  },
-                ]}
-                label="Шероховатость"
-                sliderType="default"
-              />
-              <ObjectNumberInput
-                mode={mode}
-                fields={[
-                  {
-                    onChange: (field) =>
-                      materialEditing.execute({
-                        id: activeMaterial.id,
-                        changes: { metalness: field },
-                      }),
-                    isActive: false,
-                    value: activeMaterial.metalness,
-                  },
-                ]}
-                label="Блеск"
-                sliderType="default"
-              />
+          <div className={paramsStyles.paramStack}>
+            <div className="panel-section">
+              <p className={paramsStyles.sectionTitle}>
+                {formatMaterialSectionTitle(
+                  t("panel.params.materialParams"),
+                  activeMaterial.name
+                )}
+              </p>
+              <div className={paramsStyles.paramRow2}>
+                <ObjectNumberInput
+                  mode={mode}
+                  inputWidth="compact"
+                  fields={[
+                    {
+                      onChange: (field) =>
+                        materialEditing.execute({
+                          id: activeMaterial.id,
+                          changes: { roughness: field },
+                        }),
+                      isActive: false,
+                      value: activeMaterial.roughness,
+                      min: 0,
+                      max: 1,
+                      step: 0.01,
+                    },
+                  ]}
+                  label={t("material.roughness")}
+                  sliderType="default"
+                />
+                <ObjectNumberInput
+                  mode={mode}
+                  inputWidth="compact"
+                  fields={[
+                    {
+                      onChange: (field) =>
+                        materialEditing.execute({
+                          id: activeMaterial.id,
+                          changes: { metalness: field },
+                        }),
+                      isActive: false,
+                      value: activeMaterial.metalness,
+                      min: 0,
+                      max: 1,
+                      step: 0.01,
+                    },
+                  ]}
+                  label={t("material.metalness")}
+                  sliderType="default"
+                />
+              </div>
               <ObjectNumberInput
                 mode={mode}
                 fields={[
@@ -124,47 +202,106 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
                       }),
                     isActive: false,
                     value: +activeMaterial.emissiveIntensity,
+                    min: 0,
+                    max: 10000,
+                    step: 1,
                   },
                 ]}
-                label="Сила свечения"
+                label={t("material.emissiveIntensity")}
                 sliderType="default"
               />
               <InputColor
+                layout="panel"
                 color={activeMaterial.baseColor}
                 onChange={(color) =>
                   materialEditing.execute({
                     id: activeMaterial.id,
-                    changes: { baseColor: color },
+                    changes: { baseColor: color, baseColorVariableId: null },
+                  })
+                }
+              />
+              <FigmaColorVariableSelect
+                value={activeMaterial.baseColorVariableId}
+                onSelect={(variableId, hex) =>
+                  materialEditing.execute({
+                    id: activeMaterial.id,
+                    changes: {
+                      baseColorVariableId: variableId,
+                      baseColor: hex,
+                    },
+                  })
+                }
+                onClear={() =>
+                  materialEditing.execute({
+                    id: activeMaterial.id,
+                    changes: { baseColorVariableId: null },
                   })
                 }
               />
             </div>
-            <div>
-              <p>Текстуры {activeMaterial.name}</p>
-              {(Object.keys(activeMaterial.textures) as TextureSlot[]).map(
-                (key) =>
-                  activeMaterial.textures[key] && (
-                    <TexturePreviewThumb
-                      materialID={activeMaterial.id}
-                      isActive={activeTextureName === key}
-                      name={key}
-                      url={activeMaterial.textures[key]?.url}
-                      onClick={() => setActiveTextureName(key)}
-                    />
-                  )
-              )}
+            <div className="panel-section">
+              <p className={paramsStyles.sectionTitle}>
+                {formatMaterialSectionTitle(
+                  t("panel.params.materialTextures"),
+                  activeMaterial.name
+                )}
+              </p>
+              <ScrollPanel variant="textures">
+                <input
+                  ref={textureActions.fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={textureActions.onFileSelected}
+                />
+                <div className={paramsStyles.textureList}>
+                  {visibleTextureSlots.map((slot) => {
+                    const stored = activeMaterial.textures[slot];
+                    if (!stored) return null;
+                    return (
+                      <TextureSlotRow
+                        key={slot}
+                        slot={slot}
+                        url={stored.url}
+                        label={t(TEXTURE_SLOT_LABEL_KEYS[slot])}
+                        isActive={activeTextureName === slot}
+                        actionLabels={textureActionLabels}
+                        actions={{
+                          saveToDevice: textureActions.saveToDevice,
+                          openLoadFromDevice:
+                            textureActions.openLoadFromDevice,
+                          saveToFigma: textureActions.saveToFigma,
+                          loadFromFigma: textureActions.loadFromFigma,
+                          deleteSlot: (targetSlot) => {
+                            textureActions.deleteSlot(targetSlot);
+                            if (activeTextureName === targetSlot) {
+                              const next = visibleTextureSlots.find(
+                                (s) =>
+                                  s !== targetSlot &&
+                                  activeMaterial.textures[s]
+                              );
+                              setActiveTextureName(next ?? null);
+                            }
+                          },
+                        }}
+                        onSelect={() => setActiveTextureName(slot)}
+                      />
+                    );
+                  })}
+                </div>
+              </ScrollPanel>
             </div>
-          </>
+          </div>
         )}
       </div>
-    </div>
+    </EditorParamsPanel>
   );
 }
 
 export function PanelCamera(_props: { camera: CameraState }) {
   void _props;
   const camera = useSceneStore((s) => s.scene?.camera);
-  const [mode] = useState<PanelMode>("openR");
+  const [mode, setMode] = useState<PanelMode>("openR");
   const { camera: cameraHandler } = useHandlers();
   const { t } = useI18n();
 
@@ -178,22 +315,15 @@ export function PanelCamera(_props: { camera: CameraState }) {
   };
 
   return (
-    <div
-      style={{
-        background: "rgba(255, 255, 255, 0.1)",
-        backdropFilter: "blur(24px)",
-        userSelect: "none",
-        zIndex: 10,
-      }}
-    >
-      <div>
-        <p>{t("panel.scene.editing")}</p>
+    <EditorParamsPanel mode={mode} setMode={setMode}>
+      <div className="panel-section">
+        <p className={paramsStyles.sectionTitle}>{t("panel.scene.editing")}</p>
         {locked ? (
           <div style={{ opacity: 0.85, marginBottom: 8 }}>
             {t("panel.scene.locked")}
           </div>
         ) : null}
-        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+        <div className={paramsStyles.presetRow}>
           <ActionButton
             text={t("camera.type.perspective")}
             onClick={() => patch({ type: "Perspective" })}
@@ -206,11 +336,14 @@ export function PanelCamera(_props: { camera: CameraState }) {
         <ObjectNumberInput
           mode={mode}
           label={t("camera.near")}
-          sliderType={null}
+          sliderType="default"
           fields={[
             {
               value: camera.near,
               isActive: false,
+              min: 0.01,
+              max: Math.max(0.02, Math.min(camera.far - 0.01, 1000)),
+              step: 0.01,
               onChange: (value) => patch({ near: value }),
             },
           ]}
@@ -218,26 +351,23 @@ export function PanelCamera(_props: { camera: CameraState }) {
         <ObjectNumberInput
           mode={mode}
           label={t("camera.far")}
-          sliderType={null}
+          sliderType="default"
           fields={[
             {
               value: camera.far,
               isActive: false,
+              min: camera.near + 0.01,
+              max: 10000,
+              step: 1,
               onChange: (value) => patch({ far: value }),
             },
           ]}
         />
-        <ObjectNumberInput
+        <ObjectRatioInput
           mode={mode}
           label={t("camera.aspect")}
-          sliderType={null}
-          fields={[
-            {
-              value: camera.aspect,
-              isActive: false,
-              onChange: (value) => patch({ aspect: value }),
-            },
-          ]}
+          value={camera.aspect}
+          onChange={(value) => patch({ aspect: value })}
         />
         <ActionButton
           text={
@@ -250,23 +380,17 @@ export function PanelCamera(_props: { camera: CameraState }) {
           }
         />
         {camera.type === "Perspective" && (
-          <ObjectNumberInput
-            mode={mode}
-            label={t("camera.fov")}
-            sliderType="default"
-            fields={[
-              {
-                value: camera.fov,
-                isActive: false,
-                onChange: (value) => patch({ fov: value }),
-              },
-            ]}
-          />
+          <div className={paramsStyles.fovBlock}>
+            <p className={paramsStyles.fovLabel}>{t("camera.fov")}</p>
+            <FovSelect
+              value={camera.fov}
+              disabled={locked}
+              onChange={(value) => patch({ fov: value })}
+            />
+          </div>
         )}
-        <p style={{ marginTop: 12 }}>{t("camera.presets")}</p>
-        <div
-          style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}
-        >
+        <p className={paramsStyles.sectionTitle}>{t("camera.presets")}</p>
+        <div className={paramsStyles.presetRow}>
           {STANDARD_CAMERA_PRESETS.map((preset) => (
             <ActionButton
               key={preset}
@@ -291,7 +415,7 @@ export function PanelCamera(_props: { camera: CameraState }) {
           onClick={() => patch(buildSaveCameraViewPatch(camera))}
         />
       </div>
-    </div>
+    </EditorParamsPanel>
   );
 }
 
@@ -318,25 +442,15 @@ export function PanelLight({ light }: { light: Light }) {
   };
 
   return (
-    <div
-      style={{
-        background: "rgba(255, 255, 255, 0.1)",
-        backdropFilter: "blur(24px)",
-        userSelect: "none",
-        zIndex: 10,
-      }}
-    >
-      <PanelModeToggle mode={mode} setMode={setMode} />
-      <div>
-        <p>{t("panel.scene.editing")}</p>
+    <EditorParamsPanel mode={mode} setMode={setMode}>
+      <div className="panel-section">
+        <p className={paramsStyles.sectionTitle}>{t("panel.scene.editing")}</p>
         {locked ? (
           <div style={{ opacity: 0.85, marginBottom: 8 }}>
             {t("panel.scene.locked")}
           </div>
         ) : null}
-        <div
-          style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap" }}
-        >
+        <div className={paramsStyles.presetRow}>
           {lightTypes.map((type) => (
             <ActionButton
               key={type}
@@ -356,6 +470,9 @@ export function PanelLight({ light }: { light: Light }) {
                 {
                   value: liveLight.intensity,
                   isActive: false,
+                  min: 0,
+                  max: 10,
+                  step: 0.01,
                   onChange: (value) => patch({ intensity: value }),
                 },
               ]}
@@ -377,6 +494,9 @@ export function PanelLight({ light }: { light: Light }) {
                 {
                   value: liveLight.intensity,
                   isActive: false,
+                  min: 0,
+                  max: 10,
+                  step: 0.01,
                   onChange: (value) => patch({ intensity: value }),
                 },
               ]}
@@ -389,6 +509,9 @@ export function PanelLight({ light }: { light: Light }) {
                 {
                   value: liveLight.distance,
                   isActive: false,
+                  min: 0,
+                  max: 100,
+                  step: 0.1,
                   onChange: (value) => patch({ distance: value }),
                 },
               ]}
@@ -401,6 +524,9 @@ export function PanelLight({ light }: { light: Light }) {
                 {
                   value: liveLight.penumbra,
                   isActive: false,
+                  min: 0,
+                  max: 1,
+                  step: 0.01,
                   onChange: (value) => patch({ penumbra: value }),
                 },
               ]}
@@ -413,6 +539,9 @@ export function PanelLight({ light }: { light: Light }) {
                 {
                   value: liveLight.angle,
                   isActive: false,
+                  min: 0,
+                  max: Math.PI / 2,
+                  step: 0.01,
                   onChange: (value) => patch({ angle: value }),
                 },
               ]}
@@ -421,8 +550,8 @@ export function PanelLight({ light }: { light: Light }) {
               color={liveLight.color}
               onChange={(color) => patch({ color })}
             />
-            <p style={{ marginTop: 12 }}>{t("camera.presets")}</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <p className={paramsStyles.sectionTitle}>{t("camera.presets")}</p>
+            <div className={paramsStyles.presetRow}>
               {SPOT_LIGHT_POSITION_PRESETS.map((preset) => (
                 <ActionButton
                   key={preset}
@@ -438,20 +567,18 @@ export function PanelLight({ light }: { light: Light }) {
 
         {liveLight.type === "HDRI" && (
           <>
-            <p>{t("light.hdriPreset")}</p>
-            <ScrollPanel>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {HDRI_PRESETS.map((preset) => (
-                  <HdriPreviewThumb
-                    key={preset.id}
-                    presetId={preset.id}
-                    label={t(preset.labelKey)}
-                    isActive={liveLight.hdriPreset === preset.id}
-                    onClick={() => patch({ hdriPreset: preset.id })}
-                  />
-                ))}
-              </div>
-            </ScrollPanel>
+            <p className={paramsStyles.sectionTitle}>{t("light.hdriPreset")}</p>
+            <div className={paramsStyles.hdriRow}>
+              {HDRI_PRESETS.map((preset) => (
+                <HdriPreviewThumb
+                  key={preset.id}
+                  presetId={preset.id}
+                  label={t(preset.labelKey)}
+                  isActive={liveLight.hdriPreset === preset.id}
+                  onClick={() => patch({ hdriPreset: preset.id })}
+                />
+              ))}
+            </div>
             <ObjectNumberInput
               mode={mode}
               label={t("light.intensity")}
@@ -460,6 +587,9 @@ export function PanelLight({ light }: { light: Light }) {
                 {
                   value: liveLight.intensity,
                   isActive: false,
+                  min: 0,
+                  max: 10,
+                  step: 0.01,
                   onChange: (value) => patch({ intensity: value }),
                 },
               ]}
@@ -467,6 +597,6 @@ export function PanelLight({ light }: { light: Light }) {
           </>
         )}
       </div>
-    </div>
+    </EditorParamsPanel>
   );
 }
