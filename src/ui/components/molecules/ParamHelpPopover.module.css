@@ -1,0 +1,60 @@
+.root {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: help;
+}
+
+.trigger img {
+  width: 14px;
+  height: 14px;
+  display: block;
+  opacity: 0.65;
+}
+
+.trigger:hover img,
+.trigger:focus-visible img {
+  opacity: 1;
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--common-color-common-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  width: max-content;
+  max-width: 240px;
+  padding: var(--margin-s);
+  border: var(--border-weight) solid var(--utils-color-edge);
+  border-radius: var(--border-radius-s);
+  background: var(--interactive-color-interactive-background-primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.popoverTitle {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--common-color-common-text);
+}
+
+.popoverBody {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--interactive-color-interactive-text-secondary);
+}

@@ -15,7 +15,7 @@ import type { ActiveTransformToolMode, TransformToolMode } from "@/types/ui";
 import settingsIcon from "@/assets/images/icons/descriptive/settings.svg";
 import garbageIcon from "@/assets/images/icons/descriptive/garbage.svg";
 import bgIcon from "@/assets/images/icons/state/bgOn.svg";
-import lightingIcon from "@/assets/images/icons/descriptive/lighting.svg";
+import lightingIcon from "@/assets/images/icons/state/shadowsOn.svg";
 import infoIcon from "@/assets/images/icons/descriptive/info.svg";
 import renderIcon from "@/assets/images/icons/descriptive/render.svg";
 import reloadIcon from "@/assets/images/icons/descriptive/reload.svg";

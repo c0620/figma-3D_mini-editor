@@ -3,9 +3,9 @@ import type { MouseEvent } from "react";
 import { EditorIconButton } from "../atoms/Button";
 import type { TextureSlot } from "@/types/scene";
 import saveTextureLocalIcon from "@/assets/images/icons/descriptive/saveTextureLocal.svg";
-import loadTextureDeviceIcon from "@/assets/images/icons/descriptive/file.svg";
+import pickLocalIcon from "@/assets/images/icons/descriptive/pickLocal.svg";
 import saveTextureFigmaIcon from "@/assets/images/icons/descriptive/saveTextureFigma.svg";
-import loadTextureFigmaIcon from "@/assets/images/icons/descriptive/frame.svg";
+import pickTextureIcon from "@/assets/images/icons/descriptive/pickTexture.svg";
 import deleteTextureIcon from "@/assets/images/icons/descriptive/garbage.svg";
 import styles from "./TextureSlotRow.module.css";
 
@@ -44,7 +44,6 @@ export function TextureSlotRow({
 }) {
   const rowClass = [
     styles.row,
-    isActive ? styles.rowActive : "",
     isActive ? styles.rowActiveLayout : styles.rowCompact,
   ]
     .filter(Boolean)
@@ -53,7 +52,10 @@ export function TextureSlotRow({
   const previewClass = [
     styles.preview,
     isActive ? styles.previewLarge : styles.previewCompact,
-  ].join(" ");
+    isActive ? styles.previewActive : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const metaClass = [styles.meta, isActive ? "" : styles.metaCompact]
     .filter(Boolean)
@@ -76,26 +78,31 @@ export function TextureSlotRow({
         {isActive ? (
           <div className={styles.actions} onClick={stop}>
             <EditorIconButton
+              className={styles.actionBtn}
               src={saveTextureLocalIcon}
               title={actionLabels.saveDevice}
               onClick={() => void actions.saveToDevice(slot)}
             />
             <EditorIconButton
-              src={loadTextureDeviceIcon}
+              className={styles.actionBtn}
+              src={pickLocalIcon}
               title={actionLabels.loadDevice}
               onClick={() => actions.openLoadFromDevice(slot)}
             />
             <EditorIconButton
+              className={styles.actionBtn}
               src={saveTextureFigmaIcon}
               title={actionLabels.saveFigma}
               onClick={() => actions.saveToFigma(slot)}
             />
             <EditorIconButton
-              src={loadTextureFigmaIcon}
+              className={styles.actionBtn}
+              src={pickTextureIcon}
               title={actionLabels.loadFigma}
               onClick={() => void actions.loadFromFigma(slot)}
             />
             <EditorIconButton
+              className={styles.actionBtn}
               src={deleteTextureIcon}
               title={actionLabels.delete}
               onClick={() => actions.deleteSlot(slot)}

@@ -11,27 +11,13 @@
 }
 
 .thumb:hover {
-  border-color: var(--utils-color-edge);
+  background: var(--interactive-color-interactive-background-secondary);
 }
 
-.thumbActive {
-  border-color: var(--common-color-common-accent);
-  background: color-mix(
-    in srgb,
-    var(--common-color-common-accent) 10%,
-    var(--interactive-color-interactive-background-primary)
-  );
-}
-
-.thumbActive::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 4px;
-  bottom: 4px;
-  width: 3px;
-  background: var(--common-color-common-accent);
-  border-radius: 2px;
+.thumbActive .previewCircle,
+.thumbActive .previewPlaceholder {
+  border: 2px solid var(--common-color-common-accent);
+  box-sizing: border-box;
 }
 
 .previewCircle {

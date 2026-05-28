@@ -11,6 +11,7 @@
   --editor-size-editor-toolbar-item: 40px;
   --editor-size-editor-panel-width: 340px;
   --editor-size-editor-panel-height: 820px;
+  --editor-size-editor-panel-width-closed: 80px;
   --inputs-size-input-height: 30px;
   --inputs-size-preview-height: 30px;
   --inputs-size-toggle-height: 30px;
@@ -41,6 +42,7 @@
   --editor-size-editor-toolbar-item: 20px;
   --editor-size-editor-panel-width: 170px;
   --editor-size-editor-panel-height: 410px;
+  --editor-size-editor-panel-width-closed: 80px;
   --inputs-size-input-height: 30px;
   --inputs-size-preview-height: 30px;
   --inputs-size-toggle-height: 30px;

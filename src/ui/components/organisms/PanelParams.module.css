@@ -37,13 +37,6 @@
   min-width: 0;
 }
 
-.sectionTitle {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--interactive-color-interactive-text-secondary);
-}
-
 .presetRow {
   display: flex;
   flex-wrap: wrap;
@@ -56,16 +49,108 @@
   gap: 6px;
 }
 
-.fovLabel {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--interactive-color-interactive-text-secondary);
-}
-
 .hdriRow {
   display: flex;
   flex-wrap: wrap;
   gap: var(--margin-s);
   align-items: stretch;
+}
+
+.panelParamsShell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.panelCameraRoot,
+.panelLightRoot {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: var(--margin-m);
+}
+
+.panelCameraBody,
+.panelLightBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  gap: var(--margin-m);
+}
+
+.panelCameraFooter,
+.panelLightFooter {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.lightTargetPlaceholder {
+  width: 100%;
+  min-height: var(--inputs-size-input-height);
+  padding: 0 10px;
+  border: 1px solid var(--interactive-color-interactive-background-tertiary);
+  border-radius: var(--border-radius-s);
+  background: var(--interactive-color-interactive-background-primary);
+  color: var(--interactive-color-interactive-text-secondary);
+  font-family: "NT Somic", system-ui, sans-serif;
+  font-size: 13px;
+  text-align: left;
+  box-sizing: border-box;
+  opacity: 0.65;
+  cursor: default;
+}
+
+.cameraSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-s);
+}
+
+.cameraSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--margin-s);
+}
+
+.cameraSectionHeader h3 {
+  min-width: 0;
+}
+
+.aspectPreviewBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aspectPreviewRow {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-s);
+}
+
+.aspectPreviewRow .panel-editor-field-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.presetGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-s);
+}
+
+.presetGridRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--margin-s);
+}
+
+.presetGridRow > * {
+  flex: 1 1 0;
+  min-width: 0;
 }

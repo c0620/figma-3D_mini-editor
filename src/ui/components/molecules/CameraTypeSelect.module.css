@@ -1,0 +1,54 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--margin-s);
+  border-radius: var(--border-radius-s);
+  background: var(--interactive-color-interactive-background-primary);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-s);
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: var(--border-radius-s);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: "NT Somic", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--common-color-common-text);
+}
+
+.option:hover:not(:disabled) {
+  background: transparent;
+}
+
+.option:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.optionActive .label {
+  color: var(--common-color-common-white);
+}
+
+.iconWrapIdle {
+  background: transparent;
+}
+
+.iconWrapActive {
+  background: var(--common-color-common-accent);
+}

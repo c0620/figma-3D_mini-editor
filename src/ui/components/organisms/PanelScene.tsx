@@ -1,6 +1,5 @@
 import { PanelCtaButton } from "../atoms/Button";
 import { useSessionStore } from "@/store/sessionStore";
-import panelStyles from "./PanelScene.module.css";
 import { ScrollPanel } from "../atoms/Output";
 import { GraphItem } from "../atoms/SceneGraph";
 import { PanelModeToggle } from "../atoms/Navigation";
@@ -185,7 +184,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
     return (
       <>
         {locked ? (
-          <div className={panelStyles.lockedNotice}>
+          <div className="panel-editor-muted-note">
             {t("panel.scene.locked")}
           </div>
         ) : null}
@@ -243,6 +242,8 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
   ]);
 
   const isOpen = mode === "openL" || mode === "openR";
+  const showSceneTransformEditor =
+    activeObj != null && isTransformEditable(activeObj);
 
   return (
     <div className="panel-container panel-container--editor">
@@ -254,10 +255,10 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
           </div>
         ) : null}
       </div>
-      <h3>{t("panel.scene.content")}</h3>
+      <h3 className="panel-editor-h3">{t("panel.scene.content")}</h3>
       <PanelSceneModeContext.Provider value={mode}>
         <div className="panel-scene-body">
-          <ScrollPanel variant="graph" fillAvailable={activeObj == null}>
+          <ScrollPanel variant="graph" fillAvailable={!showSceneTransformEditor}>
             {sceneItems.map((item) => (
               <GraphItem
                 key={item.id}
@@ -288,12 +289,12 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
             </div>
           ) : null}
 
-          {activeObj && isOpen ? (
+          {showSceneTransformEditor && isOpen ? (
             <div className="panel-section">
-              <h3 className={panelStyles.editingHeading}>
+              <h3 className="panel-editor-section-heading">
                 {t("panel.scene.editing")}{" "}
-                <span className={panelStyles.editingName}>
-                  {activeEntityEditorHeading(activeObj, t)}
+                <span className="panel-editor-section-heading-em">
+                  {activeEntityEditorHeading(activeObj!, t)}
                 </span>
               </h3>
               {transformPanels}

@@ -6,9 +6,11 @@
 
 .label {
   margin: 0;
+  font-family: "NT Somic", system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: var(--interactive-color-interactive-text-secondary);
+  line-height: 1.3;
+  color: var(--common-color-common-text);
 }
 
 .labelActive {

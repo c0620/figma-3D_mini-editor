@@ -9,7 +9,6 @@ import {
   buildApplySavedCameraViewPatch,
   buildSaveCameraViewPatch,
   buildStandardCameraPresetPatch,
-  STANDARD_CAMERA_PRESETS,
 } from "@/camera/cameraPresets";
 import { ScrollPanel } from "../atoms/Output";
 import {
@@ -21,14 +20,13 @@ import { useSceneStore } from "@/store/sceneStore";
 import type { CameraPatch, LightPatch } from "@/store/sceneStore";
 import type { LightType } from "@/types/scene";
 import type { TranslationKey } from "@/i18n/en";
-import { HDRI_PRESETS } from "@/lights/hdriPresets";
-import {
-  buildSpotLightPositionPresetPatch,
-  SPOT_LIGHT_POSITION_PRESETS,
-} from "@/lights/spotLightPresets";
+import { buildSpotLightingPresetPatch } from "@/lights/spotLightingPresets";
+import { SPOT_LIGHTING_PRESET_ROWS } from "@/lights/spotLightingPresets";
 
 import { useEffect, useMemo, useState } from "react";
-import { HdriPreviewThumb, MaterialPreviewThumb } from "../molecules/ScenePreviews";
+import { MaterialPreviewThumb } from "../molecules/ScenePreviews";
+import { LightTypeSelect } from "../molecules/LightTypeSelect";
+import { HdriPresetSelect } from "../molecules/HdriPresetSelect";
 import { TextureSlotRow } from "../molecules/TextureSlotRow";
 import { TEXTURE_SLOT_ORDER } from "@/io/textureExportHelper";
 import { TEXTURE_SLOT_LABEL_KEYS } from "@/lib/textureSlotLabels";
@@ -36,13 +34,53 @@ import { useTextureSlotActions } from "@/ui/hooks/useTextureSlotActions";
 import { ObjectNumberInput, ObjectRatioInput } from "../molecules/EditorInput";
 import { FigmaColorVariableSelect } from "../molecules/FigmaColorVariableSelect";
 import { FovSelect } from "../molecules/FovSelect";
-import { InputColor } from "../atoms/Input";
+import { InputColor, Toggle } from "../atoms/Input";
 import { useFigmaColorVariableSync } from "@/figma/useFigmaColorVariableSync";
-import { ActionButton } from "../atoms/Button";
+import { OptionButton, PanelCtaButton } from "../atoms/Button";
+import { CameraTypeSelect } from "../molecules/CameraTypeSelect";
+import { ParamHelpPopover } from "../molecules/ParamHelpPopover";
+import type { StandardCameraPresetId } from "@/types/scene";
 import { PanelModeToggle } from "../atoms/Navigation";
 import paramsStyles from "./PanelParams.module.css";
 import { PanelSceneModeContext, type PanelMode } from "./PanelScene";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
+
+const CAMERA_PRESET_ROWS: StandardCameraPresetId[][] = [
+  ["top", "bottom", "left", "right"],
+  ["front", "back"],
+];
+
+function ParamsPanelSectionHeader({
+  titleKey,
+  title,
+  help,
+}: {
+  titleKey?: TranslationKey;
+  title?: string;
+  help?: { titleKey: TranslationKey; bodyKey: TranslationKey };
+}) {
+  const { t } = useI18n();
+  const heading =
+    title ?? (titleKey != null ? t(titleKey) : "");
+  return (
+    <div className={paramsStyles.cameraSectionHeader}>
+      {help ? (
+        <ParamHelpPopover titleKey={help.titleKey} bodyKey={help.bodyKey} />
+      ) : null}
+      <h3 className="panel-editor-section-title">{heading}</h3>
+    </div>
+  );
+}
+
+const LIGHT_TYPE_LABEL_KEYS: Record<LightType, TranslationKey> = {
+  Ambient: "light.type.ambient",
+  Spot: "light.type.spot",
+  HDRI: "light.type.hdri",
+};
+
+function formatLightParamsSectionTitle(template: string, type: LightType, t: (k: TranslationKey) => string): string {
+  return template.replace("{name}", t(LIGHT_TYPE_LABEL_KEYS[type]));
+}
 
 function EditorParamsPanel({
   mode,
@@ -66,7 +104,9 @@ function EditorParamsPanel({
         ) : null}
       </div>
       <PanelSceneModeContext.Provider value={mode}>
-        {isOpen ? children : null}
+        {isOpen ? (
+          <div className={paramsStyles.panelParamsShell}>{children}</div>
+        ) : null}
       </PanelSceneModeContext.Provider>
     </div>
   );
@@ -124,7 +164,7 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
     <EditorParamsPanel mode={mode} setMode={setMode}>
       <div className={paramsStyles.panelBody}>
         <div className="panel-section">
-          <p className={paramsStyles.sectionTitle}>
+          <p className="panel-editor-section-heading">
             {t("panel.params.meshMaterials")}
           </p>
           <ScrollPanel variant="mats">
@@ -143,7 +183,7 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
         {activeMaterial && (
           <div className={paramsStyles.paramStack}>
             <div className="panel-section">
-              <p className={paramsStyles.sectionTitle}>
+              <p className="panel-editor-section-heading">
                 {formatMaterialSectionTitle(
                   t("panel.params.materialParams"),
                   activeMaterial.name
@@ -240,7 +280,7 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
               />
             </div>
             <div className="panel-section">
-              <p className={paramsStyles.sectionTitle}>
+              <p className="panel-editor-section-heading">
                 {formatMaterialSectionTitle(
                   t("panel.params.materialTextures"),
                   activeMaterial.name
@@ -316,104 +356,138 @@ export function PanelCamera(_props: { camera: CameraState }) {
 
   return (
     <EditorParamsPanel mode={mode} setMode={setMode}>
-      <div className="panel-section">
-        <p className={paramsStyles.sectionTitle}>{t("panel.scene.editing")}</p>
-        {locked ? (
-          <div style={{ opacity: 0.85, marginBottom: 8 }}>
-            {t("panel.scene.locked")}
-          </div>
-        ) : null}
-        <div className={paramsStyles.presetRow}>
-          <ActionButton
-            text={t("camera.type.perspective")}
-            onClick={() => patch({ type: "Perspective" })}
-          />
-          <ActionButton
-            text={t("camera.type.orthographic")}
-            onClick={() => patch({ type: "Orthographic" })}
-          />
-        </div>
-        <ObjectNumberInput
-          mode={mode}
-          label={t("camera.near")}
-          sliderType="default"
-          fields={[
-            {
-              value: camera.near,
-              isActive: false,
-              min: 0.01,
-              max: Math.max(0.02, Math.min(camera.far - 0.01, 1000)),
-              step: 0.01,
-              onChange: (value) => patch({ near: value }),
-            },
-          ]}
-        />
-        <ObjectNumberInput
-          mode={mode}
-          label={t("camera.far")}
-          sliderType="default"
-          fields={[
-            {
-              value: camera.far,
-              isActive: false,
-              min: camera.near + 0.01,
-              max: 10000,
-              step: 1,
-              onChange: (value) => patch({ far: value }),
-            },
-          ]}
-        />
-        <ObjectRatioInput
-          mode={mode}
-          label={t("camera.aspect")}
-          value={camera.aspect}
-          onChange={(value) => patch({ aspect: value })}
-        />
-        <ActionButton
-          text={
-            camera.aspectPreviewEnabled
-              ? t("camera.aspectPreview.on")
-              : t("camera.aspectPreview.off")
-          }
-          onClick={() =>
-            patch({ aspectPreviewEnabled: !camera.aspectPreviewEnabled })
-          }
-        />
-        {camera.type === "Perspective" && (
-          <div className={paramsStyles.fovBlock}>
-            <p className={paramsStyles.fovLabel}>{t("camera.fov")}</p>
-            <FovSelect
-              value={camera.fov}
-              disabled={locked}
-              onChange={(value) => patch({ fov: value })}
-            />
-          </div>
-        )}
-        <p className={paramsStyles.sectionTitle}>{t("camera.presets")}</p>
-        <div className={paramsStyles.presetRow}>
-          {STANDARD_CAMERA_PRESETS.map((preset) => (
-            <ActionButton
-              key={preset}
-              text={t(`camera.preset.${preset}`)}
-              onClick={() =>
-                patch(buildStandardCameraPresetPatch(camera, preset))
-              }
-            />
-          ))}
-          {camera.savedView ? (
-            <ActionButton
-              text={t("camera.preset.saved")}
-              onClick={() => {
-                const savedPatch = buildApplySavedCameraViewPatch(camera);
-                if (savedPatch) patch(savedPatch);
+      <div className={paramsStyles.panelCameraRoot}>
+        <div className={paramsStyles.panelCameraBody}>
+          <section className={paramsStyles.cameraSection}>
+            <ParamsPanelSectionHeader
+              titleKey="camera.type.title"
+              help={{
+                titleKey: "camera.help.type.title",
+                bodyKey: "camera.help.type.body",
               }}
             />
-          ) : null}
+            {locked ? (
+              <p className="panel-editor-muted-note">{t("panel.scene.locked")}</p>
+            ) : null}
+            <CameraTypeSelect
+              value={camera.type}
+              disabled={locked}
+              onChange={(type) => patch({ type })}
+            />
+          </section>
+
+          <section className={paramsStyles.cameraSection}>
+            <ParamsPanelSectionHeader titleKey="camera.params.title" />
+            <ObjectNumberInput
+              mode={mode}
+              label={t("camera.near")}
+              sliderType="default"
+              sliderLayout="inline"
+              inputWidth="compact"
+              fields={[
+                {
+                  value: camera.near,
+                  isActive: false,
+                  min: 0.01,
+                  max: Math.max(0.02, Math.min(camera.far - 0.01, 1000)),
+                  step: 0.01,
+                  onChange: (value) => patch({ near: value }),
+                },
+              ]}
+            />
+            <ObjectNumberInput
+              mode={mode}
+              label={t("camera.far")}
+              sliderType="default"
+              sliderLayout="inline"
+              inputWidth="compact"
+              fields={[
+                {
+                  value: camera.far,
+                  isActive: false,
+                  min: camera.near + 0.01,
+                  max: 10000,
+                  step: 1,
+                  onChange: (value) => patch({ far: value }),
+                },
+              ]}
+            />
+            <ObjectRatioInput
+              mode={mode}
+              label={t("camera.aspect")}
+              value={camera.aspect}
+              onChange={(value) => patch({ aspect: value })}
+            />
+            <div className={paramsStyles.aspectPreviewBlock}>
+              <p className="panel-editor-field-label">{t("camera.renderArea")}</p>
+              <div className={paramsStyles.aspectPreviewRow}>
+                <Toggle
+                  checked={camera.aspectPreviewEnabled}
+                  disabled={locked}
+                  onChange={(checked) =>
+                    patch({ aspectPreviewEnabled: checked })
+                  }
+                />
+                <span className="panel-editor-field-label">
+                  {t("camera.aspectPreview.mode")}
+                </span>
+              </div>
+            </div>
+            {camera.type === "Perspective" ? (
+              <div className={paramsStyles.fovBlock}>
+                <p className="panel-editor-field-label">{t("camera.fov")}</p>
+                <FovSelect
+                  value={camera.fov}
+                  disabled={locked}
+                  onChange={(value) => patch({ fov: value })}
+                />
+              </div>
+            ) : null}
+          </section>
+
+          <section className={paramsStyles.cameraSection}>
+            <ParamsPanelSectionHeader
+              titleKey="camera.presets"
+              help={{
+                titleKey: "camera.help.presets.title",
+                bodyKey: "camera.help.presets.body",
+              }}
+            />
+            <div className={paramsStyles.presetGrid}>
+              {CAMERA_PRESET_ROWS.map((row) => (
+                <div key={row.join("-")} className={paramsStyles.presetGridRow}>
+                  {row.map((preset) => (
+                    <OptionButton
+                      key={preset}
+                      text={t(`camera.preset.${preset}`)}
+                      onClick={() =>
+                        patch(buildStandardCameraPresetPatch(camera, preset))
+                      }
+                    />
+                  ))}
+                </div>
+              ))}
+              {camera.savedView ? (
+                <div className={paramsStyles.presetGridRow}>
+                  <OptionButton
+                    text={t("camera.preset.saved")}
+                    onClick={() => {
+                      const savedPatch = buildApplySavedCameraViewPatch(camera);
+                      if (savedPatch) patch(savedPatch);
+                    }}
+                  />
+                </div>
+              ) : null}
+            </div>
+          </section>
         </div>
-        <ActionButton
-          text={t("camera.preset.saveCurrent")}
-          onClick={() => patch(buildSaveCameraViewPatch(camera))}
-        />
+        <div className={paramsStyles.panelCameraFooter}>
+          <PanelCtaButton
+            text={t("camera.preset.saveCurrent")}
+            disabled={locked}
+            onClick={() => patch(buildSaveCameraViewPatch(camera))}
+          />
+        </div>
       </div>
     </EditorParamsPanel>
   );
@@ -434,168 +508,212 @@ export function PanelLight({ light }: { light: Light }) {
     lightEditing.execute({ id: liveLight.id, changes });
   };
 
-  const lightTypes: LightType[] = ["Ambient", "Spot", "HDRI"];
-  const lightTypeLabel: Record<LightType, TranslationKey> = {
-    Ambient: "light.type.ambient",
-    Spot: "light.type.spot",
-    HDRI: "light.type.hdri",
-  };
+  const intensityField = (value: number, onChange: (v: number) => void) => ({
+    value,
+    isActive: false,
+    min: 0,
+    max: 10000,
+    step: 1,
+    onChange,
+  });
 
   return (
     <EditorParamsPanel mode={mode} setMode={setMode}>
-      <div className="panel-section">
-        <p className={paramsStyles.sectionTitle}>{t("panel.scene.editing")}</p>
-        {locked ? (
-          <div style={{ opacity: 0.85, marginBottom: 8 }}>
-            {t("panel.scene.locked")}
-          </div>
-        ) : null}
-        <div className={paramsStyles.presetRow}>
-          {lightTypes.map((type) => (
-            <ActionButton
-              key={type}
-              text={t(lightTypeLabel[type])}
-              onClick={() => patch({ type })}
+      <div className={paramsStyles.panelLightRoot}>
+        <div className={paramsStyles.panelLightBody}>
+          <section className={paramsStyles.cameraSection}>
+            <ParamsPanelSectionHeader
+              titleKey="light.type.title"
+              help={{
+                titleKey: "light.help.type.title",
+                bodyKey: "light.help.type.body",
+              }}
             />
-          ))}
+            {locked ? (
+              <p className="panel-editor-muted-note">{t("panel.scene.locked")}</p>
+            ) : null}
+            <LightTypeSelect
+              value={liveLight.type}
+              disabled={locked}
+              onChange={(type) => patch({ type })}
+            />
+          </section>
+
+          <section className={paramsStyles.cameraSection}>
+            <ParamsPanelSectionHeader
+              title={formatLightParamsSectionTitle(
+                t("light.params.title"),
+                liveLight.type,
+                t
+              )}
+            />
+            {liveLight.type === "Ambient" && (
+              <>
+                <ObjectNumberInput
+                  mode={mode}
+                  label={t("light.intensity")}
+                  sliderType="default"
+                  fields={[
+                    {
+                      value: liveLight.intensity,
+                      isActive: false,
+                      min: 1,
+                      max: 100,
+                      step: 0.01,
+                      onChange: (value) => patch({ intensity: value }),
+                    },
+                  ]}
+                />
+                <InputColor
+                  layout="panel"
+                  color={liveLight.color}
+                  onChange={(color) => patch({ color })}
+                />
+              </>
+            )}
+
+            {liveLight.type === "Spot" && (
+              <>
+                <ObjectNumberInput
+                  mode={mode}
+                  label={t("light.intensity")}
+                  sliderType="default"
+                  fields={[intensityField(liveLight.intensity, (value) => patch({ intensity: value }))]}
+                />
+                <ObjectNumberInput
+                  mode={mode}
+                  label={t("light.distance")}
+                  sliderType="default"
+                  fields={[
+                    {
+                      value: liveLight.distance,
+                      isActive: false,
+                      min: 0,
+                      max: 10000,
+                      step: 1,
+                      onChange: (value) => patch({ distance: value }),
+                    },
+                  ]}
+                />
+                <div className={paramsStyles.paramRow2}>
+                  <ObjectNumberInput
+                    mode={mode}
+                    inputWidth="compact"
+                    label={t("light.penumbra")}
+                    sliderType="default"
+                    fields={[
+                      {
+                        value: liveLight.penumbra,
+                        isActive: false,
+                        min: 0,
+                        max: 1,
+                        step: 0.01,
+                        onChange: (value) => patch({ penumbra: value }),
+                      },
+                    ]}
+                  />
+                  <ObjectNumberInput
+                    mode={mode}
+                    inputWidth="compact"
+                    label={t("light.angle")}
+                    sliderType="default"
+                    fields={[
+                      {
+                        value: liveLight.angle,
+                        isActive: false,
+                        min: 0,
+                        max: Math.PI / 2,
+                        step: 0.01,
+                        onChange: (value) => patch({ angle: value }),
+                      },
+                    ]}
+                  />
+                </div>
+                <div>
+                  <p className="panel-editor-field-label">{t("light.target")}</p>
+                  <button
+                    type="button"
+                    className={paramsStyles.lightTargetPlaceholder}
+                    disabled
+                  >
+                    {t("light.target.placeholder")}
+                  </button>
+                </div>
+                <InputColor
+                  layout="panel"
+                  color={liveLight.color}
+                  onChange={(color) => patch({ color })}
+                />
+              </>
+            )}
+
+            {liveLight.type === "HDRI" && (
+              <ObjectNumberInput
+                mode={mode}
+                label={t("light.intensity")}
+                sliderType="default"
+                fields={[
+                  {
+                    value: liveLight.intensity,
+                    isActive: false,
+                    min: 1,
+                    max: 10,
+                    step: 0.01,
+                    onChange: (value) => patch({ intensity: value }),
+                  },
+                ]}
+              />
+            )}
+          </section>
         </div>
 
-        {liveLight.type === "Ambient" && (
-          <>
-            <ObjectNumberInput
-              mode={mode}
-              label={t("light.intensity")}
-              sliderType="default"
-              fields={[
-                {
-                  value: liveLight.intensity,
-                  isActive: false,
-                  min: 0,
-                  max: 10,
-                  step: 0.01,
-                  onChange: (value) => patch({ intensity: value }),
-                },
-              ]}
-            />
-            <InputColor
-              color={liveLight.color}
-              onChange={(color) => patch({ color })}
-            />
-          </>
-        )}
+        {liveLight.type === "HDRI" ? (
+          <div className={paramsStyles.panelLightFooter}>
+            <section className={paramsStyles.cameraSection}>
+              <ParamsPanelSectionHeader
+                titleKey="light.hdriPreset.title"
+                help={{
+                  titleKey: "light.help.hdri.title",
+                  bodyKey: "light.help.hdri.body",
+                }}
+              />
+              <HdriPresetSelect
+                value={liveLight.hdriPreset}
+                disabled={locked}
+                onChange={(preset) => patch({ hdriPreset: preset })}
+              />
+            </section>
+          </div>
+        ) : null}
 
-        {liveLight.type === "Spot" && (
-          <>
-            <ObjectNumberInput
-              mode={mode}
-              label={t("light.intensity")}
-              sliderType="default"
-              fields={[
-                {
-                  value: liveLight.intensity,
-                  isActive: false,
-                  min: 0,
-                  max: 10,
-                  step: 0.01,
-                  onChange: (value) => patch({ intensity: value }),
-                },
-              ]}
-            />
-            <ObjectNumberInput
-              mode={mode}
-              label={t("light.distance")}
-              sliderType="default"
-              fields={[
-                {
-                  value: liveLight.distance,
-                  isActive: false,
-                  min: 0,
-                  max: 100,
-                  step: 0.1,
-                  onChange: (value) => patch({ distance: value }),
-                },
-              ]}
-            />
-            <ObjectNumberInput
-              mode={mode}
-              label={t("light.penumbra")}
-              sliderType="default"
-              fields={[
-                {
-                  value: liveLight.penumbra,
-                  isActive: false,
-                  min: 0,
-                  max: 1,
-                  step: 0.01,
-                  onChange: (value) => patch({ penumbra: value }),
-                },
-              ]}
-            />
-            <ObjectNumberInput
-              mode={mode}
-              label={t("light.angle")}
-              sliderType="default"
-              fields={[
-                {
-                  value: liveLight.angle,
-                  isActive: false,
-                  min: 0,
-                  max: Math.PI / 2,
-                  step: 0.01,
-                  onChange: (value) => patch({ angle: value }),
-                },
-              ]}
-            />
-            <InputColor
-              color={liveLight.color}
-              onChange={(color) => patch({ color })}
-            />
-            <p className={paramsStyles.sectionTitle}>{t("camera.presets")}</p>
-            <div className={paramsStyles.presetRow}>
-              {SPOT_LIGHT_POSITION_PRESETS.map((preset) => (
-                <ActionButton
-                  key={preset}
-                  text={t(`camera.preset.${preset}`)}
-                  onClick={() =>
-                    patch(buildSpotLightPositionPresetPatch(liveLight, preset))
-                  }
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {liveLight.type === "HDRI" && (
-          <>
-            <p className={paramsStyles.sectionTitle}>{t("light.hdriPreset")}</p>
-            <div className={paramsStyles.hdriRow}>
-              {HDRI_PRESETS.map((preset) => (
-                <HdriPreviewThumb
-                  key={preset.id}
-                  presetId={preset.id}
-                  label={t(preset.labelKey)}
-                  isActive={liveLight.hdriPreset === preset.id}
-                  onClick={() => patch({ hdriPreset: preset.id })}
-                />
-              ))}
-            </div>
-            <ObjectNumberInput
-              mode={mode}
-              label={t("light.intensity")}
-              sliderType="default"
-              fields={[
-                {
-                  value: liveLight.intensity,
-                  isActive: false,
-                  min: 0,
-                  max: 10,
-                  step: 0.01,
-                  onChange: (value) => patch({ intensity: value }),
-                },
-              ]}
-            />
-          </>
-        )}
+        {liveLight.type === "Spot" ? (
+          <div className={paramsStyles.panelLightFooter}>
+            <section className={paramsStyles.cameraSection}>
+              <ParamsPanelSectionHeader
+                titleKey="light.presets.title"
+                help={{
+                  titleKey: "light.help.presets.title",
+                  bodyKey: "light.help.presets.body",
+                }}
+              />
+              <div className={paramsStyles.presetGrid}>
+                {SPOT_LIGHTING_PRESET_ROWS.map((row) => (
+                  <div key={row.join("-")} className={paramsStyles.presetGridRow}>
+                    {row.map((preset) => (
+                      <OptionButton
+                        key={preset}
+                        text={t(`light.preset.${preset}`)}
+                        onClick={() =>
+                          patch(buildSpotLightingPresetPatch(preset))
+                        }
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        ) : null}
       </div>
     </EditorParamsPanel>
   );
