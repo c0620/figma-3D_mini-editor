@@ -119,7 +119,7 @@ export default function LoadFigmaSceneScreen({
   }
 
   return (
-    <div>
+    <div className="page">
       <NavTitle title={currentTextContent.title} to={"/"} />
       <TextBlock
         text={currentTextContent.text}

@@ -103,3 +103,25 @@ export function PanelButton({
     </div>
   );
 }
+
+export function ToolButton({
+  src,
+  onClick,
+}: {
+  src: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        backgroundColor: "black",
+        width: "40px",
+        height: "40px",
+        padding: "0px",
+      }}
+    >
+      <img src={src} style={{ width: "20px", height: "20px" }} />
+    </button>
+  );
+}

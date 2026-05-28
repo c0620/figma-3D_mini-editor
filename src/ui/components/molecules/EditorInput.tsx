@@ -29,7 +29,7 @@ export function ObjectNumberInput({
   ) : (
     ""
   );
-  if (mode == "open") {
+  if (mode == "openR" || mode == "openL") {
     return (
       <div>
         {label} {inputs} {slider}

@@ -16,7 +16,7 @@ export function TextBlock({
 }
 export function ScrollPanel({ children }: { children: any }) {
   const mode = useContext(PanelSceneModeContext);
-  if (mode == "open") {
+  if (mode == "openL" || mode == "openR") {
     return (
       <div style={{ backgroundColor: "rgba(34, 34, 34, 1)" }}>
         Open {children}

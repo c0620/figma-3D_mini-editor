@@ -1,6 +1,11 @@
 import { create } from "zustand";
 
-import type { ActiveTransformToolMode, Notification } from "../types/ui";
+import type {
+  ActiveTransformToolMode,
+  ColorTheme,
+  Notification,
+  windowSize,
+} from "../types/ui";
 import type { Locale } from "../services/localizationService";
 import { useSceneStore } from "./sceneStore";
 import { isSceneCameraEntityId } from "./sceneEntityList";
@@ -13,6 +18,8 @@ export interface UiState {
   canUndo: boolean;
   canRedo: boolean;
   locale: Locale;
+  colorTheme: ColorTheme;
+  windowSize: windowSize;
 }
 
 interface UiActions {
@@ -23,6 +30,9 @@ interface UiActions {
   removeNotification(id: string): void;
   setHistoryFlags(canUndo: boolean, canRedo: boolean): void;
   setLocale(locale: Locale): void;
+  setColorTheme(theme: ColorTheme): void;
+  toggleColorTheme(): void;
+  toggleWindowSize(): void;
 }
 
 export const useSessionStore = create<UiState & UiActions>((set) => ({
@@ -33,6 +43,8 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
   canUndo: false,
   canRedo: false,
   locale: "ru" as Locale,
+  colorTheme: "Dark",
+  windowSize: "Large",
 
   setActiveObjectId: (id) => set({ activeObjectId: id }),
   setTransformToolMode: (mode) => {
@@ -57,4 +69,11 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
     set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) })),
   setHistoryFlags: (canUndo, canRedo) => set({ canUndo, canRedo }),
   setLocale: (locale) => set({ locale }),
+  setColorTheme: (theme) => set({ colorTheme: theme }),
+  toggleColorTheme: () =>
+    set((s) => ({
+      colorTheme: s.colorTheme === "Dark" ? "Light" : "Dark",
+    })),
+  toggleWindowSize: () =>
+    set((s) => ({ windowSize: s.windowSize === "Large" ? "Small" : "Large" })),
 }));

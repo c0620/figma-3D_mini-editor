@@ -1,0 +1,17 @@
+.panel-container {
+  background: var(--editor-utils-color-panel-background);
+  backdrop-filter: blur(24px);
+  user-select: none;
+  z-index: 10;
+  border-radius: var(--border-radius-m);
+  border: var(--border-weight) solid var(--utils-color-edge);
+}
+
+.tools-container {
+  display: flex;
+  gap: 16px;
+  background-color: var(--editor-utils-color-panel-background);
+  padding: 10px;
+  border-radius: var(--border-radius-m);
+  border: var(--border-weight) solid var(--utils-color-edge);
+}

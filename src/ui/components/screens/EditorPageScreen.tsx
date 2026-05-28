@@ -24,7 +24,7 @@ export default function EditorPage() {
   }
 
   return (
-    <div style={{ width: "100%", height: "100%" }}>
+    <div className="page">
       {isExportOpen && (
         <ExportModal onClose={() => setIsExportOpen(false)} />
       )}
@@ -55,7 +55,7 @@ export default function EditorPage() {
         <PanelTop openModal={(val: boolean) => setIsExportOpen(val)} />
         <PanelBottom activeObj={activeObj} />
       </div>
-      <div style={{ width: "100vw", height: "100vh" }}>
+      <div className="page_fill">
         <SceneCanvas />
       </div>
     </div>

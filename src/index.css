@@ -1,14 +1,17 @@
-* {
-  box-sizing: border-box;
-}
-
+@import url("./styles/reset.css");
+@import url("./styles/colors.css");
+@import url("./styles/sizes.css");
+@import url("./styles/margins.css");
+@import url("./styles/fonts.css");
+@import url("./styles/panels.css");
+@import url("./styles/layout.css");
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--common-color-common-text);
+  background-color: var(--editor-utils-color-background-primary);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -27,11 +30,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-  flex-direction: column;
 }
 
 h1 {
@@ -95,31 +93,55 @@ button:focus-visible {
   cursor: pointer;
 }
 
-.button-blue {
-  background: #2563eb;
+.background-start {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: -100;
+  top: 40px;
+  overflow: hidden;
 }
 
-.button-blue:hover {
-  background: #1d4ed8;
+.circle-blur {
+  margin: 0 auto;
+  width: var(--window-size-window-width);
+  height: var(--window-size-window-width);
+  border-radius: 50%;
+  background: rgba(255, 164, 83, 0.48);
+  filter: blur(50px);
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 24%);
 }
 
-.button-red {
-  background: #dc2626;
+.circle-bg {
+  width: var(--window-size-window-width);
+  height: var(--window-size-window-width);
+  border-radius: 50%;
+  background: var(--common-color-common-accent);
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 24%);
 }
 
-.button-red:hover {
-  background: #b91c1c;
+.circle-middle {
+  width: calc(var(--window-size-window-width) - 20%);
+  height: calc(var(--window-size-window-width) - 20%);
+  border-radius: 50%;
+  background: rgba(252, 147, 78, 1);
+  filter: blur(50px);
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 30%);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.circle-top {
+  width: calc(var(--window-size-window-width) - 30%);
+  height: calc(var(--window-size-window-width) - 30%);
+  border-radius: 50%;
+  background: rgba(255, 163, 83, 1);
+  filter: blur(50px);
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 38%);
 }

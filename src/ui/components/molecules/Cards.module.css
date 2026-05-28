@@ -1,0 +1,37 @@
+.card {
+  padding: 30px;
+  height: var(--outputs-size-card-height);
+  width: var(--outputs-size-card-width);
+  overflow: hidden;
+  border-radius: var(--border-radius-m);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+}
+
+.t1 {
+  max-width: 60%;
+}
+
+.models {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: -10;
+}
+
+.button {
+  height: var(--button-size-button-nav-height);
+  background-color: var(--common-color-common-black);
+  border-radius: var(--border-radius-m);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40%;
+}

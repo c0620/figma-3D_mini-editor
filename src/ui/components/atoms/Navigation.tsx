@@ -1,6 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import { NavLinkButton, OptionButton } from "./Button";
 import type { PanelMode } from "../organisms/PanelScene";
+import arrowL from "@/assets/images/icons/descriptive/arrowL.svg";
+import arrowR from "@/assets/images/icons/descriptive/arrowR.svg";
 
 export function PanelModeToggle({
   mode,
@@ -9,13 +11,32 @@ export function PanelModeToggle({
   mode: PanelMode;
   setMode: Dispatch<SetStateAction<PanelMode>>;
 }) {
+  var action: PanelMode;
+  var arrow: string;
+  switch (mode) {
+    case "openL":
+      action = "closeL";
+      arrow = arrowL;
+      break;
+    case "openR":
+      action = "closeR";
+      arrow = arrowR;
+      break;
+    case "closeL":
+      action = "openL";
+      arrow = arrowR;
+      break;
+    case "closeR":
+      action = "openR";
+      arrow = arrowL;
+  }
   return (
     <button
       onClick={() => {
-        mode == "open" ? setMode("close") : setMode("open");
+        mode == "openL" || mode == "openR" ? setMode(action) : setMode(action);
       }}
     >
-      {mode == "open" ? "<" : ">"}
+      <img src={arrow} />
     </button>
   );
 }

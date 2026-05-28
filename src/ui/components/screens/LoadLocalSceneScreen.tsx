@@ -15,7 +15,7 @@ export default function LoadLocalSceneScreen() {
   const [sceneLoadStatus, setSceneLoadStatus] = useState("initial");
 
   return (
-    <div>
+    <div className="page">
       <NavTitle title={textContent.title} to={"/"} />
       <TextBlock
         text={textContent.text}

@@ -1,0 +1,86 @@
+@font-face {
+  font-family: "NT Somic";
+  src: url("/src/assets/fonts/01_NTSomic-Regular.ttf");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "NT Somic";
+  src: url("/src/assets/fonts/02_NTSomic-Medium.ttf");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "NT Somic";
+  src: url("/src/assets/fonts/03_NTSomic-Bold.ttf");
+  font-weight: 700;
+}
+
+.titleStart,
+.textStart,
+h1,
+h2,
+h3,
+h4,
+.t1,
+.t2,
+.t3,
+.t4 {
+  font-family: "NT Somic", serif;
+}
+
+.titleStart {
+  font-weight: 700;
+  font-size: 136px;
+  text-align: center;
+}
+
+.textStart {
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 40px;
+  text-align: center;
+}
+
+h1 {
+  font-weight: 700;
+  font-size: 48px;
+}
+
+h2 {
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 36px;
+}
+
+h3 {
+  font-weight: 500;
+  font-size: 24px;
+}
+
+h4 {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.t1 {
+  font-size: 24px;
+  line-height: 29px;
+}
+
+.t2 {
+  font-size: 20px;
+}
+
+.t3 {
+  font-size: 16px;
+}
+
+.t4 {
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.accent {
+  font-weight: 700;
+}

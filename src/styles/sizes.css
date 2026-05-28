@@ -1,0 +1,53 @@
+[data-window-size="Large"] {
+  /* number */
+  --size-input-top-panel: 40px;
+  --button-size-button-icon-height: 20px;
+  --button-size-button-mode-height: 30px;
+  --button-size-button-main-midi-height: 40px;
+  --button-size-button-main-mini-height: 40px;
+  --button-size-button-option-height: 40px;
+  --button-size-button-main-max-height: 60px;
+  --button-size-button-nav-height: 60px;
+  --editor-size-editor-toolbar-item: 40px;
+  --editor-size-editor-panel-width: 340px;
+  --editor-size-editor-panel-height: 820px;
+  --inputs-size-input-height: 30px;
+  --inputs-size-preview-height: 30px;
+  --inputs-size-toggle-height: 30px;
+  --window-size-modal-height: 720px;
+  --window-size-window-height: 900px;
+  --window-size-modal-width: 1440px;
+  --window-size-window-width: 1600px;
+  --outputs-size-card-height: 340px;
+  --outputs-size-card-width: 480px;
+  --border-radius-m: 20px;
+  --border-radius-s: 10px;
+  --border-weight: 2px;
+}
+
+[data-window-size="Small"] {
+  /* number */
+  --size-input-top-panel: 40px;
+  --button-size-button-icon-height: 18px;
+  --button-size-button-main-midi-height: 20px;
+  --button-size-button-main-mini-height: 20px;
+  --button-size-button-mode-height: 20px;
+  --button-size-button-option-height: 20px;
+  --button-size-button-main-max-height: 30px;
+  --button-size-button-nav-height: 30px;
+  --editor-size-editor-toolbar-item: 20px;
+  --editor-size-editor-panel-width: 170px;
+  --editor-size-editor-panel-height: 410px;
+  --inputs-size-input-height: 30px;
+  --inputs-size-preview-height: 30px;
+  --inputs-size-toggle-height: 30px;
+  --window-size-modal-height: 360px;
+  --window-size-window-height: 450px;
+  --window-size-modal-width: 720px;
+  --window-size-window-width: 900px;
+  --outputs-size-card-height: 170px;
+  --outputs-size-card-width: 240px;
+  --border-radius-m: 20px;
+  --border-radius-s: 10px;
+  --border-weight: 2px;
+}

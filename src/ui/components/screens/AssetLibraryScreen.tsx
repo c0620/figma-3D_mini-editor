@@ -1,3 +1,7 @@
 export default function AssetLibraryScreen() {
-  return <h1>Asset Library</h1>;
+  return (
+    <div className="page">
+      <h1>Asset Library</h1>
+    </div>
+  );
 }

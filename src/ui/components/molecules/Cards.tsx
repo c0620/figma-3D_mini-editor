@@ -1,4 +1,6 @@
 import { NavLink } from "react-router";
+import styles from "./Cards.module.css";
+import next from "@/assets/images/icons/descriptive/arrowR.svg";
 
 export function CardStart({
   title,
@@ -12,11 +14,16 @@ export function CardStart({
   to: string;
 }) {
   return (
-    <div>
-      <h3>{title}</h3>
-      <div>{text}</div>
-      <img src={image}></img>
-      <NavLink to={to}>Загрузить</NavLink>
+    <div className={"panel-container " + styles.card}>
+      <div className={styles.text}>
+        <h2>{title}</h2>
+        <div className={"t1 " + styles.t1}>{text}</div>
+      </div>
+
+      <img className={styles.models} src={image}></img>
+      <NavLink className={styles.button} to={to}>
+        <img src={next} />
+      </NavLink>
     </div>
   );
 }

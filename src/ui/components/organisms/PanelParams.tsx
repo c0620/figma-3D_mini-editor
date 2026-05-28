@@ -37,12 +37,13 @@ import { ObjectNumberInput } from "../molecules/EditorInput";
 import type { PanelMode } from "./PanelScene";
 import { InputColor } from "../atoms/Input";
 import { ActionButton } from "../atoms/Button";
+import { PanelModeToggle } from "../atoms/Navigation";
 
 export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
   void mesh;
   const materials = useActiveMeshMaterials();
   const [activeMaterialIndex, setActiveMaterialIndex] = useState(0);
-  const [mode, setMode] = useState<PanelMode>("open");
+  const [mode, setMode] = useState<PanelMode>("openR");
   const { materialEditing } = useHandlers();
 
   const activeMaterial = materials ? materials[activeMaterialIndex] : null;
@@ -163,7 +164,7 @@ export function PanelMesh({ mesh }: { mesh: SceneMesh }) {
 export function PanelCamera(_props: { camera: CameraState }) {
   void _props;
   const camera = useSceneStore((s) => s.scene?.camera);
-  const [mode] = useState<PanelMode>("open");
+  const [mode] = useState<PanelMode>("openR");
   const { camera: cameraHandler } = useHandlers();
   const { t } = useI18n();
 
@@ -263,7 +264,9 @@ export function PanelCamera(_props: { camera: CameraState }) {
           />
         )}
         <p style={{ marginTop: 12 }}>{t("camera.presets")}</p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+        <div
+          style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}
+        >
           {STANDARD_CAMERA_PRESETS.map((preset) => (
             <ActionButton
               key={preset}
@@ -294,8 +297,9 @@ export function PanelCamera(_props: { camera: CameraState }) {
 
 export function PanelLight({ light }: { light: Light }) {
   const liveLight =
-    useSceneStore((s) => s.scene?.lights.find((l) => l.id === light.id)) ?? light;
-  const [mode] = useState<PanelMode>("open");
+    useSceneStore((s) => s.scene?.lights.find((l) => l.id === light.id)) ??
+    light;
+  const [mode, setMode] = useState<PanelMode>("openR");
   const { lightEditing } = useHandlers();
   const { t } = useI18n();
 
@@ -322,6 +326,7 @@ export function PanelLight({ light }: { light: Light }) {
         zIndex: 10,
       }}
     >
+      <PanelModeToggle mode={mode} setMode={setMode} />
       <div>
         <p>{t("panel.scene.editing")}</p>
         {locked ? (
@@ -329,7 +334,9 @@ export function PanelLight({ light }: { light: Light }) {
             {t("panel.scene.locked")}
           </div>
         ) : null}
-        <div style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+        <div
+          style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap" }}
+        >
           {lightTypes.map((type) => (
             <ActionButton
               key={type}

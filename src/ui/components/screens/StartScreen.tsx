@@ -2,17 +2,28 @@ import { CardStart } from "../molecules/Cards";
 import phone from "../../../assets/images/start-phone.png";
 import sphere from "../../../assets/images/start-sphere.png";
 import suzanne from "../../../assets/images/start-suzanne.png";
+import { PluginTools } from "../organisms/PluginTools";
 
 export default function StartScreen() {
   return (
-    <>
-      <div>settings</div>
-      <h1 className="">3D: мини-редактор</h1>
+    <div className="page page_start">
+      <PluginTools />
       <div>
-        Переносите собственные или готовые модели, создавайте и редактируйте
-        рендеры прямо в Figma
+        <h1 className="titleStart" style={{ marginBottom: "var(--margin-s)" }}>
+          3D: мини-редактор
+        </h1>
+        <div className="textStart">
+          Переносите собственные или готовые модели, <br /> создавайте и
+          редактируйте рендеры прямо в Figma
+        </div>
       </div>
-      <div style={{ display: "flex" }}>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "space-between",
+        }}
+      >
         <CardStart
           title="Библиотека ассетов"
           text="Импорт готовых простых объектов и моделей для мокапов"
@@ -32,6 +43,12 @@ export default function StartScreen() {
           to="/load/local"
         />
       </div>
-    </>
+      <div className="background-start">
+        <div className="circle-blur"></div>
+        <div className="circle-bg"></div>
+        <div className="circle-middle"></div>
+        <div className="circle-top"></div>
+      </div>
+    </div>
   );
 }

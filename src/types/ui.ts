@@ -1,5 +1,7 @@
 export type TransformToolMode = "translate" | "rotate" | "scale";
 export type ActiveTransformToolMode = TransformToolMode | null;
+export type ColorTheme = "Dark" | "Light";
+export type windowSize = "Large" | "Small";
 
 export interface TooltipData {
   toolId: string;

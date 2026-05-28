@@ -21,9 +21,9 @@ import {
   isTransformEditable,
 } from "@/lib/transformSelection";
 
-export type PanelMode = "open" | "close";
+export type PanelMode = "openL" | "closeL" | "openR" | "closeR";
 
-export const PanelSceneModeContext = createContext<PanelMode>("open");
+export const PanelSceneModeContext = createContext<PanelMode>("openL");
 
 const AXIS = ["x", "y", "z"] as const;
 
@@ -105,13 +105,18 @@ function buildAxisFields(
 }
 
 export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
-  const [mode, setMode] = useState<PanelMode>("open");
+  const [mode, setMode] = useState<PanelMode>("openL");
   const scene = useSceneStore((s) => s.scene);
   const { t } = useI18n();
 
   const sceneItems = useSceneEntities();
   const sceneId = scene?.id ?? null;
-  const { selection, transform, camera: cameraHandler, lightAddition } = useHandlers();
+  const {
+    selection,
+    transform,
+    camera: cameraHandler,
+    lightAddition,
+  } = useHandlers();
 
   const activeRowId = useMemo(
     () => activeEntityRowId(activeObj, sceneId),
@@ -218,7 +223,15 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
         )}
       </>
     );
-  }, [scene, activeObj, sceneId, mode, applyTransformDimension, t, cameraHandler]);
+  }, [
+    scene,
+    activeObj,
+    sceneId,
+    mode,
+    applyTransformDimension,
+    t,
+    cameraHandler,
+  ]);
 
   return (
     <div
