@@ -1,0 +1,19 @@
+<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g clip-path="url(#clip0_98_17513)">
+<circle cx="13" cy="13" r="11.8182" stroke="#EDEDED" stroke-width="2.36364"/>
+<circle cx="13" cy="13" r="12" stroke="#EDEDED" stroke-width="2"/>
+<circle cx="12.9999" cy="13" r="4.90909" stroke="#EDEDED" stroke-width="2"/>
+<g id="Repeat group 1_inner" data-figma-trr="r5u2.3-0f">
+<path d="M10.4476 8.85358L15.552 2.47446" stroke="#EDEDED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<use xlink:href="#Repeat%20group%201_inner" transform="translate(21.3464 -3.38076) rotate(72)"/>
+<use xlink:href="#Repeat%20group%201_inner" transform="translate(31.1581 15.8761) rotate(144)"/>
+<use xlink:href="#Repeat%20group%201_inner" transform="translate(15.8756 31.1583) rotate(-144)"/>
+<use xlink:href="#Repeat%20group%201_inner" transform="translate(-3.3811 21.3463) rotate(-72)"/>
+</g>
+<defs>
+<clipPath id="clip0_98_17513">
+<rect width="26" height="26" fill="white"/>
+</clipPath>
+</defs>
+</svg>
