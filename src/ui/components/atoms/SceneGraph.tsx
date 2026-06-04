@@ -46,13 +46,12 @@ export function GraphItem({
 
   return (
     <div
-      onClick={onSelect}
       className={clsx(styles.sceneGraph, {
         [styles.textDisabled]: item.locked && !isActive,
         [styles.textActive]: isActive,
       })}
     >
-      <div className={styles.graphInfo}>
+      <div className={styles.graphInfo} onClick={onSelect}>
         <div
           className={clsx(styles.itemImage, {
             [styles.imageActive]: isActive,
