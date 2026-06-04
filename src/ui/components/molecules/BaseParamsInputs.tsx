@@ -1,8 +1,3 @@
-import { ActionButton } from "../atoms/Button";
-import { ScrollPanel } from "../atoms/Output";
-import { GraphItem } from "../atoms/SceneGraph";
-import { PanelModeToggle } from "../atoms/Navigation";
-import { createContext, useCallback, useMemo, useState } from "react";
 import {
   useHandlers,
   useSceneEntities,
@@ -10,30 +5,14 @@ import {
 } from "@/app/ApplicationKernelContext";
 import { sceneCameraEntityId } from "@/store/sceneEntityList";
 import { useSceneStore } from "@/store/sceneStore";
-import { ObjectNumberInput, type InputField } from "../molecules/EditorInput";
 import type { Transform } from "@/types/scene";
+import { useCallback, useContext, useMemo } from "react";
+import { ObjectNumberInput, type InputField } from "../atoms/EditorInput";
+import { PanelSceneModeContext } from "../organisms/panels/BasePanel";
 
-export type PanelMode = "open" | "close";
-
-export const PanelSceneModeContext = createContext<PanelMode>("open");
+import style from "./BaseParamsInputs.module.scss";
 
 const AXIS = ["x", "y", "z"] as const;
-
-/** Id строки дерева для выделения (совпадает с GraphItem.item.id). */
-function activeEntityRowId(
-  active: ActiveEntity | null,
-  sceneId: string | null
-): string | null {
-  if (!active || !sceneId) return null;
-  switch (active.kind) {
-    case "mesh":
-      return active.data.id;
-    case "light":
-      return active.data.id;
-    case "camera":
-      return sceneCameraEntityId(sceneId);
-  }
-}
 
 function activeEntityEditorHeading(active: ActiveEntity): string {
   switch (active.kind) {
@@ -71,22 +50,6 @@ function transformForSelection(
   }
 }
 
-function isSelectionLocked(
-  scene: NonNullable<ReturnType<typeof useSceneStore.getState>["scene"]>,
-  active: ActiveEntity
-): boolean {
-  switch (active.kind) {
-    case "mesh":
-      return (
-        scene.objects.find((o) => o.id === active.data.id)?.locked ?? false
-      );
-    case "light":
-      return scene.lights.find((l) => l.id === active.data.id)?.locked ?? false;
-    case "camera":
-      return scene.camera.locked;
-  }
-}
-
 function buildAxisFields(
   key: keyof Transform,
   tuple: [number, number, number],
@@ -107,18 +70,27 @@ function buildAxisFields(
   }));
 }
 
-export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
-  const [mode, setMode] = useState<PanelMode>("open");
+function isSelectionLocked(
+  scene: NonNullable<ReturnType<typeof useSceneStore.getState>["scene"]>,
+  active: ActiveEntity
+): boolean {
+  switch (active.kind) {
+    case "mesh":
+      return (
+        scene.objects.find((o) => o.id === active.data.id)?.locked ?? false
+      );
+    case "light":
+      return scene.lights.find((l) => l.id === active.data.id)?.locked ?? false;
+    case "camera":
+      return scene.camera.locked;
+  }
+}
+
+export function BaseParamsInputs({ activeObj }: { activeObj: ActiveEntity }) {
+  const { base } = useHandlers();
   const scene = useSceneStore((s) => s.scene);
-
-  const sceneItems = useSceneEntities();
   const sceneId = scene?.id ?? null;
-  const { selection, base } = useHandlers();
-
-  const activeRowId = useMemo(
-    () => activeEntityRowId(activeObj, sceneId),
-    [activeObj, sceneId]
-  );
+  const mode = useContext(PanelSceneModeContext);
 
   const applyTransformDimension = useCallback(
     (dimensionKey: keyof Transform, axisIndex: 0 | 1 | 2, value: number) => {
@@ -150,6 +122,8 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
     [activeObj, sceneId, base]
   );
 
+  var locked = isSelectionLocked(scene!, activeObj);
+
   const transformPanels = useMemo(() => {
     if (!scene || !activeObj || !sceneId) return null;
 
@@ -163,26 +137,21 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
     const t = transformForSelection(scene, activeObj);
     if (!t) return null;
 
-    const locked = isSelectionLocked(scene, activeObj);
+    locked = isSelectionLocked(scene!, activeObj);
 
     const groups: { key: keyof Transform; ru: string }[] = [
-      { key: "position", ru: "Позиция" },
+      { key: "position", ru: "Позиционирование" },
       { key: "rotation", ru: "Поворот" },
-      { key: "scale", ru: "Масштаб" },
+      { key: "scale", ru: "Масштабирование" },
     ];
 
     return (
       <>
-        {locked ? (
-          <div style={{ opacity: 0.85, marginBottom: 8 }}>
-            Объект заблокирован — параметры недоступны
-          </div>
-        ) : null}
         {groups.map(({ key: dim, ru }) => (
           <ObjectNumberInput
             key={dim}
             mode={mode}
-            label={ru}
+            groupLabel={ru}
             fields={buildAxisFields(
               dim,
               t[dim],
@@ -194,69 +163,19 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
         ))}
       </>
     );
-  }, [scene, activeObj, sceneId, mode, applyTransformDimension]);
+  }, [scene, mode, activeObj, sceneId, applyTransformDimension]);
 
   return (
     <div
-      style={{
-        background: "rgba(71, 71, 71, 0.33)",
-        backdropFilter: "blur(24px)",
-        userSelect: "none",
-        zIndex: 10,
-      }}
+      className={style.baseParams}
+      style={locked ? { opacity: "0.5" } : { opacity: "1" }}
     >
-      <div>
-        <PanelModeToggle mode={mode} setMode={setMode} />
-        <PanelSceneModeContext.Provider value={mode}>
-          <ScrollPanel>
-            {sceneItems.map((item) => (
-              <GraphItem
-                key={item.id}
-                item={item}
-                isActive={item.id === activeRowId}
-                onSelect={() =>
-                  item.id === activeRowId
-                    ? selection.execute({ id: null })
-                    : selection.execute({ id: item.id })
-                }
-              />
-            ))}
-          </ScrollPanel>
-          <ActionButton
-            onClick={() => console.log("add obj")}
-            text="Добавить объект"
-          />
-          <ActionButton
-            onClick={() => console.log("add light")}
-            text="Добавить свет"
-          />
-
-          {activeObj && (
-            <div>
-              <div>
-                Редактирование{" "}
-                <strong>{activeEntityEditorHeading(activeObj)}</strong>{" "}
-              </div>
-              <div>{transformPanels}</div>
-            </div>
-          )}
-        </PanelSceneModeContext.Provider>
-      </div>
-    </div>
-  );
-}
-
-export function PanelObject() {
-  return (
-    <div
-      style={{
-        background: "rgba(255, 255, 255, 0.1)",
-        backdropFilter: "blur(24px)",
-        userSelect: "none",
-        zIndex: 10,
-      }}
-    >
-      Panel Object
+      {mode == "open" && (
+        <h3 className="h3">
+          Редактирование {activeEntityEditorHeading(activeObj)}
+        </h3>
+      )}
+      {transformPanels}
     </div>
   );
 }

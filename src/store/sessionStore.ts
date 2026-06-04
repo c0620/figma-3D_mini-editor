@@ -2,7 +2,12 @@ import { create } from "zustand";
 
 import type { Notification } from "../types/ui";
 
+type colorTheme = "Light" | "Dark";
+type windowSize = "Small" | "Large";
+
 export interface UiState {
+  colorTheme: colorTheme;
+  windowSize: windowSize;
   activeObjectId: string | null;
   projectName: string;
   notifications: Notification[];
@@ -11,6 +16,8 @@ export interface UiState {
 }
 
 interface UiActions {
+  setColorTheme(theme: colorTheme): void;
+  setWindowSize(size: windowSize): void;
   setActiveObjectId(id: string | null): void;
   setProjectName(name: string): void;
   pushNotification(notification: Notification): void;
@@ -18,13 +25,17 @@ interface UiActions {
   setHistoryFlags(canUndo: boolean, canRedo: boolean): void;
 }
 
-export const useUiStore = create<UiState & UiActions>((set) => ({
+export const useSessionStore = create<UiState & UiActions>((set) => ({
+  colorTheme: "Dark",
+  windowSize: "Large",
   activeObjectId: null,
   projectName: "",
   notifications: [],
   canUndo: false,
   canRedo: false,
 
+  setColorTheme: (theme) => set({ colorTheme: theme }),
+  setWindowSize: (size) => set({ windowSize: size }),
   setActiveObjectId: (id) => set({ activeObjectId: id }),
   setProjectName: (name) => set({ projectName: name }),
   pushNotification: (notification) =>

@@ -4,7 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { useSceneStore } from "../../../store/sceneStore";
 import { threeAssetRegistry } from "../../../io/threeAssetRegistry";
 import type { SceneObject } from "../../../types/scene";
-import { useUiStore } from "@/store/uiStore";
+import { useSessionStore } from "@/store/sessionStore";
 
 function SceneObjectMesh({
   object,
@@ -37,7 +37,7 @@ function SceneObjectMesh({
 
 export function SceneRenderer() {
   const scene = useSceneStore((s) => s.scene);
-  const activeId = useUiStore((s) => s.activeObjectId);
+  const activeId = useSessionStore((s) => s.activeObjectId);
   if (!scene) return null;
 
   return (

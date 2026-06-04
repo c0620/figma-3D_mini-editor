@@ -1,0 +1,12 @@
+.group-label {
+  margin-bottom: var(--margin-xs);
+}
+
+.number-inputs {
+  display: flex;
+  gap: var(--margin-s);
+}
+
+.vertical {
+  flex-direction: column;
+}

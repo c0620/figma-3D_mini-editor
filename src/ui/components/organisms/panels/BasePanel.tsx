@@ -1,0 +1,35 @@
+import { useState, createContext } from "react";
+import type { PanelMode } from "../../types/panel";
+import styles from "./Panel.module.scss";
+import { PanelModeToggle } from "../../atoms/Navigation";
+
+export const PanelSceneModeContext = createContext<PanelMode>("open");
+
+export function Panel({
+  panel,
+  text,
+  children,
+}: {
+  panel: "Left" | "Right";
+  text: string;
+  children: React.ReactNode;
+}) {
+  const [mode, setMode] = useState<PanelMode>("open");
+  return (
+    <div
+      className={
+        mode == "open" ? styles.panel : styles.panel + ` ${styles.close}`
+      }
+    >
+      <PanelSceneModeContext value={mode}>
+        <PanelModeToggle
+          mode={mode}
+          setMode={setMode}
+          panel={panel}
+          text={text}
+        />
+        {children}
+      </PanelSceneModeContext>
+    </div>
+  );
+}

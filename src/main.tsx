@@ -1,18 +1,18 @@
-import './index.css';
+import "@/styles/global.scss";
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 
-import App from './App.tsx';
-import { AppKernelProvider } from './app/ApplicationKernelContext';
-import { buildKernel } from './app/compositionRoot';
+import App from "./App.tsx";
+import { AppKernelProvider } from "./app/ApplicationKernelContext";
+import { buildKernel } from "./app/compositionRoot";
 
 const kernel = buildKernel();
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AppKernelProvider kernel={kernel}>
       <App />
     </AppKernelProvider>
-  </StrictMode>,
+  </StrictMode>
 );

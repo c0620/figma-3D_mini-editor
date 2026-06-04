@@ -1,0 +1,9 @@
+@use "./reset.scss";
+@use "./colors.scss";
+@use "./fonts.scss";
+@use "./margins.scss";
+@use "./sizes.scss";
+body {
+  background-color: var(--editor-utils-color-background-primary);
+  font-family: "NT Somic", serif;
+}

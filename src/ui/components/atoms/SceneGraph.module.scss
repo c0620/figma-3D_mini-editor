@@ -1,0 +1,56 @@
+.item-image {
+  background-color: var(--interactive-color-interactive-background-tertiary);
+  height: var(--button-size-button-mode-height);
+  aspect-ratio: 1;
+  border-radius: var(--border-radius-s);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.item-image > img {
+  height: var(--button-size-button-icon-height);
+}
+
+.scene-graph {
+  display: flex;
+  color: var(--interactive-color-interactive-text-secondary);
+  justify-content: space-between;
+}
+
+.graph-info {
+  display: flex;
+  gap: var(--margin-m);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  align-items: center;
+}
+
+.graph-info > p {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.buttons {
+  display: flex;
+  gap: var(--margin-s);
+}
+
+.text-active {
+  color: var(--common-color-common-text);
+}
+
+.text-disabled {
+  color: var(--interactive-color-interactive-text-secondary);
+}
+
+.image-active {
+  background-color: var(--common-color-common-accent);
+}
+
+.image-disabled {
+  background-color: var(--interactive-color-interactive-background-primary);
+}

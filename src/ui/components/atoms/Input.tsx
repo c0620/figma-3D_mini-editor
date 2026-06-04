@@ -1,6 +1,8 @@
 import type { ChangeEvent } from "react";
 
-import type { InputField } from "../molecules/EditorInput";
+import type { InputField } from "./EditorInput";
+
+import styles from "./Input.module.scss";
 
 export function InputText({ field }: { field: InputField }) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -10,16 +12,19 @@ export function InputText({ field }: { field: InputField }) {
   };
 
   return (
-    <>
-      {field.label ? <label>{field.label}</label> : null}
+    <div className={styles.inputText}>
+      {field.label ? (
+        <label className={styles.inputTextLabel}>{field.label}</label>
+      ) : null}
       <input
+        className={styles.inputTextField}
         type="number"
         step="any"
         style={field.isActive ? { color: "orange" } : { color: "white" }}
         onChange={handleChange}
         value={Number.isFinite(field.value) ? field.value : 0}
       />
-    </>
+    </div>
   );
 }
 

@@ -11,7 +11,7 @@ import type { AppHandlers, AppKernel } from "./compositionRoot";
 import { buildSceneEntityList } from "../store/sceneEntityList";
 import { isSceneCameraEntityId } from "../store/sceneEntityList";
 import { useSceneStore } from "../store/sceneStore";
-import { useUiStore } from "../store/uiStore";
+import { useSessionStore } from "../store/sessionStore";
 
 export type {
   SceneEntityKind,
@@ -91,7 +91,7 @@ export function useSceneEntities() {
  * Пересчитывается только при изменении `activeObjectId` или `scene`.
  */
 export function useActiveObject(): ActiveEntity | null {
-  const activeObjectId = useUiStore((s) => s.activeObjectId);
+  const activeObjectId = useSessionStore((s) => s.activeObjectId);
   const scene = useSceneStore((s) => s.scene);
 
   return useMemo(() => {
@@ -116,5 +116,5 @@ export function useActiveObject(): ActiveEntity | null {
  * Легковесная подписка: не тянет данные сцены.
  */
 export function useActiveObjectId() {
-  return useUiStore((s) => s.activeObjectId);
+  return useSessionStore((s) => s.activeObjectId);
 }

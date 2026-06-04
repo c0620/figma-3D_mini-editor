@@ -1,0 +1,29 @@
+.mode-toggle {
+  display: flex;
+  color: var(--common-color-common-text);
+  justify-content: space-between;
+}
+
+.mode-toggle-text {
+  margin: auto;
+  text-align: center;
+}
+
+.mode-toggle-button {
+  width: var(--size-input-top-panel);
+  aspect-ratio: 1;
+  background-color: var(--common-color-common-black);
+  border-radius: var(--border-radius-s);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mode-toggle-button > img {
+  height: var(--button-size-button-icon-height);
+  aspect-ratio: 1;
+}
+
+.hide {
+  display: none;
+}

@@ -1,0 +1,27 @@
+.panel {
+  background: var(--editor-utils-color-panel-background);
+  backdrop-filter: blur(24px);
+  user-select: none;
+  z-index: 10;
+  border-radius: var(--border-radius-m);
+  border: 1px solid var(--utils-color-edge);
+  height: var(--editor-size-editor-panel-height);
+  width: var(--editor-size-editor-panel-width);
+  padding: var(--margin-l);
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+  color: var(--common-color-common-text);
+  gap: var(--margin-l);
+}
+
+.panel.close {
+  width: var(--editor-size-editor-panel-width-closed);
+}
+
+.panel-scene {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+  height: 100%;
+}

@@ -1,7 +1,7 @@
-import type { Transform } from '../types/scene';
-import { isSceneCameraEntityId } from '../store/sceneEntityList';
-import { useUiStore } from '../store/uiStore';
-import { SceneToolHandler } from './sceneToolHandler';
+import type { Transform } from "../types/scene";
+import { isSceneCameraEntityId } from "../store/sceneEntityList";
+import { useSessionStore } from "../store/sessionStore";
+import { SceneToolHandler } from "./sceneToolHandler";
 
 export interface BaseToolPayload {
   id?: string | null;
@@ -23,7 +23,7 @@ export class BaseToolHandler extends SceneToolHandler {
       scale,
     } = payload as BaseToolPayload;
 
-    const id = explicitId ?? useUiStore.getState().activeObjectId;
+    const id = explicitId ?? useSessionStore.getState().activeObjectId;
     if (!id) return;
 
     const transformPatch = this.buildTransformPatch({

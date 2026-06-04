@@ -1,0 +1,38 @@
+.input-text {
+  display: flex;
+  background-color: var(--interactive-color-interactive-background-primary);
+  border-radius: var(--border-radius-s);
+  gap: var(--margin-s);
+  justify-content: center;
+  align-items: center;
+  padding: 0 var(--margin-s);
+}
+
+.input-text-label {
+  color: var(--interactive-color-interactive-text-tertiary);
+}
+
+.input-text-field {
+  background-color: var(--interactive-color-interactive-background-primary);
+  border-radius: var(--border-radius-s);
+  box-shadow: none;
+  border: none;
+  text-align: center;
+  height: var(--inputs-size-input-height);
+  width: 100%;
+}
+
+input {
+  all: unset;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
