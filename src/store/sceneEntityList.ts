@@ -1,4 +1,4 @@
-import type { Scene } from "../types/scene";
+import type { Scene, Transform } from "../types/scene";
 
 export type SceneEntityKind = "mesh" | "light" | "camera";
 
@@ -20,6 +20,19 @@ export function isSceneCameraEntityId(
   entityId: string
 ): boolean {
   return entityId === sceneCameraEntityId(sceneId);
+}
+
+/** Transform сущности по id (включая синтетический id камеры). */
+export function transformByEntityId(
+  scene: Scene,
+  entityId: string
+): Transform | null {
+  if (isSceneCameraEntityId(scene.id, entityId)) return scene.camera.transform;
+  return (
+    scene.lights.find((l) => l.id === entityId)?.transform ??
+    scene.objects.find((o) => o.id === entityId)?.transform ??
+    null
+  );
 }
 
 /**

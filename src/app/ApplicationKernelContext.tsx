@@ -19,9 +19,9 @@ export type {
 } from "../store/sceneEntityList";
 
 export type ActiveEntity =
-  | { kind: "mesh"; data: SceneObject }
-  | { kind: "light"; data: Light }
-  | { kind: "camera"; data: CameraState };
+  | { id: string; kind: "mesh"; data: SceneObject }
+  | { id: string; kind: "light"; data: Light }
+  | { id: string; kind: "camera"; data: CameraState };
 
 const AppKernelContext = createContext<AppKernel | null>(null);
 
@@ -98,14 +98,14 @@ export function useActiveObject(): ActiveEntity | null {
     if (!activeObjectId || !scene) return null;
 
     if (isSceneCameraEntityId(scene.id, activeObjectId)) {
-      return { kind: "camera", data: scene.camera };
+      return { id: activeObjectId, kind: "camera", data: scene.camera };
     }
 
     const light = scene.lights.find((l) => l.id === activeObjectId);
-    if (light) return { kind: "light", data: light };
+    if (light) return { id: activeObjectId, kind: "light", data: light };
 
     const obj = scene.objects.find((o) => o.id === activeObjectId);
-    if (obj) return { kind: "mesh", data: obj };
+    if (obj) return { id: activeObjectId, kind: "mesh", data: obj };
 
     return null;
   }, [activeObjectId, scene]);
