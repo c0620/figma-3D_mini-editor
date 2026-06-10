@@ -1,8 +1,8 @@
 import { NavLink } from "react-router";
 import { SceneRenderer } from "../viewport/SceneViewport";
 import { useActiveObject } from "@/app/ApplicationKernelContext";
-import { PanelScene } from "../organisms/panels/PanelScene";
-import { PanelParams } from "../organisms/panels/PanelParams";
+import { PanelScene } from "../templates/panels/PanelScene";
+import { PanelParams } from "../templates/panels/PanelParams";
 
 export default function EditorPage() {
   const activeObj = useActiveObject();
@@ -22,7 +22,7 @@ export default function EditorPage() {
         }}
       >
         <PanelScene activeObj={activeObj} />
-        <PanelParams />
+        {activeObj && <PanelParams activeObj={activeObj} />}
       </div>
       <div style={{ width: "100vw", height: "100vh" }}>
         <SceneRenderer />

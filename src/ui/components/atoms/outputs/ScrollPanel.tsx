@@ -1,29 +1,16 @@
 import { useContext } from "react";
-import { PanelSceneModeContext } from "../organisms/panels/BasePanel";
+import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 
-import styles from "./Output.module.scss";
+import styles from "./ScrollPanel.module.scss";
 import clsx from "clsx";
 
-export function TextBlock({
-  text,
-  textListItems,
-}: {
-  text: string;
-  textListItems: Array<string> | null;
-}) {
-  return (
-    <div>
-      {text} {textListItems && textListItems.map((item) => <p>{item}</p>)}
-    </div>
-  );
-}
 export function ScrollPanel({
-  isActive,
+  isLong,
   text,
   img,
   children,
 }: {
-  isActive: Boolean;
+  isLong: Boolean;
   text?: string;
   img?: string;
   children: any;
@@ -46,7 +33,7 @@ export function ScrollPanel({
 
       <div
         className={clsx(styles.scrollPanel, {
-          [styles.panelLong]: !isActive,
+          [styles.panelLong]: isLong,
           [styles.closed]: mode == "close",
         })}
       >

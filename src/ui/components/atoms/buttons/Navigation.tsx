@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { NavLinkButton } from "./Button";
-import type { PanelMode } from "../types/panel";
+import type { PanelMode } from "../../types/panel";
 import clsx from "clsx";
 
 import styles from "./Navigation.module.scss";

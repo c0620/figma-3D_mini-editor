@@ -1,7 +1,7 @@
 import { useState, createContext } from "react";
 import type { PanelMode } from "../../types/panel";
 import styles from "./Panel.module.scss";
-import { PanelModeToggle } from "../../atoms/Navigation";
+import { PanelModeToggle } from "../../atoms/buttons/Navigation";
 
 export const PanelSceneModeContext = createContext<PanelMode>("open");
 

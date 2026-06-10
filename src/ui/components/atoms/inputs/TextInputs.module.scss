@@ -20,6 +20,7 @@
   text-align: center;
   height: var(--inputs-size-input-height);
   width: 100%;
+  max-width: 90px;
 }
 
 input {
@@ -35,4 +36,17 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
+}
+
+.group-label {
+  margin-bottom: var(--margin-xs);
+}
+
+.number-inputs {
+  display: flex;
+  gap: var(--margin-s);
+}
+
+.vertical {
+  flex-direction: column;
 }

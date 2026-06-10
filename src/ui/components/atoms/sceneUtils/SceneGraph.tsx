@@ -1,8 +1,8 @@
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import type { SceneEntitySummary } from "@/store/sceneEntityList";
 import { useContext } from "react";
-import { PanelSceneModeContext } from "../organisms/panels/BasePanel";
-import { SmallButton } from "./Button";
+import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
+import { SmallButton } from "../buttons/Button";
 
 import styles from "./SceneGraph.module.scss";
 

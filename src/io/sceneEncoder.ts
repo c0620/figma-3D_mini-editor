@@ -76,6 +76,8 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
 
     const id = node.uuid;
     const threeMat = node.material as ThreeMaterial | ThreeMaterial[];
+
+    //toDO: extract not only first mat
     const domainMat = extractDomainMaterial(threeMat);
     materials[domainMat.id] = domainMat;
 

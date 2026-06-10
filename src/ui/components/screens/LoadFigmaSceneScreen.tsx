@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { MainButton } from "../atoms/Button";
-import { FigmaInput, FileInput } from "../atoms/Input";
-import { NavTitle } from "../atoms/Navigation";
-import { TextBlock } from "../atoms/Output";
+import { MainButton } from "../atoms/buttons/Button";
+import { NavTitle } from "../atoms/buttons/Navigation";
+import { TextBlock } from "../atoms/outputs/TextBlock";
 
 export default function LoadFigmaSceneScreen({
   type,

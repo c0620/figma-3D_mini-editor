@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { MainButton } from "../atoms/Button";
-import { FigmaInput, FileInput } from "../atoms/Input";
-import { NavTitle } from "../atoms/Navigation";
-import { TextBlock } from "../atoms/Output";
+import { MainButton } from "../atoms/buttons/Button";
+import { NavTitle } from "../atoms/buttons/Navigation";
 import { useTransfer } from "@/app/ApplicationKernelContext";
+import { FileInput } from "../atoms/inputs/FileInputs";
+import { TextBlock } from "../atoms/outputs/TextBlock";
 export default function LoadLocalSceneScreen() {
   const textContent = {
     title: "Загрузка с устройства",
