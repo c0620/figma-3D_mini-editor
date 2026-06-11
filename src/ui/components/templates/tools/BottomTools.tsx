@@ -8,23 +8,34 @@ import scale from "@/assets/images/icons/descriptive/scale.svg";
 import undo from "@/assets/images/icons/descriptive/undo.svg";
 import redo from "@/assets/images/icons/descriptive/redo.svg";
 import type { ActiveEntity } from "@/app/ApplicationKernelContext";
+import { useSessionStore, type ObjectToolMode } from "@/store/sessionStore";
 
 export function BottomTools({ activeObj }: { activeObj: ActiveEntity | null }) {
+  const activeTool = useSessionStore().activeObjectTool;
+  const setActiveTool = useSessionStore().setActiveObjectTool;
+  const toggleActiveTool = (tool: ObjectToolMode) => {
+    if (!activeTool || activeTool != tool) setActiveTool(tool);
+    if (activeTool == tool) setActiveTool(null);
+  };
+
   return (
     <div className={styles.toolsRow}>
       {activeObj && (
         <div className={styles.tool}>
           <SquareStateButton
-            onClick={() => console.log("delete")}
+            onClick={() => toggleActiveTool("translate")}
             imgs={{ active: pan, inactive: pan }}
+            active={activeTool === "translate"}
           />
           <SquareStateButton
-            onClick={() => console.log("delete")}
+            onClick={() => toggleActiveTool("rotate")}
             imgs={{ active: rotate, inactive: rotate }}
+            active={activeTool === "rotate"}
           />
           <SquareStateButton
-            onClick={() => console.log("delete")}
+            onClick={() => toggleActiveTool("scale")}
             imgs={{ active: scale, inactive: scale }}
+            active={activeTool === "scale"}
           />
         </div>
       )}

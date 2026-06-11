@@ -1,7 +1,7 @@
 import type { ChangeEvent } from "react";
 
 import styles from "./TextInputs.module.scss";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import clsx from "clsx";
 
@@ -20,6 +20,7 @@ export type InputField = {
 
 export function InputText({ field }: { field: InputField }) {
   const [cachedValue, setCachedValue] = useState(field.value);
+  useEffect(() => setCachedValue(field.value), [field.value]);
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const parsed = Number.parseFloat(e.target.value.replace(",", "."));
     setCachedValue(parsed);

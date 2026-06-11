@@ -7,7 +7,6 @@ export function FileInput({
   error?: any;
   success?: boolean;
 }) {
-  console.log(error, success);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (!file) return;

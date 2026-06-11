@@ -47,11 +47,13 @@ export function SquareButton({ onClick, text, img }: ButtonProps) {
 export function SquareStateButton({
   onClick,
   imgs,
+  active,
 }: {
   onClick: () => void;
   imgs: { active: string; inactive: string };
+  active?: boolean;
 }) {
-  const [isActive, setActive] = useState(false);
+  const [isActive, setActive] = useState(active ? active : false);
   const img = isActive ? imgs.active : imgs.inactive;
 
   const handleClick = () => {
@@ -61,7 +63,9 @@ export function SquareStateButton({
 
   return (
     <div
-      className={clsx(styles.squareButton, { [styles.active]: isActive })}
+      className={clsx(styles.squareButton, {
+        [styles.active]: active !== undefined ? active : isActive,
+      })}
       onClick={handleClick}
     >
       <img src={img} />

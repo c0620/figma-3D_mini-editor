@@ -76,9 +76,9 @@ export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
   for (const transform in activeObjTrans) {
     var valueTransforms = [];
     for (const i in activeObjTrans[transform as keyof Transform]) {
-      console.log(activeObjTrans[transform as keyof Transform][i], +i, AXES[i]);
       valueTransforms.push(
         <NumberFieldInput
+          key={`${activeObj.id}-${transform}-${i}`}
           field={{
             value: activeObjTrans[transform as keyof Transform][i],
             isActive: false,
