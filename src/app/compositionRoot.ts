@@ -35,7 +35,6 @@ import { CommandBus } from "../commands/commandBus";
 import { DeletionGarbageCollector } from "../commands/deletionGarbageCollector";
 import { History } from "../store/history";
 import { NotificationService } from "../store/notificationService";
-import { useSceneStore } from "../store/sceneStore";
 import { SceneStorage } from "../store/sceneStorage";
 
 import type { SceneEntitySummary } from "../store/sceneEntityList";
@@ -154,7 +153,7 @@ export function buildKernel(): AppKernel {
   const executor = new ActionExecutor(sceneStorage);
   const reverter = new ActionReverter(sceneStorage);
   const gc = new DeletionGarbageCollector(sceneStorage);
-  const bus = new CommandBus(history, executor, reverter, gc);
+  const bus = new CommandBus(sceneStorage, history, executor, reverter, gc);
 
   executor.handlers.set(CommandType.DeleteModel, deletionHandler);
   executor.handlers.set(CommandType.AddLight, lightAdditionHandler);
@@ -198,7 +197,7 @@ export function buildKernel(): AppKernel {
     undo: () => bus.undo(),
     redo: () => bus.redo(),
     listSceneEntities: () =>
-      buildSceneEntityList(useSceneStore.getState().scene),
+      buildSceneEntityList(sceneStorage.getSceneOrNull()),
     transfer,
     notifications,
     help,

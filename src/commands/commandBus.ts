@@ -1,23 +1,26 @@
 import { CommandType } from "../types/commands";
 import type { HistoryEntry } from "../types/commands";
 import { History } from "../store/history";
-import { useSessionStore } from "../store/sessionStore";
+import { SceneStorage } from "../store/sceneStorage";
 import { ActionExecutor } from "./actionExecutor";
 import { ActionReverter } from "./actionReverter";
 import { DeletionGarbageCollector } from "./deletionGarbageCollector";
 
 export class CommandBus {
+  scene: SceneStorage;
   history: History;
   executor: ActionExecutor;
   reverter: ActionReverter;
   deletionGc: DeletionGarbageCollector;
 
   constructor(
+    scene: SceneStorage,
     history: History,
     executor: ActionExecutor,
     reverter: ActionReverter,
     deletionGc: DeletionGarbageCollector
   ) {
+    this.scene = scene;
     this.history = history;
     this.executor = executor;
     this.reverter = reverter;
@@ -50,11 +53,9 @@ export class CommandBus {
   }
 
   private syncHistoryFlags(): void {
-    useSessionStore
-      .getState()
-      .setHistoryFlags(
-        this.history.actions.length > 0,
-        this.history.redoActions.length > 0
-      );
+    this.scene.setHistoryFlags(
+      this.history.actions.length > 0,
+      this.history.redoActions.length > 0
+    );
   }
 }

@@ -1,30 +1,47 @@
-import type { CameraState, Light, Scene, SceneObject } from "../types/scene";
+import type {
+  CameraState,
+  EnvironmentState,
+  Light,
+  Scene,
+  SceneObject,
+} from "../types/scene";
 
 import { useSceneStore } from "./sceneStore";
-import type { CameraPatch, LightPatch, SceneObjectPatch } from "./sceneStore";
+import type {
+  CameraPatch,
+  EnvironmentPatch,
+  LightPatch,
+  SceneObjectPatch,
+} from "./sceneStore";
 import { useSessionStore } from "./sessionStore";
+import type { ObjectToolMode } from "./sessionStore";
 
+/**
+ * Imperative-фасад над `sceneStore` и `sessionStore` для non-React слоя
+ * (handlers, commands, IO, render). Прямых обращений к сторам в этих слоях
+ * быть не должно — только через данный класс.
+ */
 export class SceneStorage {
-  load(scene: Scene): void {
-    useSceneStore.getState().loadScene(scene);
-  }
+  // --- Scene: чтение ---
 
+  /** Сцена с гарантией наличия. Бросает, если сцена не загружена (для IO/render). */
   getScene(): Scene {
     const scene = useSceneStore.getState().scene;
     if (!scene) throw new Error("SceneStorage.getScene: no scene loaded");
     return scene;
   }
 
-  patchSceneObject(objectId: string, patch: SceneObjectPatch): void {
-    useSceneStore.getState().patchSceneObject(objectId, patch);
+  /** Безопасное чтение сцены без исключения. */
+  getSceneOrNull(): Scene | null {
+    return useSceneStore.getState().scene;
   }
 
-  patchLight(lightId: string, patch: LightPatch): void {
-    useSceneStore.getState().patchLight(lightId, patch);
+  getCamera(): CameraState | null {
+    return useSceneStore.getState().scene?.camera ?? null;
   }
 
-  patchCamera(patch: CameraPatch): void {
-    useSceneStore.getState().patchCamera(patch);
+  getEnvironment(): EnvironmentState | null {
+    return useSceneStore.getState().scene?.environment ?? null;
   }
 
   findObjectById(id: string): SceneObject | null {
@@ -39,15 +56,65 @@ export class SceneStorage {
     return scene.lights.find((l) => l.id === id) ?? null;
   }
 
-  getCamera(): CameraState | null {
-    return useSceneStore.getState().scene?.camera ?? null;
+  // --- Scene: запись ---
+
+  load(scene: Scene): void {
+    useSceneStore.getState().loadScene(scene);
   }
 
-  setActive(id: string | null): void {
+  clearScene(): void {
+    useSceneStore.getState().clearScene();
+  }
+
+  patchSceneObject(objectId: string, patch: SceneObjectPatch): void {
+    useSceneStore.getState().patchSceneObject(objectId, patch);
+  }
+
+  patchLight(lightId: string, patch: LightPatch): void {
+    useSceneStore.getState().patchLight(lightId, patch);
+  }
+
+  patchCamera(patch: CameraPatch): void {
+    useSceneStore.getState().patchCamera(patch);
+  }
+
+  patchEnvironment(patch: EnvironmentPatch): void {
+    useSceneStore.getState().patchEnvironment(patch);
+  }
+
+  addLight(light: Light): void {
+    useSceneStore.getState().addLight(light);
+  }
+
+  // --- Session: чтение ---
+
+  getActiveObjectId(): string | null {
+    return useSessionStore.getState().activeObjectId;
+  }
+
+  getProjectName(): string {
+    return useSessionStore.getState().projectName;
+  }
+
+  getActiveObjectTool(): ObjectToolMode | null {
+    return useSessionStore.getState().activeObjectTool;
+  }
+
+  // --- Session: запись ---
+
+  setActiveObjectId(id: string | null): void {
     useSessionStore.getState().setActiveObjectId(id);
   }
 
-  updateProjectName(name: string): void {
+  setProjectName(name: string): void {
     useSessionStore.getState().setProjectName(name);
+  }
+
+  setHistoryFlags(canUndo: boolean, canRedo: boolean): void {
+    useSessionStore.getState().setHistoryFlags(canUndo, canRedo);
+  }
+
+  setActiveObjectTool(tool: ObjectToolMode): void {
+    useSessionStore.getState().setActiveObjectTool(tool);
   }
 }

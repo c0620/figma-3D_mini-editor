@@ -1,5 +1,6 @@
 import type {
   CameraState,
+  EnvironmentState,
   Light,
   Scene,
   SceneObject,
@@ -22,6 +23,8 @@ export type CameraPatch = Partial<Omit<CameraState, 'transform'>> & {
   transform?: Partial<Transform>;
 };
 
+export type EnvironmentPatch = Partial<EnvironmentState>;
+
 interface SceneState {
   scene: Scene | null;
 }
@@ -32,6 +35,8 @@ interface SceneActions {
   patchSceneObject(objectId: string, patch: SceneObjectPatch): void;
   patchLight(lightId: string, patch: LightPatch): void;
   patchCamera(patch: CameraPatch): void;
+  patchEnvironment(patch: EnvironmentPatch): void;
+  addLight(light: Light): void;
 }
 
 export type { SceneObjectPatch };
@@ -90,6 +95,25 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
           ...state.scene,
           camera: { ...prev, ...rest, transform: nextTransform },
         },
+      };
+    }),
+
+  patchEnvironment: (patch) =>
+    set((state) => {
+      if (!state.scene) return state;
+      return {
+        scene: {
+          ...state.scene,
+          environment: { ...state.scene.environment, ...patch },
+        },
+      };
+    }),
+
+  addLight: (light) =>
+    set((state) => {
+      if (!state.scene) return state;
+      return {
+        scene: { ...state.scene, lights: [...state.scene.lights, light] },
       };
     }),
 }));

@@ -1,6 +1,5 @@
 import type { Transform } from "../types/scene";
 import { isSceneCameraEntityId } from "../store/sceneEntityList";
-import { useSessionStore } from "../store/sessionStore";
 import { SceneToolHandler } from "./sceneToolHandler";
 
 export interface BaseToolPayload {
@@ -15,15 +14,10 @@ export interface BaseToolPayload {
  * (SceneObject, Light или Camera). Работает через иммутабельный патч стора.
  */
 export class BaseToolHandler extends SceneToolHandler {
-  execute(payload: object): void {
-    const {
-      id: explicitId,
-      position,
-      rotation,
-      scale,
-    } = payload as BaseToolPayload;
+  execute(payload: BaseToolPayload): void {
+    const { id: explicitId, position, rotation, scale } = payload;
 
-    const id = explicitId ?? useSessionStore.getState().activeObjectId;
+    const id = explicitId ?? this.scene.getActiveObjectId();
     if (!id) return;
 
     const transformPatch = this.buildTransformPatch({

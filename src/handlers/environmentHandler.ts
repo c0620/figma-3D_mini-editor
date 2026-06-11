@@ -1,7 +1,8 @@
+import type { EnvironmentPatch } from '../store/sceneStore';
 import { SceneToolHandler } from './sceneToolHandler';
 
 export class EnvironmentHandler extends SceneToolHandler {
   execute(payload: object): void {
-    Object.assign(this.scene.getScene().environment, payload);
+    this.scene.patchEnvironment(payload as EnvironmentPatch);
   }
 }

@@ -1,8 +1,6 @@
 import type { Light } from "../types/scene";
 import { randomUUID } from "../lib/randomId";
 
-import { useSceneStore } from "../store/sceneStore";
-
 import { SceneToolHandler } from "./sceneToolHandler";
 
 export class LightAdditionHandler extends SceneToolHandler {
@@ -22,14 +20,6 @@ export class LightAdditionHandler extends SceneToolHandler {
       },
     };
 
-    useSceneStore.setState((state) => {
-      if (!state.scene) return state;
-      return {
-        scene: {
-          ...state.scene,
-          lights: [...state.scene.lights, light],
-        },
-      };
-    });
+    this.scene.addLight(light);
   }
 }

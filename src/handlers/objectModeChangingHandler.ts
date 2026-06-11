@@ -1,5 +1,5 @@
-import { useSessionStore } from "../store/sessionStore";
 import type { SceneObject } from "../types/scene";
+import type { SceneStorage } from "../store/sceneStorage";
 import { SceneToolHandler } from "./sceneToolHandler";
 
 export type ObjectGraphToolsSetPayload = {
@@ -9,11 +9,14 @@ export type ObjectGraphToolsSetPayload = {
   locked?: boolean;
 };
 
-function resolveMeshObjectId(explicit?: string | null): string | null {
+function resolveMeshObjectId(
+  scene: SceneStorage,
+  explicit?: string | null
+): string | null {
   const id =
     typeof explicit === "string" && explicit.length > 0
       ? explicit
-      : useSessionStore.getState().activeObjectId;
+      : scene.getActiveObjectId();
   return id ?? null;
 }
 
@@ -35,7 +38,7 @@ export class ObjectGraphToolsHandler extends SceneToolHandler {
     const hasLock = typeof locked === "boolean";
     if (!hasVisibility && !hasLock) return;
 
-    const resolvedId = resolveMeshObjectId(explicitObjectId);
+    const resolvedId = resolveMeshObjectId(this.scene, explicitObjectId);
     if (!resolvedId) return;
 
     const obj = this.scene.findObjectById(resolvedId);
@@ -55,7 +58,7 @@ export class ToggleVisibilityHandler extends SceneToolHandler {
     const id =
       typeof (payload as { id?: string }).id === "string"
         ? (payload as { id: string }).id
-        : resolveMeshObjectId();
+        : resolveMeshObjectId(this.scene);
     if (!id) return;
 
     const obj = this.scene.findObjectById(id);
@@ -71,7 +74,7 @@ export class ToggleLockHandler extends SceneToolHandler {
     const id =
       typeof (payload as { id?: string }).id === "string"
         ? (payload as { id: string }).id
-        : resolveMeshObjectId();
+        : resolveMeshObjectId(this.scene);
     if (!id) return;
 
     const obj = this.scene.findObjectById(id);
