@@ -92,7 +92,13 @@ export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
     transforms.push(
       <div>
         <p className="t3">{transform}</p>
-        <div className={clsx(styles.inputRow)}>{valueTransforms}</div>
+        <div
+          className={clsx(styles.inputRow, {
+            [styles.inactive]: activeObj.data.locked,
+          })}
+        >
+          {valueTransforms}
+        </div>
       </div>
     );
   }
@@ -100,7 +106,7 @@ export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
   return (
     <div
       className={clsx(styles.baseParams, {
-        [styles.hide]: mode == "close" && true,
+        [styles.hide]: mode == "close" && true, //toDo: show when active BottomTools
       })}
       style={locked ? { opacity: "0.5" } : { opacity: "1" }}
     >

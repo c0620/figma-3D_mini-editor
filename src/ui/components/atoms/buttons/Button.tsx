@@ -2,6 +2,13 @@ import { Link } from "react-router";
 
 import styles from "./Button.module.scss";
 import clsx from "clsx";
+import { useState } from "react";
+
+export interface ButtonProps {
+  onClick: () => void;
+  text?: string;
+  img?: string;
+}
 
 export function MainButton({
   text,
@@ -20,19 +27,44 @@ export function MainButton({
   }
 }
 
-export function ActionButton({
-  onClick,
-  text,
-  img,
-}: {
-  onClick: () => void;
-  text?: string;
-  img?: string;
-}) {
+export function ActionButton({ onClick, text, img }: ButtonProps) {
   return (
     <div className={clsx(styles.actionButton, "h4")} onClick={onClick}>
       {text}
       {img && <img src={img} alt={text} />}
+    </div>
+  );
+}
+
+export function SquareButton({ onClick, text, img }: ButtonProps) {
+  return (
+    <div className={styles.squareButton} onClick={onClick}>
+      {img && <img src={img} alt={text} />}
+    </div>
+  );
+}
+
+export function SquareStateButton({
+  onClick,
+  imgs,
+}: {
+  onClick: () => void;
+  imgs: { active: string; inactive: string };
+}) {
+  const [isActive, setActive] = useState(false);
+  const img = isActive ? imgs.active : imgs.inactive;
+
+  const handleClick = () => {
+    setActive(!isActive);
+    onClick();
+  };
+
+  return (
+    <div
+      className={clsx(styles.squareButton, { [styles.active]: isActive })}
+      onClick={handleClick}
+    >
+      <img src={img} />
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { SceneRenderer } from "../viewport/SceneViewport";
 import { useActiveObject } from "@/app/ApplicationKernelContext";
 import { PanelScene } from "../templates/panels/PanelScene";
 import { PanelParams } from "../templates/panels/PanelParams";
+import { TopTools } from "../templates/tools/TopTools";
+import { BottomTools } from "../templates/tools/BottomTools";
 
 export default function EditorPage() {
   const activeObj = useActiveObject();
@@ -23,6 +25,22 @@ export default function EditorPage() {
       >
         <PanelScene activeObj={activeObj} />
         {activeObj && <PanelParams activeObj={activeObj} />}
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          width: "100%",
+          top: "5%",
+          height: "90%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "space-between",
+          userSelect: "none",
+        }}
+      >
+        <TopTools />
+        <BottomTools activeObj={activeObj} />
       </div>
       <div style={{ width: "100vw", height: "100vh" }}>
         <SceneRenderer />

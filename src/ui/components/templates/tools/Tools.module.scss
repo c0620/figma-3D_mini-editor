@@ -1,0 +1,33 @@
+@use "../../../../styles/global.scss" as *;
+.tool {
+  @include blurred-background;
+  display: flex;
+  padding: var(--margin-s);
+  gap: var(--margin-m);
+}
+
+.tools-row {
+  display: flex;
+  gap: var(--margin-l);
+  z-index: 10;
+}
+
+.tool-accent {
+  @include blurred-background;
+  border: none;
+  display: flex;
+  padding: var(--margin-s);
+  background-color: var(--common-color-common-accent);
+  background-image:
+    linear-gradient(
+      0deg,
+      var(--common-color-common-accent) 0%,
+      rgba(0, 0, 0, 0) 68%
+    ),
+    linear-gradient(
+      45deg,
+      var(--common-color-common-accent) 16%,
+      #ffebc0 58%,
+      var(--common-color-common-accent) 80%
+    );
+}

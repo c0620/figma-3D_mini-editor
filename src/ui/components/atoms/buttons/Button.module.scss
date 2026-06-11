@@ -24,7 +24,26 @@
   align-items: center;
 }
 
-.action-button > img {
+.square-button {
+  background-color: var(--common-color-common-black);
+  color: var(--common-color-common-white);
+  border-radius: var(--border-radius-s);
+  height: var(--button-size-button-main-midi-height);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: var(--button-size-button-main-midi-height);
+  // &:hover {
+  //   background-color: var(--common-color-common-accent);
+  // }
+}
+
+.action-button > img,
+.square-button > img {
   height: var(--button-size-button-icon-height);
   aspect-ratio: 1;
+}
+
+.active {
+  background-color: var(--common-color-common-accent);
 }
