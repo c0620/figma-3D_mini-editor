@@ -22,5 +22,5 @@ export enum CommandType {
 
 export interface HistoryEntry {
   type: CommandType;
-  payload: object;
+  snapshot: object;
 }

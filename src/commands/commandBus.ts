@@ -3,59 +3,65 @@ import type { HistoryEntry } from "../types/commands";
 import { History } from "../store/history";
 import { SceneStorage } from "../store/sceneStorage";
 import { ActionExecutor } from "./actionExecutor";
-import { ActionReverter } from "./actionReverter";
 import { DeletionGarbageCollector } from "./deletionGarbageCollector";
 
 export class CommandBus {
   scene: SceneStorage;
   history: History;
   executor: ActionExecutor;
-  reverter: ActionReverter;
   deletionGc: DeletionGarbageCollector;
 
   constructor(
     scene: SceneStorage,
     history: History,
     executor: ActionExecutor,
-    reverter: ActionReverter,
     deletionGc: DeletionGarbageCollector
   ) {
     this.scene = scene;
     this.history = history;
     this.executor = executor;
-    this.reverter = reverter;
     this.deletionGc = deletionGc;
   }
 
   execute(type: CommandType, payload: object): void {
+    const snapshot = this.executor.snapshot(type, payload);
+    const entry: HistoryEntry = { type, snapshot };
+    const evicted = this.history.pushPreviousAction(entry);
+
     this.executor.run(type, payload);
-    const entry: HistoryEntry = { type, payload };
-    const evicted = this.history.push(entry);
     this.history.clearRedo();
+
     this.deletionGc.purgeIfEvicted(evicted);
     this.syncHistoryFlags();
   }
 
   undo(): void {
-    const entry = this.history.popLast();
-    if (!entry) return;
-    this.history.redoActions.push(entry);
-    this.reverter.revert(entry.type, entry.payload);
+    const previous = this.history.getPreviousAction();
+    if (!previous) return;
+
+    const current = this.executor.snapshot(previous.type, previous.snapshot);
+    this.history.current.push({ type: previous.type, snapshot: current });
+
+    this.executor.run(previous.type, previous.snapshot);
     this.syncHistoryFlags();
   }
 
   redo(): void {
-    const entry = this.history.popRedo();
+    const entry = this.history.getRedoAction();
     if (!entry) return;
-    this.executor.run(entry.type, entry.payload);
-    this.history.actions.push(entry);
+
+    const current = this.executor.snapshot(entry.type, entry.snapshot);
+    this.history.previous.push({ type: entry.type, snapshot: current });
+
+    this.executor.run(entry.type, entry.snapshot);
+
     this.syncHistoryFlags();
   }
 
   private syncHistoryFlags(): void {
     this.scene.setHistoryFlags(
-      this.history.actions.length > 0,
-      this.history.redoActions.length > 0
+      this.history.previous.length > 0,
+      this.history.current.length > 0
     );
   }
 }

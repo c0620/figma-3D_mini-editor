@@ -1,4 +1,4 @@
-import { SceneStorage } from '../store/sceneStorage';
+import { SceneStorage } from "../store/sceneStorage";
 
 export abstract class SceneToolHandler {
   scene: SceneStorage;
@@ -8,4 +8,5 @@ export abstract class SceneToolHandler {
   }
 
   abstract execute(payload: object): void;
+  abstract getStateBeforeExecute(payload: object): any;
 }

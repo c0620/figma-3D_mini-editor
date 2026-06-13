@@ -2,7 +2,10 @@ import { CommandType } from "../types/commands";
 import type { Light, TextureSlot } from "../types/scene";
 import { FigmaAPI } from "../figma/figmaApi";
 import { FigmaHandler } from "../figma/figmaHandler";
-import { BaseToolHandler } from "../handlers/baseToolHandler";
+import {
+  TransformObjectHandler,
+  type TransformObjectHandlerPayload,
+} from "../handlers/transformObjectHandler";
 import { CameraEditingHandler } from "../handlers/cameraEditingHandler";
 import { DeletionHandler } from "../handlers/deletionHandler";
 import { EnvironmentHandler } from "../handlers/environmentHandler";
@@ -30,7 +33,6 @@ import { LocalizationService } from "../services/localizationService";
 import { HelpService } from "../services/helpService";
 import { TooltipService } from "../services/tooltipService";
 import { ActionExecutor } from "../commands/actionExecutor";
-import { ActionReverter } from "../commands/actionReverter";
 import { CommandBus } from "../commands/commandBus";
 import { DeletionGarbageCollector } from "../commands/deletionGarbageCollector";
 import { History } from "../store/history";
@@ -55,10 +57,9 @@ export interface AppHandlers {
   graphTools: ObjectGraphToolsHandler;
   /** Управление камерой — без истории, вызывается напрямую */
   camera: CameraEditingHandler;
-  /** Базовый трансформ (заглушка до реализации TransformObjectHandler) */
-  base: BaseToolHandler;
 
   /** Ниже — прокси через CommandBus, действия записываются в историю */
+  transform: HandlerProxy<TransformObjectHandlerPayload>;
   deletion: HandlerProxy<{ modelId: string }>;
   visibility: HandlerProxy<{ id: string | null }>;
   lock: HandlerProxy<{ id: string }>;
@@ -136,7 +137,7 @@ export function buildKernel(): AppKernel {
   const help = new HelpService(i18n, tooltips);
 
   // --- Tool handlers ---
-  const baseHandler = new BaseToolHandler(sceneStorage);
+  const transformHandler = new TransformObjectHandler(sceneStorage);
   const selectionHandler = new SelectionHandler(sceneStorage);
   const deletionHandler = new DeletionHandler(sceneStorage);
   const cameraHandler = new CameraEditingHandler(sceneStorage);
@@ -151,10 +152,10 @@ export function buildKernel(): AppKernel {
 
   // --- Commands ---
   const executor = new ActionExecutor(sceneStorage);
-  const reverter = new ActionReverter(sceneStorage);
   const gc = new DeletionGarbageCollector(sceneStorage);
-  const bus = new CommandBus(sceneStorage, history, executor, reverter, gc);
+  const bus = new CommandBus(sceneStorage, history, executor, gc);
 
+  executor.handlers.set(CommandType.TransformObject, transformHandler);
   executor.handlers.set(CommandType.DeleteModel, deletionHandler);
   executor.handlers.set(CommandType.AddLight, lightAdditionHandler);
   executor.handlers.set(CommandType.EditLight, lightEditingHandler);
@@ -165,8 +166,9 @@ export function buildKernel(): AppKernel {
   executor.handlers.set(CommandType.ExportTexture, textureExportHandler);
   executor.handlers.set(CommandType.ToggleVisibility, toggleVisibilityHandler);
   executor.handlers.set(CommandType.ToggleLock, toggleLockHandler);
+
   // SelectObject вызывается напрямую через selectionHandler, минуя bus
-  // TransformObject, EditMaterial, ToggleVisibility, ToggleLock, RenameScene — TBD
+  // EditMaterial, ToggleLock, RenameScene — TBD
 
   // --- Сборка handlers-объекта для UI ---
   const makeProxy = <P extends object>(type: CommandType): HandlerProxy<P> => ({
@@ -177,9 +179,10 @@ export function buildKernel(): AppKernel {
     selection: selectionHandler,
     graphTools: graphToolsHandler,
     camera: cameraHandler,
-    base: baseHandler,
+
     environment: environmentHandler,
 
+    transform: makeProxy(CommandType.TransformObject),
     deletion: makeProxy(CommandType.DeleteModel),
     visibility: makeProxy(CommandType.ToggleVisibility),
     lock: makeProxy(CommandType.ToggleLock),

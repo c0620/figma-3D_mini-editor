@@ -46,7 +46,7 @@ export function SceneRenderer() {
   const activeId = useSessionStore((s) => s.activeObjectId);
   if (!scene) return null;
 
-  const { base } = useHandlers();
+  const { transform } = useHandlers();
   const activeTool = useSessionStore((s) => s.activeObjectTool);
   const meshRef = useRef<Mesh>(null);
 
@@ -54,7 +54,7 @@ export function SceneRenderer() {
     const transformObj = meshRef.current!;
     switch (activeTool) {
       case "translate":
-        base.execute({
+        transform.execute({
           id: activeId,
           position: [
             transformObj.position.x,
@@ -64,7 +64,7 @@ export function SceneRenderer() {
         });
         break;
       case "rotate":
-        base.execute({
+        transform.execute({
           id: activeId,
           rotation: [
             transformObj.rotation.x,
@@ -74,7 +74,7 @@ export function SceneRenderer() {
         });
         break;
       case "scale":
-        base.execute({
+        transform.execute({
           id: activeId,
           scale: [
             transformObj.scale.x,

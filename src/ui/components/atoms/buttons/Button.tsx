@@ -8,6 +8,7 @@ export interface ButtonProps {
   onClick: () => void;
   text?: string;
   img?: string;
+  deactivated?: boolean;
 }
 
 export function MainButton({
@@ -36,9 +37,12 @@ export function ActionButton({ onClick, text, img }: ButtonProps) {
   );
 }
 
-export function SquareButton({ onClick, text, img }: ButtonProps) {
+export function SquareButton({ onClick, text, img, deactivated }: ButtonProps) {
   return (
-    <div className={styles.squareButton} onClick={onClick}>
+    <div
+      className={clsx(styles.squareButton, { [styles.frozen]: deactivated })}
+      onClick={onClick}
+    >
       {img && <img src={img} alt={text} />}
     </div>
   );

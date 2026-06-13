@@ -2,7 +2,7 @@ import type { Transform } from "../types/scene";
 import { isSceneCameraEntityId } from "../store/sceneEntityList";
 import { SceneToolHandler } from "./sceneToolHandler";
 
-export interface BaseToolPayload {
+export interface TransformObjectHandlerPayload {
   id?: string | null;
   position?: [number, number, number];
   rotation?: [number, number, number];
@@ -13,10 +13,10 @@ export interface BaseToolPayload {
  * Устанавливает position / rotation / scale для активного объекта
  * (SceneObject, Light или Camera). Работает через иммутабельный патч стора.
  */
-export class BaseToolHandler extends SceneToolHandler {
-  execute(payload: BaseToolPayload): void {
+export class TransformObjectHandler extends SceneToolHandler {
+  execute(payload: TransformObjectHandlerPayload): void {
     const { id: explicitId, position, rotation, scale } = payload;
-
+    console.log("position");
     const id = explicitId ?? this.scene.getActiveObjectId();
     if (!id) return;
 
@@ -52,5 +52,14 @@ export class BaseToolHandler extends SceneToolHandler {
     if (parts.rotation !== undefined) out.rotation = parts.rotation;
     if (parts.scale !== undefined) out.scale = parts.scale;
     return out;
+  }
+
+  getStateBeforeExecute(payload: TransformObjectHandlerPayload) {
+    const { id: explicitId } = payload;
+
+    const id = explicitId ?? this.scene.getActiveObjectId();
+    if (!id) return;
+
+    return { id: explicitId, ...this.scene.findObjectById(id)?.transform };
   }
 }
