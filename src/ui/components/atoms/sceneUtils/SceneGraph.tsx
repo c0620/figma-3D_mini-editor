@@ -33,16 +33,18 @@ export function GraphItem({
 
   var itemImg;
   switch (item.kind) {
-    case "mesh":
+    case "Mesh":
       itemImg = mesh;
       break;
-    case "light":
+    case "Light":
       itemImg = light;
       break;
-    case "camera":
+    case "Camera":
       itemImg = camera;
       break;
   }
+
+  console.log(isActive);
 
   return (
     <div
@@ -51,6 +53,7 @@ export function GraphItem({
         [styles.textActive]: isActive,
       })}
     >
+      <div className="">{"*".repeat(item.level)}</div>
       <div className={styles.graphInfo} onClick={onSelect}>
         <div
           className={clsx(styles.itemImage, {

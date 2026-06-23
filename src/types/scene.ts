@@ -1,19 +1,36 @@
+import type { BufferGeometry, Material as ThreeMaterial } from "three";
+
+export type ObjectID = string;
+export type CameraID = string;
+export type MaterialID = string;
+export type TextureMiniature = unknown;
+
 export enum TextureSlot {
-  BaseColor = "BaseColor",
-  Normal = "Normal",
-  Roughness = "Roughness",
-  Metalness = "Metalness",
-  Emissive = "Emissive",
+  BaseColor = "map",
+  Normal = "normalMap",
+  Roughness = "roughnessMap",
+  Metalness = "metalnessMap",
+  Emissive = "emissiveMap",
 }
 
 export interface Material {
-  id: string;
+  id: MaterialID;
   baseColor: string;
   roughness: number;
   metalness: number;
-  emissive: string;
-  textures: Record<TextureSlot, string | null>;
+  emissiveIntensity: number;
+  textures: Record<TextureSlot, TextureMiniature | null>;
 }
+
+export type ThreeAssetMaterial = MaterialID;
+
+export interface ThreeAsset {
+  geometry: BufferGeometry;
+  materials: ThreeAssetMaterial[];
+}
+
+export type SceneUtilKind = "Camera" | "Environment";
+export type SceneObjectKind = "Light" | "Mesh" | "Group";
 
 export interface Transform {
   position: [number, number, number];
@@ -21,27 +38,36 @@ export interface Transform {
   scale: [number, number, number];
 }
 
-export interface SceneObject {
-  id: string;
+interface BasicSceneObject {
+  id: ObjectID;
   name: string;
+  kind: SceneObjectKind;
   visible: boolean;
   locked: boolean;
-  pendingDelete: boolean;
   transform: Transform;
-  materialId: string;
+  pendingDelete: boolean;
+  parentId: ObjectID | null;
 }
 
-export interface Light {
-  id: string;
-  type: "Directional" | "Ambient" | "HDRI";
+export interface SceneMesh extends BasicSceneObject {
+  materials: MaterialID[];
+  kind: "Mesh";
+}
+
+export interface SceneLight extends BasicSceneObject {
+  type: "Spot" | "Ambient" | "HDRI";
   color: string;
   intensity: number;
-  transform: Transform;
-  visible: boolean;
-  locked: boolean;
+  kind: "Light";
+}
+
+export interface SceneGroup extends BasicSceneObject {
+  kind: "Group";
 }
 
 export interface CameraState {
+  id: CameraID;
+  kind: "Camera";
   type: "Perspective" | "Orthographic";
   zoom: number;
   transform: Transform;
@@ -53,11 +79,24 @@ export interface EnvironmentState {
   shadowsEnabled: boolean;
 }
 
+export type SceneObject = SceneLight | SceneMesh | SceneGroup;
+
+export interface SceneGraph {
+  roots: string[];
+  objects: Record<ObjectID, SceneObject>;
+  graphThree: Record<ObjectID, ObjectID[]>;
+}
+
 export interface Scene {
   id: string;
-  objects: SceneObject[];
-  materials: Record<string, Material>;
-  lights: Light[];
-  camera: CameraState;
+  materials: Record<MaterialID, Material>;
+  sceneGraph: SceneGraph;
+  cameras: Record<CameraID, CameraState>;
   environment: EnvironmentState;
 }
+
+export type ObjectRef =
+  | { kind: SceneUtilKind; id: CameraID }
+  | { kind: SceneObjectKind; id: ObjectID };
+
+export type ActiveEntity = SceneMesh | SceneLight | SceneGroup | CameraState;

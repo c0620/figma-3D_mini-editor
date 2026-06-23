@@ -22,4 +22,8 @@ export class LightAdditionHandler extends SceneToolHandler {
 
     this.scene.addLight(light);
   }
+
+  getStateBeforeExecute(payload: object) {
+    return this.scene;
+  }
 }

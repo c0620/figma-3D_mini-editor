@@ -1,5 +1,5 @@
 import { CommandType } from "../types/commands";
-import type { Light, TextureSlot } from "../types/scene";
+import type { SceneLight, TextureSlot } from "../types/scene";
 import { FigmaAPI } from "../figma/figmaApi";
 import { FigmaHandler } from "../figma/figmaHandler";
 import {
@@ -63,7 +63,7 @@ export interface AppHandlers {
   deletion: HandlerProxy<{ modelId: string }>;
   visibility: HandlerProxy<{ id: string | null }>;
   lock: HandlerProxy<{ id: string }>;
-  lightAddition: HandlerProxy<Light>;
+  lightAddition: HandlerProxy<SceneLight>;
   lightEditing: HandlerProxy<{ id: string; changes: object }>;
   background: HandlerProxy<{ backgroundColor: string | null }>;
   shadows: HandlerProxy<{ shadowsEnabled: boolean }>;

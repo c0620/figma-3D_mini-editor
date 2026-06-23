@@ -1,7 +1,9 @@
 import type {
+  CameraID,
   CameraState,
   EnvironmentState,
-  Light,
+  ObjectID,
+  ObjectRef,
   Scene,
   SceneObject,
 } from "../types/scene";
@@ -10,7 +12,6 @@ import { useSceneStore } from "./sceneStore";
 import type {
   CameraPatch,
   EnvironmentPatch,
-  LightPatch,
   SceneObjectPatch,
 } from "./sceneStore";
 import { useSessionStore } from "./sessionStore";
@@ -36,24 +37,20 @@ export class SceneStorage {
     return useSceneStore.getState().scene;
   }
 
-  getCamera(): CameraState | null {
-    return useSceneStore.getState().scene?.camera ?? null;
-  }
-
   getEnvironment(): EnvironmentState | null {
     return useSceneStore.getState().scene?.environment ?? null;
   }
 
-  findObjectById(id: string): SceneObject | null {
+  findObjectById(id: ObjectID): SceneObject | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;
-    return scene.objects.find((o) => o.id === id) ?? null;
+    return scene.sceneGraph.objects[id];
   }
 
-  findLightById(id: string): Light | null {
+  findCameraById(id: CameraID): CameraState | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;
-    return scene.lights.find((l) => l.id === id) ?? null;
+    return scene.cameras[id];
   }
 
   // --- Scene: запись ---
@@ -66,12 +63,8 @@ export class SceneStorage {
     useSceneStore.getState().clearScene();
   }
 
-  patchSceneObject(objectId: string, patch: SceneObjectPatch): void {
-    useSceneStore.getState().patchSceneObject(objectId, patch);
-  }
-
-  patchLight(lightId: string, patch: LightPatch): void {
-    useSceneStore.getState().patchLight(lightId, patch);
+  patchObject(objectId: string, patch: SceneObjectPatch): void {
+    useSceneStore.getState().patchObject(objectId, patch);
   }
 
   patchCamera(patch: CameraPatch): void {
@@ -82,14 +75,14 @@ export class SceneStorage {
     useSceneStore.getState().patchEnvironment(patch);
   }
 
-  addLight(light: Light): void {
-    useSceneStore.getState().addLight(light);
-  }
+  // deleteObject(id: string) : void {
+  //   useSceneStore.
+  // }
 
   // --- Session: чтение ---
 
-  getActiveObjectId(): string | null {
-    return useSessionStore.getState().activeObjectId;
+  getActiveObjectId(): ObjectRef | null {
+    return useSessionStore.getState().activeObjectRef;
   }
 
   getProjectName(): string {
@@ -102,8 +95,8 @@ export class SceneStorage {
 
   // --- Session: запись ---
 
-  setActiveObjectId(id: string | null): void {
-    useSessionStore.getState().setActiveObjectId(id);
+  setActiveObjectId(objectRef: ObjectRef | null): void {
+    useSessionStore.getState().setActiveObjectRef(objectRef);
   }
 
   setProjectName(name: string): void {

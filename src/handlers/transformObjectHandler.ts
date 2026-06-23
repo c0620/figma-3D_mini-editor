@@ -1,5 +1,4 @@
 import type { Transform } from "../types/scene";
-import { isSceneCameraEntityId } from "../store/sceneEntityList";
 import { SceneToolHandler } from "./sceneToolHandler";
 
 export interface TransformObjectHandlerPayload {
@@ -29,7 +28,7 @@ export class TransformObjectHandler extends SceneToolHandler {
 
     const sceneId = this.scene.getScene().id;
 
-    if (isSceneCameraEntityId(sceneId, id)) {
+    if (id === "camera") {
       this.scene.patchCamera({ transform: transformPatch });
       return;
     }

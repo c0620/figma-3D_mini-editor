@@ -2,26 +2,24 @@ import { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 
 import type {
+  ActiveEntity,
   CameraState,
   EnvironmentState,
-  Light,
+  SceneGroup,
+  SceneLight,
+  SceneMesh,
   SceneObject,
 } from "../types/scene";
 import type { AppHandlers, AppKernel } from "./compositionRoot";
 import { buildSceneEntityList } from "../store/sceneEntityList";
-import { isSceneCameraEntityId } from "../store/sceneEntityList";
 import { useSceneStore } from "../store/sceneStore";
 import { useSessionStore } from "../store/sessionStore";
+import { findSceneObject } from "@/utils/findSceneObject";
 
 export type {
   SceneEntityKind,
   SceneEntitySummary,
 } from "../store/sceneEntityList";
-
-export type ActiveEntity =
-  | { id: string; kind: "mesh"; data: SceneObject }
-  | { id: string; kind: "light"; data: Light }
-  | { id: string; kind: "camera"; data: CameraState };
 
 const AppKernelContext = createContext<AppKernel | null>(null);
 
@@ -85,36 +83,16 @@ export function useSceneEntities() {
   return useMemo(() => buildSceneEntityList(scene), [scene]);
 }
 
-/**
- * Текущий активный объект сцены — меш, источник света, камера или окружение.
- * Возвращает дискриминированный union `ActiveEntity` или `null`.
- * Пересчитывается только при изменении `activeObjectId` или `scene`.
- */
 export function useActiveObject(): ActiveEntity | null {
-  const activeObjectId = useSessionStore((s) => s.activeObjectId);
+  const activeObjectRef = useSessionStore((s) => s.activeObjectRef);
   const scene = useSceneStore((s) => s.scene);
 
   return useMemo(() => {
-    if (!activeObjectId || !scene) return null;
-
-    if (isSceneCameraEntityId(scene.id, activeObjectId)) {
-      return { id: activeObjectId, kind: "camera", data: scene.camera };
-    }
-
-    const light = scene.lights.find((l) => l.id === activeObjectId);
-    if (light) return { id: activeObjectId, kind: "light", data: light };
-
-    const obj = scene.objects.find((o) => o.id === activeObjectId);
-    if (obj) return { id: activeObjectId, kind: "mesh", data: obj };
-
-    return null;
-  }, [activeObjectId, scene]);
+    if (!activeObjectRef || !scene) return null;
+    return findSceneObject(activeObjectRef, scene);
+  }, [activeObjectRef, scene]);
 }
 
-/**
- * id текущего выбранного объекта (любого — меш, свет, камера, окружение).
- * Легковесная подписка: не тянет данные сцены.
- */
-export function useActiveObjectId() {
-  return useSessionStore((s) => s.activeObjectId);
+export function useActiveObjectRef() {
+  return useSessionStore((s) => s.activeObjectRef);
 }

@@ -5,115 +5,182 @@ import {
   Mesh,
   MeshStandardMaterial,
   Color,
+  Object3D,
   Vector3,
   Quaternion,
   Euler,
   type Material as ThreeMaterial,
-  type Object3D,
+  Group,
+  Light,
+  DirectionalLight,
+  SpotLight,
 } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 import { randomUUID } from "../lib/randomId";
-import type { Material, Scene, SceneObject } from "../types/scene";
+import type {
+  Material,
+  MaterialID,
+  Scene,
+  SceneGraph,
+  SceneGroup,
+  SceneLight,
+  SceneMesh,
+  SceneObject,
+} from "../types/scene";
 import { TextureSlot } from "../types/scene";
-import { threeAssetRegistry } from "./threeAssetRegistry";
+import { threeAssetRegistry } from "../store/threeAssetRegistry";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
 type ImportFileType = SceneFileType | "Figma";
-
-function extractDomainMaterial(
-  threeMat: ThreeMaterial | ThreeMaterial[]
-): Material {
-  const m = Array.isArray(threeMat) ? threeMat[0] : threeMat;
-  const std = m as MeshStandardMaterial;
-  const color =
-    std.color instanceof Color ? `#${std.color.getHexString()}` : "#cccccc";
-  const emissive =
-    std.emissive instanceof Color
-      ? `#${std.emissive.getHexString()}`
-      : "#000000";
-
-  return {
-    id: m.uuid,
-    baseColor: color,
-    roughness: typeof std.roughness === "number" ? std.roughness : 1,
-    metalness: typeof std.metalness === "number" ? std.metalness : 0,
-    emissive,
-    textures: {
-      [TextureSlot.BaseColor]: null,
-      [TextureSlot.Normal]: null,
-      [TextureSlot.Roughness]: null,
-      [TextureSlot.Metalness]: null,
-      [TextureSlot.Emissive]: null,
-    },
-  };
-}
 
 /**
  * Обход графа Three: каждый Mesh → SceneObject (плоский), геометрия и материал
  * уходят в threeAssetRegistry под тем же id. Сама Three-структура остаётся
  * вне стора.
  */
+
+function parseObjectThree(
+  node: Object3D,
+  parentID: string,
+  objectThree: SceneGraph["graphThree"],
+  sceneObjects: SceneGraph["objects"]
+) {
+  // const worldPos = new Vector3();
+  // const worldQuat = new Quaternion();
+  // const worldScale = new Vector3();
+  // const worldEuler = new Euler();
+
+  // node.matrixWorld.decompose(worldPos, worldQuat, worldScale);
+  // worldEuler.setFromQuaternion(worldQuat);
+
+  const transform = {
+    position: node.position.toArray() as [number, number, number],
+    rotation: [node.rotation.x, node.rotation.y, node.rotation.z] as [
+      number,
+      number,
+      number,
+    ],
+    scale: node.scale.toArray() as [number, number, number],
+  };
+
+  const id = node.uuid;
+
+  if (node instanceof Mesh) {
+    threeAssetRegistry.register(id, {
+      geometry: node.geometry,
+      materials: node.material,
+    });
+    objectThree[id] = [];
+
+    sceneObjects[id] = {
+      id: id,
+      parentId: parentID,
+      kind: "Mesh",
+      transform,
+      visible: node.visible,
+      locked: false,
+      pendingDelete: false,
+      name: node.name,
+      materials: Array.isArray(node.material)
+        ? node.material.map((m) => m.uuid)
+        : [node.material.uuid],
+    } as SceneMesh;
+  } else if (node instanceof Light) {
+    const type = node instanceof SpotLight ? "Spot" : "Ambient";
+
+    sceneObjects[id] = {
+      id: id,
+      parentId: parentID,
+      kind: "Light",
+      type: type,
+      color: node.color.getHexString(),
+      intensity: node.intensity,
+      transform: transform,
+      visible: node.visible,
+      locked: false,
+      name: node.name,
+      pendingDelete: false,
+    } as SceneLight;
+  } else if (node instanceof Group || node instanceof Object3D) {
+    sceneObjects[id] = {
+      id: id,
+      parentId: parentID,
+      kind: "Group",
+      transform: transform,
+      visible: node.visible,
+      locked: false,
+      name: node.name,
+      pendingDelete: false,
+    } as SceneGroup;
+    node.children.forEach((c) =>
+      parseObjectThree(c, id, objectThree, sceneObjects)
+    );
+  }
+  if (parentID !== id) {
+    if (parentID in objectThree) {
+      objectThree[parentID]!.push(id);
+    } else {
+      objectThree[parentID] = [id];
+    }
+  }
+}
+
 function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
   threeAssetRegistry.clear();
 
   const threeRoot = "scene" in root ? root.scene : root;
-  const objects: SceneObject[] = [];
-  const materials: Record<string, Material> = {};
+  const graphThree: SceneGraph["graphThree"] = {};
+  const sceneObjects: SceneGraph["objects"] = {};
 
   threeRoot.updateMatrixWorld(true);
 
-  const worldPos = new Vector3();
-  const worldQuat = new Quaternion();
-  const worldScale = new Vector3();
-  const worldEuler = new Euler();
+  var parent: Object3D = threeRoot;
 
-  threeRoot.traverse((node) => {
-    if (!(node instanceof Mesh)) return;
+  parseObjectThree(threeRoot, parent.uuid, graphThree, sceneObjects);
 
-    node.matrixWorld.decompose(worldPos, worldQuat, worldScale);
-    worldEuler.setFromQuaternion(worldQuat);
+  console.log(graphThree);
 
-    const id = node.uuid;
-    const threeMat = node.material as ThreeMaterial | ThreeMaterial[];
+  const materials: Record<MaterialID, Material> = {};
 
-    //toDO: extract not only first mat
-    const domainMat = extractDomainMaterial(threeMat);
-    materials[domainMat.id] = domainMat;
-
-    threeAssetRegistry.register(id, {
-      geometry: node.geometry,
-      material: threeMat,
-    });
-
-    objects.push({
-      id,
-      name: node.name || "Mesh",
-      visible: node.visible,
-      locked: false,
-      pendingDelete: false,
-      transform: {
-        position: [worldPos.x, worldPos.y, worldPos.z],
-        rotation: [worldEuler.x, worldEuler.y, worldEuler.z],
-        scale: [worldScale.x, worldScale.y, worldScale.z],
-      },
-      materialId: domainMat.id,
-    });
-  });
+  Object.entries(threeAssetRegistry.materials).map(
+    ([id, m]) =>
+      (materials[id] = {
+        id,
+        baseColor: m.material.color.getHexString(),
+        roughness: m.material.roughness,
+        metalness: m.material.metalness,
+        emissiveIntensity: m.material.emissiveIntensity,
+        textures: {
+          emissiveMap: m.material.emissiveMap?.image,
+          map: m.material.map?.image,
+          metalnessMap: m.material.metalnessMap?.image,
+          normalMap: m.material.normalMap?.image,
+          roughnessMap: m.material.roughnessMap?.image,
+        },
+      })
+  );
 
   return {
     id: randomUUID(),
-    objects,
+    sceneGraph: {
+      objects: sceneObjects,
+      graphThree,
+      roots: [threeRoot.uuid],
+    },
     materials,
-    lights: [],
-    camera: {
-      type: "Perspective",
-      zoom: 1,
-      locked: false,
-      transform: {
-        position: [0, 0, 5],
-        rotation: [0, 0, 0],
-        scale: [1, 1, 1],
+    cameras: {
+      "1": {
+        kind: "Camera",
+        id: "1",
+        type: "Perspective",
+        zoom: 1,
+        locked: false,
+        transform: {
+          position: [0, 0, 5],
+          rotation: [0, 0, 0],
+          scale: [1, 1, 1],
+        },
       },
     },
     environment: { backgroundColor: null, shadowsEnabled: false },

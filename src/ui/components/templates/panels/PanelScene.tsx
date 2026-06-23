@@ -1,8 +1,4 @@
-import {
-  type ActiveEntity,
-  useSceneEntities,
-  useHandlers,
-} from "@/app/ApplicationKernelContext";
+import { useSceneEntities, useHandlers } from "@/app/ApplicationKernelContext";
 
 import { ScrollPanel } from "../../atoms/outputs/ScrollPanel";
 import { GraphItem } from "../../atoms/sceneUtils/SceneGraph";
@@ -15,6 +11,7 @@ import sceneIcon from "@/assets/images/icons/descriptive/scene.svg";
 import { TransformInputs } from "../../organisms/TransformInputs";
 import styles from "./Panel.module.scss";
 import { PanelModeButton } from "../../molecules/buttons/PanelModeButton";
+import type { ActiveEntity } from "@/types/scene";
 
 export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
   const sceneItems = useSceneEntities();

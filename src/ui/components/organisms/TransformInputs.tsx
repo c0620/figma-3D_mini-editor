@@ -1,11 +1,6 @@
-import {
-  useHandlers,
-  useSceneEntities,
-  type ActiveEntity,
-} from "@/app/ApplicationKernelContext";
-import { sceneCameraEntityId } from "@/store/sceneEntityList";
+import { useHandlers, useSceneEntities } from "@/app/ApplicationKernelContext";
 import { useSceneStore } from "@/store/sceneStore";
-import type { Transform } from "@/types/scene";
+import type { ActiveEntity, Transform } from "@/types/scene";
 import { useCallback, useContext, useMemo } from "react";
 import { PanelSceneModeContext } from "../templates/panels/BasePanel";
 
@@ -16,59 +11,45 @@ import { NumberFieldInput } from "../molecules/inputs/NumberFieldInput";
 
 export function activeEntityEditorHeading(active: ActiveEntity): string {
   switch (active.kind) {
-    case "mesh":
-      return active.data.name?.trim() ? `mesh «${active.data.name}»` : "mesh";
-    case "light":
-      return active.data.type === "Directional"
+    case "Mesh":
+      return active.name?.trim() ? `mesh «${active.name}»` : "mesh";
+    case "Light":
+      return active.type === "Spot"
         ? "Направленный свет"
-        : active.data.type === "Ambient"
+        : active.type === "Ambient"
           ? "Окружающий свет"
           : "HDRI";
-    case "camera":
-      return active.data.type === "Perspective"
+    case "Camera":
+      return active.type === "Perspective"
         ? "Камера (перспектива)"
         : "Камера (ортография)";
-  }
-}
-
-function isSelectionLocked(
-  scene: NonNullable<ReturnType<typeof useSceneStore.getState>["scene"]>,
-  active: ActiveEntity
-): boolean {
-  switch (active.kind) {
-    case "mesh":
-      return (
-        scene.objects.find((o) => o.id === active.data.id)?.locked ?? false
-      );
-    case "light":
-      return scene.lights.find((l) => l.id === active.data.id)?.locked ?? false;
-    case "camera":
-      return scene.camera.locked;
+    case "Group":
+      return `group «${active.name}»`;
   }
 }
 
 export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
   const mode = useContext(PanelSceneModeContext);
 
-  const { base } = useHandlers();
+  const { transform } = useHandlers();
   const scene = useSceneStore((s) => s.scene);
   const sceneId = scene?.id ?? null;
 
   if (!sceneId) return;
 
-  var locked = isSelectionLocked(scene!, activeObj);
+  var locked = activeObj.locked;
 
   const transformHandler = (
     type: keyof Transform,
     i: number,
     value: number
   ) => {
-    var nextTuple = [...activeObj.data.transform[type]];
+    var nextTuple = [...activeObj.transform[type]];
     nextTuple[i] = value;
-    base.execute({ id: activeObj.id, [type]: nextTuple });
+    transform.execute({ id: activeObj.id, [type]: nextTuple });
   };
 
-  const activeObjTrans = activeObj.data.transform;
+  const activeObjTrans = activeObj.transform;
   const AXES = ["x", "y", "z"];
 
   const transforms = [];
@@ -94,7 +75,7 @@ export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
         <p className="t3">{transform}</p>
         <div
           className={clsx(styles.inputRow, {
-            [styles.inactive]: activeObj.data.locked,
+            [styles.inactive]: activeObj.locked,
           })}
         >
           {valueTransforms}

@@ -1,4 +1,4 @@
-import { SceneToolHandler } from './sceneToolHandler';
+import { SceneToolHandler } from "./sceneToolHandler";
 
 export class DeletionHandler extends SceneToolHandler {
   execute(payload: object): void {
@@ -7,6 +7,14 @@ export class DeletionHandler extends SceneToolHandler {
   }
 
   softDelete(modelId: string): void {
-    this.scene.patchSceneObject(modelId, { pendingDelete: true, visible: false });
+    this.scene.patchSceneObject(modelId, {
+      pendingDelete: true,
+      visible: false,
+    });
+  }
+
+  getStateBeforeExecute(payload: object) {
+    const { modelId } = payload as { modelId: string };
+    return { modelId };
   }
 }
