@@ -19,16 +19,17 @@ export type InputField = {
 };
 
 export function InputText({ field }: { field: InputField }) {
-  const [cachedValue, setCachedValue] = useState(field.value);
-  useEffect(() => setCachedValue(field.value), [field.value]);
+  const [cachedValue, setCachedValue] = useState("" + field.value);
+  useEffect(() => setCachedValue("" + field.value), [field.value]);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const parsed = Number.parseFloat(e.target.value.replace(",", "."));
-    setCachedValue(parsed);
+    setCachedValue(e.target.value.replace(",", "."));
   };
 
   const setChange = () => {
-    if (Number.isFinite(cachedValue)) field.onChange(cachedValue);
-    else setCachedValue(field.value);
+    const parsed = Number.parseFloat(cachedValue);
+    if (Number.isFinite(parsed)) field.onChange(parsed);
+    else setCachedValue("" + field.value);
   };
 
   return (
