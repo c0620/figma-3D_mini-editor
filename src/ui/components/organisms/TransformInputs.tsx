@@ -46,7 +46,7 @@ export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
   ) => {
     var nextTuple = [...activeObj.transform[type]];
     nextTuple[i] = value;
-    transform.execute({ id: activeObj.id, [type]: nextTuple });
+    transform.execute({ objectRef: activeObj, [type]: nextTuple });
   };
 
   const activeObjTrans = activeObj.transform;

@@ -81,7 +81,7 @@ export class SceneStorage {
 
   // --- Session: чтение ---
 
-  getActiveObjectId(): ObjectRef | null {
+  getActiveObjectRef(): ObjectRef | null {
     return useSessionStore.getState().activeObjectRef;
   }
 

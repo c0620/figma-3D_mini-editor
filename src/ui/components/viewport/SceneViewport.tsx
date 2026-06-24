@@ -3,7 +3,12 @@ import { Canvas } from "@react-three/fiber";
 
 import { useSceneStore } from "../../../store/sceneStore";
 import { threeAssetRegistry } from "../../../store/threeAssetRegistry";
-import type { CameraID, ObjectID, SceneObject } from "../../../types/scene";
+import type {
+  CameraID,
+  ObjectID,
+  ObjectRef,
+  SceneObject,
+} from "../../../types/scene";
 import { useSessionStore, type ObjectToolMode } from "@/store/sessionStore";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import { Mesh, Object3D } from "three";
@@ -12,11 +17,9 @@ import React, { type RefObject, useRef } from "react";
 function SceneObjectMesh({
   object,
   isActive,
-  ref,
 }: {
   object: SceneObject;
   isActive: boolean;
-  ref?: RefObject<Mesh | null>;
 }) {
   const asset = threeAssetRegistry.get(object.id);
   if (!asset) return null;
@@ -28,12 +31,7 @@ function SceneObjectMesh({
 
   return (
     <>
-      <mesh
-        ref={ref}
-        geometry={asset.geometry}
-        material={material}
-        name={object.name}
-      >
+      <mesh geometry={asset.geometry} material={material} name={object.name}>
         {isActive && <Outlines thickness={3} color="orange" />}
       </mesh>
     </>
@@ -45,10 +43,10 @@ function SceneObjectLight() {
 }
 
 function SceneObjectControls({
-  activeRefID,
+  activeRef,
   ref,
 }: {
-  activeRefID: ObjectID;
+  activeRef: ObjectRef;
   ref: RefObject<Object3D>;
 }) {
   const { transform } = useHandlers();
@@ -59,7 +57,7 @@ function SceneObjectControls({
     switch (activeTool) {
       case "translate":
         transform.execute({
-          id: activeRefID,
+          objectRef: activeRef,
           position: [
             transformObj.position.x,
             transformObj.position.y,
@@ -69,7 +67,7 @@ function SceneObjectControls({
         break;
       case "rotate":
         transform.execute({
-          id: activeRefID,
+          objectRef: activeRef,
           rotation: [
             transformObj.rotation.x,
             transformObj.rotation.y,
@@ -79,7 +77,7 @@ function SceneObjectControls({
         break;
       case "scale":
         transform.execute({
-          id: activeRefID,
+          objectRef: activeRef,
           scale: [
             transformObj.scale.x,
             transformObj.scale.y,
@@ -93,7 +91,7 @@ function SceneObjectControls({
   if (activeTool) {
     return (
       <TransformControls
-        key={`${activeRefID}-controls`}
+        key={`${activeRef.id}-controls`}
         mode={activeTool ? activeTool : undefined}
         onMouseUp={handleTransformControls}
         object={ref as RefObject<Object3D>}
@@ -108,11 +106,12 @@ function SceneObjectControls({
 function SceneNode({
   id,
   activeId,
+  ref,
 }: {
   id: ObjectID;
   activeId: ObjectID | CameraID | undefined;
+  ref: RefObject<Object3D | null>;
 }) {
-  const nodeRef = useRef<Mesh>(null);
   const node = useSceneStore((s) => s.scene!.sceneGraph.objects[id]);
   const childrenIDs = useSceneStore((s) => s.scene!.sceneGraph.graphThree[id]);
 
@@ -121,33 +120,28 @@ function SceneNode({
   const isActive = node.id === activeId;
 
   return (
-    <group
-      position={node.transform.position}
-      rotation={node.transform.rotation}
-      scale={node.transform.scale}
-      visible={node.visible}
-      name={node.name}
-    >
-      {node.kind === "Mesh" && (
-        <SceneObjectMesh
-          object={node}
-          isActive={isActive}
-          ref={isActive ? nodeRef : undefined}
-          key={`sceneMesh-${node.id}`}
-        />
-      )}
-      {isActive && (
-        <SceneObjectControls
-          activeRefID={node.id}
-          ref={nodeRef as RefObject<Object3D>}
-          key={`controls-${node.id}`}
-        />
-      )}
-      {node.kind === "Light" && <SceneObjectLight />}
-      {(childrenIDs ?? []).map((cid) => (
-        <SceneNode key={cid} id={cid} activeId={activeId} />
-      ))}
-    </group>
+    <>
+      <group
+        position={node.transform.position}
+        rotation={node.transform.rotation}
+        scale={node.transform.scale}
+        visible={node.visible}
+        name={node.name}
+        ref={node.id === activeId ? ref : null}
+      >
+        {node.kind === "Mesh" && (
+          <SceneObjectMesh
+            object={node}
+            isActive={isActive}
+            key={`sceneMesh-${node.id}`}
+          />
+        )}
+        {node.kind === "Light" && <SceneObjectLight />}
+        {(childrenIDs ?? []).map((cid) => (
+          <SceneNode key={cid} id={cid} activeId={activeId} ref={ref} />
+        ))}
+      </group>
+    </>
   );
 }
 
@@ -155,6 +149,8 @@ export function SceneRenderer() {
   const scene = useSceneStore((s) => s.scene);
   const activeRef = useSessionStore((s) => s.activeObjectRef);
   if (!scene) return null;
+
+  const nodeRef = useRef<Object3D | null>(null);
 
   return (
     <div className="canvas" style={{ width: "100%", height: "100%" }}>
@@ -164,8 +160,15 @@ export function SceneRenderer() {
         <ambientLight intensity={1} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         {scene.sceneGraph.roots.map((oid) => (
-          <SceneNode id={oid} activeId={activeRef?.id} />
+          <SceneNode id={oid} activeId={activeRef?.id} ref={nodeRef} />
         ))}
+        {activeRef && nodeRef && (
+          <SceneObjectControls
+            activeRef={activeRef}
+            ref={nodeRef as RefObject<Object3D>}
+            key={`controls-${activeRef.id}`}
+          />
+        )}
       </Canvas>
     </div>
   );
