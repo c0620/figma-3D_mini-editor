@@ -44,8 +44,6 @@ export function GraphItem({
       break;
   }
 
-  console.log(isActive);
-
   return (
     <div
       className={clsx(styles.sceneGraph, {

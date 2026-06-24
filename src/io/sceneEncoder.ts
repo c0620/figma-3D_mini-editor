@@ -88,7 +88,6 @@ function parseObjectThree(
     } as SceneMesh;
   } else if (node instanceof Light) {
     const type = node instanceof SpotLight ? "Spot" : "Ambient";
-
     sceneObjects[id] = {
       id: id,
       parentId: parentID,
@@ -113,9 +112,6 @@ function parseObjectThree(
       name: node.name,
       pendingDelete: false,
     } as SceneGroup;
-    node.children.forEach((c) =>
-      parseObjectThree(c, id, objectThree, sceneObjects)
-    );
   }
   if (parentID !== id) {
     if (parentID in objectThree) {
@@ -124,6 +120,9 @@ function parseObjectThree(
       objectThree[parentID] = [id];
     }
   }
+  node.children.forEach((c) =>
+    parseObjectThree(c, id, objectThree, sceneObjects)
+  );
 }
 
 function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
@@ -138,8 +137,6 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
   var parent: Object3D = threeRoot;
 
   parseObjectThree(threeRoot, parent.uuid, graphThree, sceneObjects);
-
-  console.log(graphThree);
 
   const materials: Record<MaterialID, Material> = {};
 
