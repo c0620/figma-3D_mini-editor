@@ -14,6 +14,7 @@ import type {
 
 import { create } from "zustand";
 import { applyToSceneThreeNode } from "@/utils/applyToSceneThreeNode";
+import { threeAssetRegistry } from "../store/threeAssetRegistry";
 
 type SceneObjectPatch =
   | (Partial<
@@ -51,8 +52,10 @@ interface SceneActions {
   patchObject(objectId: string, patch: SceneObjectPatch): void;
   patchCamera(patch: CameraPatch): void;
   patchEnvironment(patch: EnvironmentPatch): void;
-  traverseScene(): void;
-  deleteObject(objectRef: ObjectRef): void;
+  traverseScene(): void; //toDo?
+  addObject(object: SceneLight | SceneMesh | SceneGroup): void;
+  addCamera(camera: CameraState): void;
+  deleteObject(objectId: ObjectRef): void;
 }
 
 export type { SceneObjectPatch };
@@ -64,6 +67,32 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
   clearScene: () => set({ scene: null }),
 
   traverseScene: () => {},
+
+  addObject: (newObject) =>
+    set((state) => {
+      const newRoots = [...state.scene!.sceneGraph.roots];
+      const newObjects = { ...state.scene!.sceneGraph.objects };
+      const newGraphThree = { ...state.scene!.sceneGraph.graphThree };
+
+      if (newObject.parentId) {
+        if (newObject.parentId in newGraphThree)
+          newGraphThree[newObject.parentId].push(newObject.id);
+        else newGraphThree[newObject.parentId] = [newObject.id];
+      } else {
+        newRoots.push(newObject.id);
+      }
+      newObjects[newObject.id] = newObject;
+      return {
+        scene: {
+          ...state.scene!,
+          sceneGraph: {
+            roots: newRoots,
+            objects: newObjects,
+            graphThree: newGraphThree,
+          },
+        },
+      };
+    }),
 
   patchObject: (id, patch) =>
     set((state) => {
@@ -84,6 +113,19 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
         scene: {
           ...state.scene!,
           sceneGraph: { ...g, objects: { ...g.objects, [id]: next } },
+        },
+      };
+    }),
+
+  addCamera: (
+    newCamera //toDo
+  ) =>
+    set((state) => {
+      const newCameras = { ...state.scene!.cameras };
+      return {
+        scene: {
+          ...state.scene!,
+          cameras: newCameras,
         },
       };
     }),
@@ -156,6 +198,10 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
           }
           delete newObjects[node.id];
           newRoots.filter((rootID) => rootID != node.id);
+          if (node.kind == "Group" || node.kind == "Mesh") {
+            //is Group necessary?
+            threeAssetRegistry.delete(node.id);
+          }
         });
         return {
           scene: {

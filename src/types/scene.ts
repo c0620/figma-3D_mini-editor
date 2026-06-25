@@ -29,8 +29,8 @@ export interface ThreeAsset {
   materials: ThreeAssetMaterial[];
 }
 
-export type SceneUtilKind = "Camera" | "Environment";
-export type SceneObjectKind = "Light" | "Mesh" | "Group";
+export type SceneUtilKind = "Environment";
+export type SceneObjectKind = "Light" | "Mesh" | "Group" | "Camera";
 
 export interface Transform {
   position: [number, number, number];
@@ -65,7 +65,7 @@ export interface SceneGroup extends BasicSceneObject {
   kind: "Group";
 }
 
-export interface CameraState {
+export interface CameraState extends Omit<BasicSceneObject, "visible"> {
   id: CameraID;
   kind: "Camera";
   type: "Perspective" | "Orthographic";
@@ -82,7 +82,7 @@ export interface EnvironmentState {
 export type SceneObject = SceneLight | SceneMesh | SceneGroup;
 
 export interface SceneGraph {
-  roots: string[];
+  roots: ObjectID[];
   objects: Record<ObjectID, SceneObject>;
   graphThree: Record<ObjectID, ObjectID[]>;
 }

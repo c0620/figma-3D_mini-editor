@@ -1,28 +1,28 @@
 import type { HistoryEntry } from "../types/commands";
 
 export class History {
-  previous: HistoryEntry[] = [];
-  current: HistoryEntry[] = [];
+  previous: HistoryEntry<object>[] = [];
+  future: HistoryEntry<object>[] = [];
   readonly maxCount: number = 10;
 
-  pushPreviousAction(entry: HistoryEntry): HistoryEntry | null {
+  pushUndoAction(entry: HistoryEntry<object>): HistoryEntry<object> | null {
     this.previous.push(entry);
-    let evicted: HistoryEntry | null = null;
+    let evicted: HistoryEntry<object> | null = null;
     if (this.previous.length > this.maxCount) {
       evicted = this.previous.shift() ?? null;
     }
     return evicted;
   }
 
-  getPreviousAction(): HistoryEntry | null {
+  getUndoAction(): HistoryEntry<object> | null {
     return this.previous.pop() ?? null;
   }
 
-  getRedoAction(): HistoryEntry | null {
-    return this.current.pop() ?? null;
+  getRedoAction(): HistoryEntry<object> | null {
+    return this.future.pop() ?? null;
   }
 
   clearRedo(): void {
-    this.current = [];
+    this.future = [];
   }
 }

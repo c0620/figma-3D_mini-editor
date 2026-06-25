@@ -1,4 +1,4 @@
-import type { ObjectRef, Scene } from "@/types/scene";
+import type { ObjectID, ObjectRef, Scene } from "@/types/scene";
 
 export function findSceneObject(activeObjectRef: ObjectRef, scene: Scene) {
   switch (activeObjectRef.kind) {

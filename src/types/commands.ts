@@ -1,5 +1,5 @@
 export enum CommandType {
-  DeleteModel = "DeleteModel",
+  DeleteObject = "DeleteObject",
   TransformObject = "TransformObject",
   EditMaterial = "EditMaterial",
   ToggleVisibility = "ToggleVisibility",
@@ -18,9 +18,10 @@ export enum CommandType {
   ImportSceneFigma = "ImportSceneFigma",
   ExportSceneFigma = "ExportSceneFigma",
   ExportRender = "ExportRender",
+  AddObject = "AddObject",
 }
 
-export interface HistoryEntry {
+export interface HistoryEntry<T> {
   type: CommandType;
-  snapshot: object;
+  snapshot: T;
 }

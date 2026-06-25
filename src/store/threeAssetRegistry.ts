@@ -1,5 +1,6 @@
 import type {
   MaterialID,
+  ObjectID,
   TextureSlot,
   ThreeAsset,
   ThreeAssetMaterial,
@@ -88,7 +89,7 @@ class ThreeAssetRegistry {
     material.needsUpdate = true;
   }
 
-  delete(id: string): void {
+  delete(id: ObjectID): void {
     const asset = this.assets.get(id);
     if (!asset) return;
     this.disposeAsset(asset);

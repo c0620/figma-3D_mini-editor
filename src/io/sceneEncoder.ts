@@ -168,11 +168,14 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     materials,
     cameras: {
       "1": {
+        name: "Camera-1",
         kind: "Camera",
         id: "1",
         type: "Perspective",
         zoom: 1,
         locked: false,
+        pendingDelete: false,
+        parentId: null,
         transform: {
           position: [0, 0, 5],
           rotation: [0, 0, 0],

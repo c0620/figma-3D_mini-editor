@@ -25,8 +25,7 @@ export class CommandBus {
 
   execute(type: CommandType, payload: object): void {
     const snapshot = this.executor.snapshot(type, payload);
-    const entry: HistoryEntry = { type, snapshot };
-    const evicted = this.history.pushPreviousAction(entry);
+    const evicted = this.history.pushUndoAction(snapshot);
 
     this.executor.run(type, payload);
     this.history.clearRedo();
@@ -36,11 +35,14 @@ export class CommandBus {
   }
 
   undo(): void {
-    const previous = this.history.getPreviousAction();
+    const previous = this.history.getUndoAction();
     if (!previous) return;
 
     const current = this.executor.snapshot(previous.type, previous.snapshot);
-    this.history.current.push({ type: previous.type, snapshot: current });
+    this.history.future.push({
+      type: current.type,
+      snapshot: current.snapshot,
+    });
 
     this.executor.run(previous.type, previous.snapshot);
     this.syncHistoryFlags();
@@ -51,7 +53,10 @@ export class CommandBus {
     if (!entry) return;
 
     const current = this.executor.snapshot(entry.type, entry.snapshot);
-    this.history.previous.push({ type: entry.type, snapshot: current });
+    this.history.previous.push({
+      type: current.type,
+      snapshot: current.snapshot,
+    });
 
     this.executor.run(entry.type, entry.snapshot);
 
@@ -61,7 +66,7 @@ export class CommandBus {
   private syncHistoryFlags(): void {
     this.scene.setHistoryFlags(
       this.history.previous.length > 0,
-      this.history.current.length > 0
+      this.history.future.length > 0
     );
   }
 }

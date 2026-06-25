@@ -1,9 +1,38 @@
-import type { LightPatch } from '../store/sceneStore';
-import { SceneToolHandler } from './sceneToolHandler';
+import type { SceneLight } from "@/types/scene";
+import { CommandType, type HistoryEntry } from "@/types/commands";
+import type { SceneObjectPatch } from "../store/sceneStore";
+import { SceneToolHandler } from "./sceneToolHandler";
 
-export class LightEditingHandler extends SceneToolHandler {
-  execute(payload: object): void {
-    const { id, changes } = payload as { id: string; changes: LightPatch };
-    this.scene.patchLight(id, changes);
+export interface LightEditingPayload {
+  id: string;
+  changes: SceneObjectPatch;
+}
+
+export class LightEditingHandler extends SceneToolHandler<
+  LightEditingPayload,
+  LightEditingPayload
+> {
+  execute(payload: LightEditingPayload): void {
+    const { id, changes } = payload;
+    this.scene.patchObject(id, changes);
+  }
+
+  getStateBeforeExecute(
+    payload: LightEditingPayload
+  ): HistoryEntry<LightEditingPayload> {
+    const { id } = payload;
+    const light = this.scene.findObjectById(id) as SceneLight | null;
+    if (!light)
+      throw new Error(
+        "getStateBeforeExecute(lightEditingHandler): light not found"
+      );
+
+    return {
+      type: CommandType.EditLight,
+      snapshot: {
+        id,
+        changes: { ...light },
+      },
+    };
   }
 }

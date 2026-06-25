@@ -1,18 +1,34 @@
-import type { Light } from "../types/scene";
+import type { SceneLight } from "../types/scene";
 import { randomUUID } from "../lib/randomId";
+import { CommandType, type HistoryEntry } from "@/types/commands";
 
 import { SceneToolHandler } from "./sceneToolHandler";
+import type {
+  DeletionHandler,
+  DeletionHandlerPayload,
+} from "./deletionHandler";
 
-export class LightAdditionHandler extends SceneToolHandler {
-  execute(payload: object): void {
-    const incoming = payload as Partial<Light>;
-    const light: Light = {
-      id: incoming.id ?? randomUUID(),
-      type: incoming.type ?? "Directional",
+type LightAdditionHandlerPayload = Partial<Omit<SceneLight, "id">> &
+  Pick<SceneLight, "id">;
+type LightAdditionHandlerSnapsot = DeletionHandlerPayload;
+
+export class LightAdditionHandler extends SceneToolHandler<
+  LightAdditionHandlerPayload,
+  LightAdditionHandlerSnapsot
+> {
+  execute(payload: LightAdditionHandlerPayload): void {
+    const incoming = payload;
+    const light: SceneLight = {
+      id: incoming.id,
+      type: incoming.type ?? "Ambient",
       color: incoming.color ?? "#ffffff",
       intensity: incoming.intensity ?? 1,
       visible: incoming.visible ?? true,
       locked: incoming.locked ?? false,
+      kind: "Light",
+      pendingDelete: false,
+      parentId: null,
+      name: `Light${Object.values(this.scene.getScene().sceneGraph.objects).filter((o) => o.kind == "Light").length}`,
       transform: incoming.transform ?? {
         position: [0, 5, 0],
         rotation: [0, 0, 0],
@@ -20,10 +36,16 @@ export class LightAdditionHandler extends SceneToolHandler {
       },
     };
 
-    this.scene.addLight(light);
+    this.scene.addObject(light);
   }
 
-  getStateBeforeExecute(payload: object) {
-    return this.scene;
+  getStateBeforeExecute(
+    payload: LightAdditionHandlerPayload
+  ): HistoryEntry<LightAdditionHandlerSnapsot> {
+    const { id } = payload;
+    return {
+      type: CommandType.DeleteObject,
+      snapshot: { id, isDelete: true, kind: "Light" },
+    };
   }
 }

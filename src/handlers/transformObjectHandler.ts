@@ -1,18 +1,19 @@
 import type { ObjectRef, Transform } from "../types/scene";
+import { CommandType, type HistoryEntry } from "@/types/commands";
 import { SceneToolHandler } from "./sceneToolHandler";
 
-export interface TransformObjectHandlerPayload {
+export interface TransformObjectHandlerPayload extends Partial<Transform> {
   objectRef: ObjectRef;
-  position?: [number, number, number];
-  rotation?: [number, number, number];
-  scale?: [number, number, number];
 }
 
 /**
  * Устанавливает position / rotation / scale для активного объекта
  * (SceneObject, Light или Camera). Работает через иммутабельный патч стора.
  */
-export class TransformObjectHandler extends SceneToolHandler {
+export class TransformObjectHandler extends SceneToolHandler<
+  TransformObjectHandlerPayload,
+  TransformObjectHandlerPayload
+> {
   execute(payload: TransformObjectHandlerPayload): void {
     const { objectRef, position, rotation, scale } = payload;
     if (!objectRef) return;
@@ -45,13 +46,36 @@ export class TransformObjectHandler extends SceneToolHandler {
     return out;
   }
 
-  getStateBeforeExecute(payload: TransformObjectHandlerPayload) {
+  getStateBeforeExecute(
+    payload: TransformObjectHandlerPayload
+  ): HistoryEntry<TransformObjectHandlerPayload> {
     const { objectRef } = payload;
-    if (!objectRef) return;
+    if (!objectRef)
+      throw new Error(
+        "getStateBeforeExecute(transformObjectHandler): no id to revert"
+      );
+
+    if (objectRef.kind === "Camera") {
+      const camera = this.scene.findCameraById(objectRef.id);
+      if (!camera)
+        throw new Error(
+          "getStateBeforeExecute(transformObjectHandler): camera not found"
+        );
+      return {
+        type: CommandType.TransformObject,
+        snapshot: { objectRef, ...camera.transform },
+      };
+    }
+
+    const obj = this.scene.findObjectById(objectRef.id);
+    if (!obj)
+      throw new Error(
+        "getStateBeforeExecute(transformObjectHandler): object not found"
+      );
 
     return {
-      id: objectRef.id,
-      ...this.scene.findObjectById(objectRef.id)?.transform,
+      type: CommandType.TransformObject,
+      snapshot: { objectRef, ...obj.transform },
     };
   }
 }

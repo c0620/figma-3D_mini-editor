@@ -75,7 +75,13 @@ export function GraphItem({
             img={item.locked ? free : lock}
           />
           <SmallButton
-            onClick={() => deleteHandler.execute({ modelId: item.id })}
+            onClick={() =>
+              deleteHandler.execute({
+                id: item.id,
+                isDelete: true,
+                kind: item.kind,
+              })
+            }
             img={garb}
           />
         </div>

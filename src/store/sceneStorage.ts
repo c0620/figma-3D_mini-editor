@@ -41,6 +41,13 @@ export class SceneStorage {
     return useSceneStore.getState().scene?.environment ?? null;
   }
 
+  getActiveCamera(): CameraState {
+    const cameras = useSceneStore.getState().scene?.cameras;
+    if (!cameras)
+      throw new Error("getActiveCamera(SceneStorage): no camera at all");
+    return cameras[Object.keys(cameras)[0]]; //toDo: now method returns 1st camera
+  }
+
   findObjectById(id: ObjectID): SceneObject | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;
@@ -49,7 +56,7 @@ export class SceneStorage {
 
   findCameraById(id: CameraID): CameraState | null {
     const scene = useSceneStore.getState().scene;
-    if (!scene) return null;
+    if (!scene || !scene.cameras) return null;
     return scene.cameras[id];
   }
 
@@ -61,6 +68,10 @@ export class SceneStorage {
 
   clearScene(): void {
     useSceneStore.getState().clearScene();
+  }
+
+  addObject(object: SceneObject): void {
+    useSceneStore.getState().addObject(object);
   }
 
   patchObject(objectId: string, patch: SceneObjectPatch): void {
@@ -75,9 +86,9 @@ export class SceneStorage {
     useSceneStore.getState().patchEnvironment(patch);
   }
 
-  // deleteObject(id: string) : void {
-  //   useSceneStore.
-  // }
+  deleteObject(objectRef: ObjectRef): void {
+    useSceneStore.getState().deleteObject(objectRef);
+  }
 
   // --- Session: чтение ---
 

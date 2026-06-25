@@ -1,5 +1,5 @@
 import { CommandType } from "../types/commands";
-import type { SceneLight, TextureSlot } from "../types/scene";
+import type { EnvironmentState, SceneLight, TextureSlot } from "../types/scene";
 import { FigmaAPI } from "../figma/figmaApi";
 import { FigmaHandler } from "../figma/figmaHandler";
 import {
@@ -7,10 +7,16 @@ import {
   type TransformObjectHandlerPayload,
 } from "../handlers/transformObjectHandler";
 import { CameraEditingHandler } from "../handlers/cameraEditingHandler";
-import { DeletionHandler } from "../handlers/deletionHandler";
+import {
+  DeletionHandler,
+  type DeletionHandlerPayload,
+} from "../handlers/deletionHandler";
 import { EnvironmentHandler } from "../handlers/environmentHandler";
 import { LightAdditionHandler } from "../handlers/lightAdditionHandler";
-import { LightEditingHandler } from "../handlers/lightEditingHandler";
+import {
+  LightEditingHandler,
+  type LightEditingPayload,
+} from "../handlers/lightEditingHandler";
 import { SelectionHandler } from "../handlers/selectionHandler";
 import { TextureExportHandler } from "../handlers/textureExportHandler";
 import { TextureImportHandler } from "../handlers/textureImportHandler";
@@ -18,6 +24,8 @@ import {
   ObjectGraphToolsHandler,
   ToggleLockHandler,
   ToggleVisibilityHandler,
+  type ToggleLockPayload,
+  type ToggleVisibilityPayload,
 } from "../handlers/objectModeChangingHandler";
 import { SceneEncoder } from "../io/sceneEncoder";
 import { SceneImportExportService } from "../io/sceneImportExportService";
@@ -60,13 +68,13 @@ export interface AppHandlers {
 
   /** Ниже — прокси через CommandBus, действия записываются в историю */
   transform: HandlerProxy<TransformObjectHandlerPayload>;
-  deletion: HandlerProxy<{ modelId: string }>;
-  visibility: HandlerProxy<{ id: string | null }>;
-  lock: HandlerProxy<{ id: string }>;
+  deletion: HandlerProxy<DeletionHandlerPayload>;
+  visibility: HandlerProxy<ToggleVisibilityPayload>;
+  lock: HandlerProxy<ToggleLockPayload>;
   lightAddition: HandlerProxy<SceneLight>;
-  lightEditing: HandlerProxy<{ id: string; changes: object }>;
-  background: HandlerProxy<{ backgroundColor: string | null }>;
-  shadows: HandlerProxy<{ shadowsEnabled: boolean }>;
+  lightEditing: HandlerProxy<LightEditingPayload>;
+  background: HandlerProxy<EnvironmentState>; //too Narrow
+  shadows: HandlerProxy<EnvironmentState>; //too Narrow
   sceneRename: HandlerProxy<{ name: string }>;
   textureImport: HandlerProxy<{
     materialId: string;
@@ -156,7 +164,7 @@ export function buildKernel(): AppKernel {
   const bus = new CommandBus(sceneStorage, history, executor, gc);
 
   executor.handlers.set(CommandType.TransformObject, transformHandler);
-  executor.handlers.set(CommandType.DeleteModel, deletionHandler);
+  executor.handlers.set(CommandType.DeleteObject, deletionHandler);
   executor.handlers.set(CommandType.AddLight, lightAdditionHandler);
   executor.handlers.set(CommandType.EditLight, lightEditingHandler);
   executor.handlers.set(CommandType.EditCamera, cameraHandler);
@@ -183,7 +191,7 @@ export function buildKernel(): AppKernel {
     environment: environmentHandler,
 
     transform: makeProxy(CommandType.TransformObject),
-    deletion: makeProxy(CommandType.DeleteModel),
+    deletion: makeProxy(CommandType.DeleteObject),
     visibility: makeProxy(CommandType.ToggleVisibility),
     lock: makeProxy(CommandType.ToggleLock),
     lightAddition: makeProxy(CommandType.AddLight),
