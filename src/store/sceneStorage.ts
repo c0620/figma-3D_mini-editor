@@ -87,6 +87,8 @@ export class SceneStorage {
   }
 
   deleteObject(objectRef: ObjectRef): void {
+    useSessionStore.getState().setActiveObjectTool(null);
+    useSessionStore.getState().setActiveObjectRef(null);
     useSceneStore.getState().deleteObject(objectRef);
   }
 

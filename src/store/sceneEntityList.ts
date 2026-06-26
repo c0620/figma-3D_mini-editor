@@ -84,18 +84,20 @@ export function buildSceneEntityList(scene: Scene | null) {
     const node = sceneGraph[id];
     const sceneObj = sceneObjs[id];
 
-    entityList.push({
-      id,
-      kind: sceneObj.kind,
-      label: sceneObj.name,
-      visible: sceneObj.visible,
-      locked: sceneObj.locked,
-      level,
-    });
-    if (!node) {
-      return;
-    } else {
-      node.forEach((childID) => buildRecursiveSceneList(childID, level + 1));
+    if (!sceneObj.pendingDelete) {
+      entityList.push({
+        id,
+        kind: sceneObj.kind,
+        label: sceneObj.name,
+        visible: sceneObj.visible,
+        locked: sceneObj.locked,
+        level,
+      });
+      if (!node) {
+        return;
+      } else {
+        node.forEach((childID) => buildRecursiveSceneList(childID, level + 1));
+      }
     }
   }
 
@@ -105,15 +107,16 @@ export function buildSceneEntityList(scene: Scene | null) {
 
   for (const cameraID in scene.cameras) {
     const camera = scene.cameras[cameraID];
-    entityList.push({
-      id: cameraID,
-      kind: "Camera",
-      label: camera.type,
-      visible: true,
-      locked: camera.locked,
-      level: 0,
-    });
+    if (!camera.pendingDelete) {
+      entityList.push({
+        id: cameraID,
+        kind: "Camera",
+        label: camera.type,
+        visible: true,
+        locked: camera.locked,
+        level: 0,
+      });
+    }
   }
-  console.log(entityList);
   return entityList;
 }

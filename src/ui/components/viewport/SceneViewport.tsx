@@ -162,7 +162,7 @@ export function SceneRenderer() {
         {scene.sceneGraph.roots.map((oid) => (
           <SceneNode id={oid} activeId={activeRef?.id} ref={nodeRef} />
         ))}
-        {activeRef && nodeRef && (
+        {activeRef && (
           <SceneObjectControls
             activeRef={activeRef}
             ref={nodeRef as RefObject<Object3D>}

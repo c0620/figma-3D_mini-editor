@@ -7,8 +7,9 @@ import rotateIcon from "@/assets/images/icons/descriptive/rotate.svg";
 import scaleIcon from "@/assets/images/icons/descriptive/scale.svg";
 import undoIcon from "@/assets/images/icons/descriptive/undo.svg";
 import redoIcon from "@/assets/images/icons/descriptive/redo.svg";
-import { useHistory, type ActiveEntity } from "@/app/ApplicationKernelContext";
+import { useHistory } from "@/app/ApplicationKernelContext";
 import { useSessionStore, type ObjectToolMode } from "@/store/sessionStore";
+import type { ActiveEntity } from "@/types/scene";
 
 export function BottomTools({ activeObj }: { activeObj: ActiveEntity | null }) {
   const activeTool = useSessionStore().activeObjectTool;
