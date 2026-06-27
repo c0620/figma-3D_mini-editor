@@ -15,6 +15,7 @@ export enum TextureSlot {
 
 export interface Material {
   id: MaterialID;
+  name: string;
   baseColor: string;
   roughness: number;
   metalness: number;

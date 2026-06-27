@@ -10,6 +10,8 @@ import type {
   SceneObject,
   Transform,
   ObjectID,
+  MaterialID,
+  Material,
 } from "../types/scene";
 
 import { create } from "zustand";
@@ -53,6 +55,7 @@ interface SceneActions {
   patchCamera(patch: CameraPatch): void;
   patchEnvironment(patch: EnvironmentPatch): void;
   traverseScene(): void; //toDo?
+  patchMaterial(id: MaterialID, patch: Partial<Omit<Material, "id">>): void;
   addObject(object: SceneLight | SceneMesh | SceneGroup): void;
   addCamera(camera: CameraState): void;
   deleteObject(objectId: ObjectRef): void;
@@ -113,6 +116,21 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
         scene: {
           ...state.scene!,
           sceneGraph: { ...g, objects: { ...g.objects, [id]: next } },
+        },
+      };
+    }),
+
+  patchMaterial: (id, patch) =>
+    set((state) => {
+      if (!state.scene) return state;
+      const material = { ...state.scene.materials[id] };
+      if (!material) return state;
+      const next = { ...material, ...patch };
+      threeAssetRegistry.setParam(id, patch);
+      return {
+        scene: {
+          ...state.scene,
+          materials: { ...state.scene.materials, [id]: next },
         },
       };
     }),

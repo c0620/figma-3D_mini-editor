@@ -5,7 +5,6 @@ import { useCallback, useContext, useMemo } from "react";
 import { PanelSceneModeContext } from "../templates/panels/BasePanel";
 
 import styles from "./TransformInputs.module.scss";
-import { InputText, type InputField } from "../atoms/inputs/TextInputs";
 import clsx from "clsx";
 import { NumberFieldInput } from "../molecules/inputs/NumberFieldInput";
 

@@ -4,6 +4,7 @@ import styles from "./TextInputs.module.scss";
 import { useContext, useEffect, useState } from "react";
 
 import clsx from "clsx";
+import { Slider, SliderCentered } from "./Sliders";
 
 export type InputField = {
   onChange: (value: number) => void;
@@ -18,7 +19,7 @@ export type InputField = {
   };
 };
 
-export function InputText({ field }: { field: InputField }) {
+export function InputNumbers({ field }: { field: InputField }) {
   const [cachedValue, setCachedValue] = useState("" + field.value);
   useEffect(() => setCachedValue("" + field.value), [field.value]);
 
@@ -33,21 +34,29 @@ export function InputText({ field }: { field: InputField }) {
   };
 
   return (
-    <div className={styles.inputText}>
-      {field.label ? (
-        <label className={styles.inputTextLabel}>{field.label}</label>
-      ) : null}
-      <input
-        className={styles.inputTextField}
-        type="number"
-        style={field.isActive ? { color: "orange" } : { color: "white" }}
-        onInput={handleChange}
-        onKeyDown={(e) => {
-          if (e.code === "Enter") setChange();
-        }}
-        value={cachedValue}
-        onBlur={setChange}
-      />
+    <div className={styles.controls}>
+      <div className={styles.inputText}>
+        {field.label ? (
+          <label className={styles.inputTextLabel}>{field.label}</label>
+        ) : null}
+        <input
+          className={styles.inputTextField}
+          type="number"
+          style={field.isActive ? { color: "orange" } : { color: "white" }}
+          onInput={handleChange}
+          onKeyDown={(e) => {
+            if (e.code === "Enter") setChange();
+          }}
+          value={cachedValue}
+          onBlur={setChange}
+        />
+      </div>
+      {field.range &&
+        (field.range.variant == "default" ? (
+          <Slider field={field} />
+        ) : (
+          <SliderCentered field={field} />
+        ))}
     </div>
   );
 }

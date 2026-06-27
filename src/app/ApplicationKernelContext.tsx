@@ -73,6 +73,10 @@ export function useNotifications() {
   return useKernel().notifications;
 }
 
+export function useRender() {
+  return useKernel().renderService;
+}
+
 /**
  * Реактивный список объектов сцены для дерева и выбора.
  * Нельзя возвращать новый массив напрямую из селектора Zustand — при каждом рендере

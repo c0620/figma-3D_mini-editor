@@ -1,3 +1,9 @@
+.controls {
+  display: flex;
+  gap: var(--margin-s);
+  align-items: center;
+}
+
 .input-text {
   display: flex;
   background-color: var(--interactive-color-interactive-background-primary);

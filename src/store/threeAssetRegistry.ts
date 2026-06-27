@@ -60,7 +60,7 @@ class ThreeAssetRegistry {
     });
   }
 
-  get(id: string): ThreeAsset | undefined {
+  getAssetData(id: string): ThreeAsset | undefined {
     return this.assets.get(id);
   }
 
@@ -72,13 +72,9 @@ class ThreeAssetRegistry {
   //   this.materials[materialID][param] = value;
   // }
 
-  setParam(
-    id: MaterialID,
-    key: "roughness" | "metalness" | "emissiveIntensity",
-    value: number
-  ) {
+  setParam(id: MaterialID, params: Partial<Omit<Material, "id">>) {
     const material = this.materials[id].material;
-    material[key] = value;
+    material.setValues(params);
     material.needsUpdate = true;
   }
 

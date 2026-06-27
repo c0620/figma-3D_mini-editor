@@ -1,5 +1,5 @@
 import { Slider, SliderCentered } from "../../atoms/inputs/Sliders";
-import { InputText, type InputField } from "../../atoms/inputs/TextInputs";
+import { InputNumbers, type InputField } from "../../atoms/inputs/TextInputs";
 
 export function NumberFieldInput({
   title,
@@ -12,7 +12,7 @@ export function NumberFieldInput({
     <div>
       <p>{title}</p>
       <div>
-        <InputText field={field} />
+        <InputNumbers field={field} />
         {field.range &&
           (field.range.variant == "default" ? (
             <Slider field={field} />

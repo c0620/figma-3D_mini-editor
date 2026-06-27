@@ -2,6 +2,8 @@ import type {
   CameraID,
   CameraState,
   EnvironmentState,
+  Material,
+  MaterialID,
   ObjectID,
   ObjectRef,
   Scene,
@@ -23,6 +25,12 @@ import type { ObjectToolMode } from "./sessionStore";
  * быть не должно — только через данный класс.
  */
 export class SceneStorage {
+  private onClear?: () => void;
+
+  setOnClear(fn: () => void): void {
+    this.onClear = fn;
+  }
+
   // --- Scene: чтение ---
 
   /** Сцена с гарантией наличия. Бросает, если сцена не загружена (для IO/render). */
@@ -48,6 +56,10 @@ export class SceneStorage {
     return cameras[Object.keys(cameras)[0]]; //toDo: now method returns 1st camera
   }
 
+  getMaterial(id: MaterialID): Material | undefined {
+    return useSceneStore.getState().scene?.materials[id];
+  }
+
   findObjectById(id: ObjectID): SceneObject | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;
@@ -68,6 +80,7 @@ export class SceneStorage {
 
   clearScene(): void {
     useSceneStore.getState().clearScene();
+    this.onClear?.();
   }
 
   addObject(object: SceneObject): void {
@@ -76,6 +89,10 @@ export class SceneStorage {
 
   patchObject(objectId: string, patch: SceneObjectPatch): void {
     useSceneStore.getState().patchObject(objectId, patch);
+  }
+
+  patchMaterial(id: MaterialID, patch: Partial<Omit<Material, "id">>): void {
+    useSceneStore.getState().patchMaterial(id, patch);
   }
 
   patchCamera(patch: CameraPatch): void {

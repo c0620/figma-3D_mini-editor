@@ -1,0 +1,13 @@
+.material-preview {
+  display: flex;
+  gap: var(--margin-m);
+  align-items: center;
+  & > canvas {
+    width: var(--inputs-size-preview-height);
+    height: var(--inputs-size-preview-height);
+  }
+  &.active > canvas {
+    outline: 3px solid var(--common-color-common-accent);
+    border-radius: 100%;
+  }
+}

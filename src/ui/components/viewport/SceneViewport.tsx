@@ -21,7 +21,7 @@ function SceneObjectMesh({
   object: SceneObject;
   isActive: boolean;
 }) {
-  const asset = threeAssetRegistry.get(object.id);
+  const asset = threeAssetRegistry.getAssetData(object.id);
   if (!asset) return null;
 
   const mats = asset.materials.map(
@@ -32,7 +32,7 @@ function SceneObjectMesh({
   return (
     <>
       <mesh geometry={asset.geometry} material={material} name={object.name}>
-        {isActive && <Outlines thickness={3} color="orange" />}
+        {isActive && <Outlines thickness={3} color="#ff5900" />}
       </mesh>
     </>
   );

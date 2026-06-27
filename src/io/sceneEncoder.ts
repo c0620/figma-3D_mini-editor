@@ -144,6 +144,7 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     ([id, m]) =>
       (materials[id] = {
         id,
+        name: m.material.name,
         baseColor: m.material.color.getHexString(),
         roughness: m.material.roughness,
         metalness: m.material.metalness,

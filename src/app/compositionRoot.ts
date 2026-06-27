@@ -49,6 +49,10 @@ import { SceneStorage } from "../store/sceneStorage";
 
 import type { SceneEntitySummary } from "../store/sceneEntityList";
 import { buildSceneEntityList } from "../store/sceneEntityList";
+import {
+  MaterialEditingHandler,
+  type MaterialEditingPayload,
+} from "@/handlers/materialEditingHandler";
 
 /**
  * Proxy-тип для хэндлеров, команды которых идут через CommandBus (с историей).
@@ -68,6 +72,7 @@ export interface AppHandlers {
 
   /** Ниже — прокси через CommandBus, действия записываются в историю */
   transform: HandlerProxy<TransformObjectHandlerPayload>;
+  materialEditing: HandlerProxy<MaterialEditingPayload>;
   deletion: HandlerProxy<DeletionHandlerPayload>;
   visibility: HandlerProxy<ToggleVisibilityPayload>;
   lock: HandlerProxy<ToggleLockPayload>;
@@ -92,6 +97,7 @@ export interface AppKernel {
   /** Текущее содержимое сцены для дерева и выбора активного объекта (снимок на момент вызова). */
   listSceneEntities(): SceneEntitySummary[];
   transfer: SceneTransferFacade;
+  renderService: RenderService;
   notifications: NotificationService;
   help: HelpService;
   tooltips: TooltipService;
@@ -113,6 +119,7 @@ export function buildKernel(): AppKernel {
 
   // --- Render / Analytics ---
   const renderService = new RenderService(renderer, sceneStorage);
+  sceneStorage.setOnClear(() => renderService.disposeMaterialPreview());
   const analyzer = new SceneAnalyzer();
 
   // --- IO ---
@@ -146,6 +153,7 @@ export function buildKernel(): AppKernel {
 
   // --- Tool handlers ---
   const transformHandler = new TransformObjectHandler(sceneStorage);
+  const materialEditingHandler = new MaterialEditingHandler(sceneStorage);
   const selectionHandler = new SelectionHandler(sceneStorage);
   const deletionHandler = new DeletionHandler(sceneStorage);
   const cameraHandler = new CameraEditingHandler(sceneStorage);
@@ -164,6 +172,7 @@ export function buildKernel(): AppKernel {
   const bus = new CommandBus(sceneStorage, history, executor, gc);
 
   executor.handlers.set(CommandType.TransformObject, transformHandler);
+  executor.handlers.set(CommandType.EditMaterial, materialEditingHandler);
   executor.handlers.set(CommandType.DeleteObject, deletionHandler);
   executor.handlers.set(CommandType.AddLight, lightAdditionHandler);
   executor.handlers.set(CommandType.EditLight, lightEditingHandler);
@@ -191,6 +200,7 @@ export function buildKernel(): AppKernel {
     environment: environmentHandler,
 
     transform: makeProxy(CommandType.TransformObject),
+    materialEditing: makeProxy(CommandType.EditMaterial),
     deletion: makeProxy(CommandType.DeleteObject),
     visibility: makeProxy(CommandType.ToggleVisibility),
     lock: makeProxy(CommandType.ToggleLock),
@@ -210,6 +220,7 @@ export function buildKernel(): AppKernel {
     listSceneEntities: () =>
       buildSceneEntityList(sceneStorage.getSceneOrNull()),
     transfer,
+    renderService,
     notifications,
     help,
     tooltips,
