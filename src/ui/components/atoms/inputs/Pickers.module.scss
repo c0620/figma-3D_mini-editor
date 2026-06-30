@@ -1,0 +1,52 @@
+@use "./InputCommon.module.scss";
+.input-color-container {
+  @extend .common-input-outer;
+}
+
+.input-color {
+  display: flex;
+  gap: var(--margin-s);
+}
+
+.color-palette {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--inputs-size-input-height);
+  height: var(--inputs-size-input-height);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  flex: 0 0 auto;
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+  &::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+  }
+  &::-moz-color-swatch {
+    border: none;
+    border-radius: 50%;
+  }
+}
+
+.hex-input {
+  @extend .common-input-text-field;
+  width: 60%;
+}
+
+.rgb-input-container {
+  @extend .common-input-container;
+  width: 100%;
+}
+
+.rgb-input-label {
+  @extend .common-input-inner-label;
+}
+
+.rgb-input-field {
+  @extend .common-input-text-field;
+  width: 100%;
+}

@@ -80,7 +80,6 @@ export function buildSceneEntityList(scene: Scene | null) {
   const entityList: SceneEntitySummary[] = [];
 
   function buildRecursiveSceneList(id: ObjectID, level: number) {
-    console.log(id);
     const node = sceneGraph[id];
     const sceneObj = sceneObjs[id];
 

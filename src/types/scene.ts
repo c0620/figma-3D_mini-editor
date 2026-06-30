@@ -1,4 +1,4 @@
-import type { BufferGeometry, Material as ThreeMaterial } from "three";
+import type { BufferGeometry, Color, Material as ThreeMaterial } from "three";
 
 export type ObjectID = string;
 export type CameraID = string;
@@ -16,7 +16,7 @@ export enum TextureSlot {
 export interface Material {
   id: MaterialID;
   name: string;
-  baseColor: string;
+  color: Color;
   roughness: number;
   metalness: number;
   emissiveIntensity: number;

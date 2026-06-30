@@ -1,30 +1,20 @@
-.controls {
+@use "./InputCommon.module.scss";
+a.controls {
   display: flex;
   gap: var(--margin-s);
   align-items: center;
 }
 
 .input-text {
-  display: flex;
-  background-color: var(--interactive-color-interactive-background-primary);
-  border-radius: var(--border-radius-s);
-  gap: var(--margin-s);
-  justify-content: center;
-  align-items: center;
-  padding: 0 var(--margin-s);
+  @extend .common-input-container;
 }
 
 .input-text-label {
-  color: var(--interactive-color-interactive-text-tertiary);
+  @extend .common-input-inner-label;
 }
 
 .input-text-field {
-  background-color: var(--interactive-color-interactive-background-primary);
-  border-radius: var(--border-radius-s);
-  box-shadow: none;
-  border: none;
-  text-align: center;
-  height: var(--inputs-size-input-height);
+  @extend .common-input-text-field;
   width: 100%;
   max-width: 90px;
 }

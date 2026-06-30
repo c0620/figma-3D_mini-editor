@@ -34,29 +34,21 @@ export function InputNumbers({ field }: { field: InputField }) {
   };
 
   return (
-    <div className={styles.controls}>
-      <div className={styles.inputText}>
-        {field.label ? (
-          <label className={styles.inputTextLabel}>{field.label}</label>
-        ) : null}
-        <input
-          className={styles.inputTextField}
-          type="number"
-          style={field.isActive ? { color: "orange" } : { color: "white" }}
-          onInput={handleChange}
-          onKeyDown={(e) => {
-            if (e.code === "Enter") setChange();
-          }}
-          value={cachedValue}
-          onBlur={setChange}
-        />
-      </div>
-      {field.range &&
-        (field.range.variant == "default" ? (
-          <Slider field={field} />
-        ) : (
-          <SliderCentered field={field} />
-        ))}
+    <div className={styles.inputText}>
+      {field.label ? (
+        <label className={styles.inputTextLabel}>{field.label}</label>
+      ) : null}
+      <input
+        className={styles.inputTextField}
+        type="number"
+        style={field.isActive ? { color: "orange" } : { color: "white" }}
+        onInput={handleChange}
+        onKeyDown={(e) => {
+          if (e.code === "Enter") setChange();
+        }}
+        value={cachedValue}
+        onBlur={setChange}
+      />
     </div>
   );
 }

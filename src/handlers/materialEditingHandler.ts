@@ -14,10 +14,16 @@ export class MaterialEditingHandler extends SceneToolHandler<MaterialEditingPayl
   getStateBeforeExecute(
     payload: MaterialEditingPayload
   ): HistoryEntry<MaterialEditingPayload> {
-    const material = this.scene.getMaterial(payload.id);
+    const sceneMat = this.scene.getMaterial(payload.id);
+    if (!sceneMat)
+      throw new Error(
+        "getStateBeforeExecute(MaterialEditingHandler): no material"
+      );
+    const material: MaterialEditingPayload = { ...sceneMat };
+    delete material.textures; //toDo: texture patch
     return {
       type: CommandType.EditMaterial,
-      snapshot: { id: payload.id, ...material },
+      snapshot: { ...material },
     };
   }
 }

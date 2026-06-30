@@ -1,0 +1,4 @@
+@use "./../../atoms/inputs/InputCommon.module.scss";
+.number-input-container {
+  @extend .common-input-outer;
+}
