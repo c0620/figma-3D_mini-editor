@@ -20,6 +20,11 @@ export function InputColorPicker({
   const [cachedValue, setCachedValue] = useState(value.getHexString());
   const [cachedHEXValue, setCachedHEXValue] = useState(cachedValue);
 
+  useEffect(() => {
+    setCachedValue(value.getHexString());
+    setCachedHEXValue(value.getHexString());
+  }, [value.getHexString()]);
+
   const colorRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -48,7 +53,7 @@ export function InputColorPicker({
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     switch (e.target.type) {
       case "number":
-        var newValue = new Color(cachedValue);
+        var newValue = new Color("#" + cachedValue);
         const userValue = +e.target.value / 255;
         const rgb = { r: 0, g: 0, b: 0 };
         new Color("#" + cachedValue).getRGB(rgb, SRGBColorSpace);

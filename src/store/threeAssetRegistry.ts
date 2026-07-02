@@ -77,6 +77,13 @@ class ThreeAssetRegistry {
     if (params.emissiveIntensity != null && params.emissiveIntensity > 0) {
       material.emissive.copy(material.color);
     }
+    if (
+      params.color != null &&
+      ((params.emissiveIntensity && params.emissiveIntensity > 0) ||
+        material.emissiveIntensity > 0)
+    ) {
+      material.emissive.copy(params.color);
+    }
     material.setValues(params);
     material.needsUpdate = true;
   }

@@ -45,12 +45,14 @@ function MeshParams({
   activeMesh: SceneMesh;
   materialIDs: MaterialID[];
 }) {
-  const scene = useSceneStore();
-
   const [activeMaterialID, setActiveMaterialID] = useState<MaterialID>(
     materialIDs[0]
   );
-  const activeMaterial = scene.scene!.materials[activeMaterialID];
+  const materials = useSceneStore((s) => s.scene?.materials);
+  if (!materials) return <></>;
+
+  const activeMaterial = materials[activeMaterialID];
+
   return (
     <Panel panel="Right" text="Параметры">
       <div className={styles.panelScene}>
@@ -59,7 +61,7 @@ function MeshParams({
             <MaterialPreview
               key={id}
               materialID={id}
-              name={scene.scene!.materials[id].name}
+              name={materials[id].name}
               onClick={() => setActiveMaterialID(id)}
               isActive={id === activeMaterialID}
             />

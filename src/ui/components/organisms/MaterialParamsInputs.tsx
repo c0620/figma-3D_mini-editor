@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import { PanelSceneModeContext } from "../templates/panels/BasePanel";
-import { InputNumbers, type InputField } from "../atoms/inputs/TextInputs";
 
 import { activeEntityEditorHeading } from "./TransformInputs";
 import { Slider } from "../atoms/inputs/Sliders";
@@ -8,15 +7,9 @@ import { Slider } from "../atoms/inputs/Sliders";
 import styles from "./MaterialParamsInputs.module.scss";
 import type { Material, SceneMesh } from "@/types/scene";
 import { useHandlers } from "@/app/ApplicationKernelContext";
-
-function MaterialParam({ title, field }: { title: string; field: InputField }) {
-  return (
-    <div>
-      <p className="t3">{title}</p>
-      <InputNumbers field={field} />
-    </div>
-  );
-}
+import { NumberFieldInput } from "../molecules/inputs/NumberFieldInput";
+import { ColorInput } from "../molecules/inputs/ColorInput";
+import { threeAssetRegistry } from "@/store/threeAssetRegistry";
 
 export function MaterialParamsInputs({ material }: { material: Material }) {
   const mode = useContext(PanelSceneModeContext);
@@ -28,7 +21,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
         Параметры <span></span>materialname
       </h3>
       <div className={styles.paramsRow}>
-        <MaterialParam
+        <NumberFieldInput
           title="Шероховатость"
           field={{
             onChange: (value) =>
@@ -39,11 +32,13 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
               min: 0,
               max: 10,
               variant: "default",
-              step: 1,
+              step: 0.1,
+              onDrag: (value) =>
+                threeAssetRegistry.setParam(material.id, { roughness: value }),
             },
           }}
         />
-        <MaterialParam
+        <NumberFieldInput
           title="Металлик"
           field={{
             onChange: (value) =>
@@ -54,12 +49,14 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
               min: 0,
               max: 10,
               variant: "default",
-              step: 1,
+              step: 0.1,
+              onDrag: (value) =>
+                threeAssetRegistry.setParam(material.id, { metalness: value }),
             },
           }}
         />
       </div>
-      <MaterialParam
+      <NumberFieldInput
         title="Свечение"
         field={{
           onChange: (value) =>
@@ -73,8 +70,22 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
             min: 0,
             max: 10,
             variant: "default",
-            step: 1,
+            step: 0.01,
+            onDrag: (value) =>
+              threeAssetRegistry.setParam(material.id, {
+                emissiveIntensity: value,
+              }),
           },
+        }}
+      />
+      <ColorInput
+        title="Основной цвет"
+        value={material.color}
+        onChange={(value: Material["color"]) =>
+          materialEditing.execute({ id: material.id, color: value })
+        }
+        onPalette={(value: Material["color"]) => {
+          threeAssetRegistry.setParam(material.id, { color: value });
         }}
       />
     </div>

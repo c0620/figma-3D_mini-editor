@@ -80,7 +80,6 @@ export class SceneStorage {
 
   clearScene(): void {
     useSceneStore.getState().clearScene();
-    this.onClear?.();
   }
 
   addObject(object: SceneObject): void {

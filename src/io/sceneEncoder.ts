@@ -145,10 +145,12 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
       (materials[id] = {
         id,
         name: m.material.name,
-        color: m.material.color,
+        color: m.material.color.clone(),
         roughness: m.material.roughness,
         metalness: m.material.metalness,
-        emissiveIntensity: m.material.emissiveIntensity,
+        emissiveIntensity: m.material.emissive.equals(new Color(0x000000))
+          ? 0
+          : m.material.emissiveIntensity,
         textures: {
           emissiveMap: m.material.emissiveMap?.image,
           map: m.material.map?.image,

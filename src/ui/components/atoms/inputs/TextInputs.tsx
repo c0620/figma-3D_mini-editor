@@ -6,9 +6,10 @@ import { useContext, useEffect, useState } from "react";
 import clsx from "clsx";
 import { Slider, SliderCentered } from "./Sliders";
 
-export type InputField = {
+export type InputNumbersField = {
   onChange: (value: number) => void;
-  value: number;
+  value: string;
+  setValue: React.Dispatch<React.SetStateAction<string>>;
   isActive: boolean;
   label?: string;
   range?: {
@@ -16,21 +17,19 @@ export type InputField = {
     max: number;
     step: number;
     variant: "default" | "centered";
+    onDrag?: (value: number) => void;
   };
 };
 
-export function InputNumbers({ field }: { field: InputField }) {
-  const [cachedValue, setCachedValue] = useState("" + field.value);
-  useEffect(() => setCachedValue("" + field.value), [field.value]);
-
+export function InputNumbers({ field }: { field: InputNumbersField }) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setCachedValue(e.target.value.replace(",", "."));
+    field.setValue(e.target.value.replace(",", "."));
   };
 
   const setChange = () => {
-    const parsed = Number.parseFloat(cachedValue);
+    const parsed = Number.parseFloat(field.value);
     if (Number.isFinite(parsed)) field.onChange(parsed);
-    else setCachedValue("" + field.value);
+    else field.setValue("" + field.value);
   };
 
   return (
@@ -46,7 +45,7 @@ export function InputNumbers({ field }: { field: InputField }) {
         onKeyDown={(e) => {
           if (e.code === "Enter") setChange();
         }}
-        value={cachedValue}
+        value={field.value}
         onBlur={setChange}
       />
     </div>
