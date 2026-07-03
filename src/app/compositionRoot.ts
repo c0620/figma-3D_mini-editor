@@ -1,5 +1,5 @@
 import { CommandType } from "../types/commands";
-import type { EnvironmentState, SceneLight, TextureSlot } from "../types/scene";
+import type { EnvironmentState, SceneLight } from "../types/scene";
 import { FigmaAPI } from "../figma/figmaApi";
 import { FigmaHandler } from "../figma/figmaHandler";
 import {
@@ -18,8 +18,14 @@ import {
   type LightEditingPayload,
 } from "../handlers/lightEditingHandler";
 import { SelectionHandler } from "../handlers/selectionHandler";
-import { TextureExportHandler } from "../handlers/textureExportHandler";
-import { TextureImportHandler } from "../handlers/textureImportHandler";
+import {
+  TextureExportHandler,
+  type TextureExportPayload,
+} from "../handlers/textureExportHandler";
+import {
+  TextureImportHandler,
+  type TextureImportPayload,
+} from "../handlers/textureImportHandler";
 import {
   ObjectGraphToolsHandler,
   ToggleLockHandler,
@@ -33,6 +39,7 @@ import { SceneNamingService } from "../io/sceneNamingService";
 import { ScenePersistenceService } from "../io/scenePersistenceService";
 import { SceneTransferFacade } from "../io/sceneTransferFacade";
 import { TextureFigmaService } from "../io/textureFigmaService";
+import { TextureLocalService } from "../io/textureLocalService";
 import { AssetCatalogService } from "../library/assetCatalogService";
 import { Renderer } from "../render/renderer";
 import { RenderService } from "../render/renderService";
@@ -81,12 +88,8 @@ export interface AppHandlers {
   background: HandlerProxy<EnvironmentState>; //too Narrow
   shadows: HandlerProxy<EnvironmentState>; //too Narrow
   sceneRename: HandlerProxy<{ name: string }>;
-  textureImport: HandlerProxy<{
-    materialId: string;
-    slot: TextureSlot;
-    url: string;
-  }>;
-  textureExport: HandlerProxy<{ materialId: string; slot: TextureSlot }>;
+  textureImport: HandlerProxy<TextureImportPayload>;
+  textureExport: (payload: TextureExportPayload) => void;
   environment: EnvironmentHandler;
 }
 
@@ -129,6 +132,7 @@ export function buildKernel(): AppKernel {
     analyzer,
     notifications
   );
+  const textureLocal = new TextureLocalService();
   const textureFigma = new TextureFigmaService(
     figmaHandler,
     naming,
@@ -160,8 +164,16 @@ export function buildKernel(): AppKernel {
   const lightAdditionHandler = new LightAdditionHandler(sceneStorage);
   const lightEditingHandler = new LightEditingHandler(sceneStorage);
   const environmentHandler = new EnvironmentHandler(sceneStorage);
-  const textureImportHandler = new TextureImportHandler(sceneStorage);
-  const textureExportHandler = new TextureExportHandler(sceneStorage);
+  const textureImportHandler = new TextureImportHandler(
+    sceneStorage,
+    textureLocal,
+    textureFigma
+  );
+  const textureExportHandler = new TextureExportHandler(
+    sceneStorage,
+    textureLocal,
+    textureFigma
+  );
   const graphToolsHandler = new ObjectGraphToolsHandler(sceneStorage);
   const toggleVisibilityHandler = new ToggleVisibilityHandler(sceneStorage);
   const toggleLockHandler = new ToggleLockHandler(sceneStorage);
@@ -180,7 +192,6 @@ export function buildKernel(): AppKernel {
   executor.handlers.set(CommandType.SetBackground, environmentHandler);
   executor.handlers.set(CommandType.ToggleShadows, environmentHandler);
   executor.handlers.set(CommandType.ImportTexture, textureImportHandler);
-  executor.handlers.set(CommandType.ExportTexture, textureExportHandler);
   executor.handlers.set(CommandType.ToggleVisibility, toggleVisibilityHandler);
   executor.handlers.set(CommandType.ToggleLock, toggleLockHandler);
 
@@ -210,7 +221,7 @@ export function buildKernel(): AppKernel {
     shadows: makeProxy(CommandType.ToggleShadows),
     sceneRename: makeProxy(CommandType.RenameScene),
     textureImport: makeProxy(CommandType.ImportTexture),
-    textureExport: makeProxy(CommandType.ExportTexture),
+    textureExport: (payload) => textureExportHandler.execute(payload),
   };
 
   return {

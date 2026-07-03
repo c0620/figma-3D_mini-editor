@@ -5,9 +5,15 @@ import { MaterialParamsInputs } from "../../organisms/MaterialParamsInputs.tsx";
 import { useSceneStore } from "@/store/sceneStore";
 import { SelectIcon } from "../../atoms/inputs/Selects.tsx";
 import type { ActiveEntity, MaterialID, SceneMesh } from "@/types/scene.ts";
+import { TextureSlot } from "@/types/scene.ts";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry.ts";
 import { MaterialPreview } from "../../atoms/sceneUtils/MaterialPreview.tsx";
 import { useState } from "react";
+import {
+  TextureInput,
+  TextureSelect,
+} from "../../molecules/inputs/TextureSelect.tsx";
+import { ModalMini } from "../../organisms/ModalTextureImport.tsx";
 
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
   switch (activeObj.kind) {
@@ -48,32 +54,62 @@ function MeshParams({
   const [activeMaterialID, setActiveMaterialID] = useState<MaterialID>(
     materialIDs[0]
   );
+
   const materials = useSceneStore((s) => s.scene?.materials);
   if (!materials) return <></>;
 
   const activeMaterial = materials[activeMaterialID];
+  const activeThreeMaterial =
+    threeAssetRegistry.materials[activeMaterialID].material;
+
+  const [activeTextureSlot, setActiveTextureSlot] = useState<TextureSlot>(
+    TextureSlot.BaseColor
+  );
+
+  const [openImportTextureModal, setOpenImportTextureModal] = useState(false);
 
   return (
-    <Panel panel="Right" text="Параметры">
-      <div className={styles.panelScene}>
-        <ScrollPanel isLong={true} text="Материалы меша">
-          {materialIDs.map((id) => (
-            <MaterialPreview
-              key={id}
-              materialID={id}
-              name={materials[id].name}
-              onClick={() => setActiveMaterialID(id)}
-              isActive={id === activeMaterialID}
-            />
-          ))}
-        </ScrollPanel>
-      </div>
-      <MaterialParamsInputs material={activeMaterial} />
-      <div className={styles.panelScene}>
-        <ScrollPanel isLong={true} text="Текстуры">
-          <SelectIcon />
-        </ScrollPanel>
-      </div>
-    </Panel>
+    <>
+      <Panel panel="Right" text="Параметры">
+        <div className={styles.panelScene}>
+          <ScrollPanel isLong={true} text="Материалы меша">
+            {materialIDs.map((id) => (
+              <MaterialPreview
+                key={id}
+                materialID={id}
+                name={materials[id].name}
+                onClick={() => setActiveMaterialID(id)}
+                isActive={id === activeMaterialID}
+              />
+            ))}
+          </ScrollPanel>
+        </div>
+        <MaterialParamsInputs material={activeMaterial} />
+        <div className={styles.panelScene}>
+          <ScrollPanel isLong={true} text="Текстуры">
+            {Object.values(TextureSlot).map((slot) => (
+              <TextureSelect
+                key={slot}
+                materialId={activeMaterialID}
+                slot={slot}
+                materialName={activeMaterial.name}
+                texture={activeThreeMaterial[slot] ?? null}
+                isActive={slot == activeTextureSlot}
+                onClick={() => setActiveTextureSlot(slot)}
+                openImportModal={() =>
+                  setOpenImportTextureModal(!openImportTextureModal)
+                }
+              />
+            ))}
+          </ScrollPanel>
+        </div>
+      </Panel>
+      <ModalMini
+        open={openImportTextureModal}
+        changeOpen={() => setOpenImportTextureModal(!openImportTextureModal)}
+      >
+        <TextureInput materialId={activeMaterialID} slot={activeTextureSlot} />
+      </ModalMini>
+    </>
   );
 }

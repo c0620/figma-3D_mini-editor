@@ -125,8 +125,10 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
       if (!state.scene) return state;
       const material = { ...state.scene.materials[id] };
       if (!material) return state;
+      const { textures, ...threePatch } = patch;
       const next = { ...material, ...patch };
-      threeAssetRegistry.setParam(id, patch);
+      if (Object.keys(threePatch).length)
+        threeAssetRegistry.setParam(id, threePatch);
       return {
         scene: {
           ...state.scene,

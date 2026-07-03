@@ -10,6 +10,4 @@ export function SelectColor() {}
 export function ModeSelect() {}
 export function MeshMaterialSelect() {}
 
-export function TextureSelect() {}
-
 export function Options() {}

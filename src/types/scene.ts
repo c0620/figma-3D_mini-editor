@@ -1,9 +1,14 @@
-import type { BufferGeometry, Color, Material as ThreeMaterial } from "three";
+import type {
+  BufferGeometry,
+  Color,
+  Texture,
+  Material as ThreeMaterial,
+} from "three";
 
 export type ObjectID = string;
 export type CameraID = string;
 export type MaterialID = string;
-export type TextureMiniature = unknown;
+export type TextureMiniature = Texture["image"] | null;
 
 export enum TextureSlot {
   BaseColor = "map",
