@@ -18,10 +18,24 @@ export enum TextureSlot {
   Emissive = "emissiveMap",
 }
 
+export interface FigmaColor {
+  type: "figma";
+  id: Variable["id"];
+  name: Variable["name"];
+  value: Color;
+}
+
+export interface CustomColor {
+  type: "custom";
+  value: Color;
+}
+
+export type MaterialColor = FigmaColor | CustomColor;
+
 export interface Material {
   id: MaterialID;
   name: string;
-  color: Color;
+  color: MaterialColor;
   roughness: number;
   metalness: number;
   emissiveIntensity: number;

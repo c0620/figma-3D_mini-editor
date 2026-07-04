@@ -17,6 +17,10 @@ import type {
 import { create } from "zustand";
 import { applyToSceneThreeNode } from "@/utils/applyToSceneThreeNode";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
+import { Color } from "three";
+
+type SceneMaterialPatch = Pick<Material, "id"> &
+  Partial<Omit<Material, "id" | "color">> & { color?: Color };
 
 type SceneObjectPatch =
   | (Partial<
@@ -127,8 +131,11 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
       if (!material) return state;
       const { textures, ...threePatch } = patch;
       const next = { ...material, ...patch };
+      if (threePatch.color) {
+        (threePatch as SceneMaterialPatch).color = threePatch.color.value;
+      }
       if (Object.keys(threePatch).length)
-        threeAssetRegistry.setParam(id, threePatch);
+        threeAssetRegistry.setParam(id, threePatch as SceneMaterialPatch);
       return {
         scene: {
           ...state.scene,

@@ -1,6 +1,7 @@
 import type { Color } from "three";
 import { InputColorPicker } from "../../atoms/inputs/Pickers";
 import styles from "./ColorInput.module.scss";
+import type { Material } from "@/types/scene";
 
 export function ColorInput({
   title,
@@ -9,8 +10,8 @@ export function ColorInput({
   value,
 }: {
   title: string;
-  onChange: (value: Color) => void;
-  onPalette?: (value: Color) => void;
+  onChange: (value: Material["color"]) => void;
+  onPalette?: (value: Material["color"]) => void;
   value: Color;
 }) {
   return (

@@ -145,21 +145,21 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
       m.material.emissiveIntensity = 0;
     }
     materials[id] = {
-        id,
-        name: m.material.name,
-        color: m.material.color.clone(),
-        roughness: m.material.roughness,
-        metalness: m.material.metalness,
-        emissiveIntensity: m.material.emissive.equals(new Color(0x000000))
-          ? 0
-          : m.material.emissiveIntensity,
-        textures: {
-          emissiveMap: m.material.emissiveMap?.image,
-          map: m.material.map?.image,
-          metalnessMap: m.material.metalnessMap?.image,
-          normalMap: m.material.normalMap?.image,
-          roughnessMap: m.material.roughnessMap?.image,
-        },
+      id,
+      name: m.material.name,
+      color: { type: "custom", value: m.material.color.clone() },
+      roughness: m.material.roughness,
+      metalness: m.material.metalness,
+      emissiveIntensity: m.material.emissive.equals(new Color(0x000000))
+        ? 0
+        : m.material.emissiveIntensity,
+      textures: {
+        emissiveMap: m.material.emissiveMap?.image,
+        map: m.material.map?.image,
+        metalnessMap: m.material.metalnessMap?.image,
+        normalMap: m.material.normalMap?.image,
+        roughnessMap: m.material.roughnessMap?.image,
+      },
     };
   });
 

@@ -7,6 +7,7 @@ import {
 } from "react";
 import styles from "./Pickers.module.scss";
 import { Color, SRGBColorSpace } from "three";
+import type { Material } from "@/types/scene";
 
 export function InputColorPicker({
   value,
@@ -14,8 +15,8 @@ export function InputColorPicker({
   onPalette,
 }: {
   value: Color;
-  onChange: (value: Color) => void;
-  onPalette?: (value: Color) => void;
+  onChange: (value: Material["color"]) => void;
+  onPalette?: (value: Material["color"]) => void;
 }) {
   const [cachedValue, setCachedValue] = useState(value.getHexString());
   const [cachedHEXValue, setCachedHEXValue] = useState(cachedValue);
@@ -43,7 +44,11 @@ export function InputColorPicker({
     }
 
     const handler = () => {
-      onChangeRef.current(new Color(el.value));
+      const newColor: Material["color"] = {
+        type: "custom",
+        value: new Color(el.value),
+      };
+      onChangeRef.current(newColor);
     };
 
     listenerRef.current = handler;
@@ -71,16 +76,21 @@ export function InputColorPicker({
         newValue.setRGB(rgb.r, rgb.g, rgb.b, SRGBColorSpace);
         setCachedValue(newValue.getHexString());
         setCachedHEXValue(newValue.getHexString());
-        onChange(newValue);
+        onChange({
+          type: "custom",
+          value: newValue,
+        });
         break;
       case "color":
         var newValue = new Color(e.target.value);
         setCachedValue(newValue.getHexString());
         setCachedHEXValue(newValue.getHexString());
-        onPalette?.(newValue);
+        onPalette?.({
+          type: "custom",
+          value: newValue,
+        });
         break;
       case "text":
-        console.log(e.target.value);
         setCachedHEXValue(e.target.value);
         break;
     }
@@ -89,11 +99,13 @@ export function InputColorPicker({
   const onBlurHex = () => {
     const hex = Number.parseInt(cachedHEXValue, 16);
     if (cachedHEXValue.length == 6 && 0x000000 <= hex && hex <= 0xffffff) {
-      console.log("pass");
       var newValue = new Color(hex);
       setCachedValue(newValue.getHexString());
       setCachedHEXValue(newValue.getHexString());
-      onChange(newValue);
+      onChange({
+        type: "custom",
+        value: newValue,
+      });
     } else {
       setCachedHEXValue(cachedValue);
     }

@@ -16,6 +16,7 @@ import { getMockFigmaVariables } from "./materialParamsInputs.mocks";
 export function MaterialParamsInputs({ material }: { material: Material }) {
   const mode = useContext(PanelSceneModeContext);
   const { materialEditing } = useHandlers();
+  const figmaVariables = getMockFigmaVariables();
 
   return (
     <div className={styles.materialParams}>
@@ -82,13 +83,20 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
       />
       <ColorInput
         title="Основной цвет"
-        value={material.color}
+        value={material.color.value}
         onChange={(value: Material["color"]) =>
           materialEditing.execute({ id: material.id, color: value })
         }
         onPalette={(value: Material["color"]) => {
-          threeAssetRegistry.setParam(material.id, { color: value });
+          threeAssetRegistry.setParam(material.id, { color: value.value });
         }}
+      />
+      <SelectColor
+        variables={figmaVariables}
+        value={material.color}
+        onChange={(value: Material["color"]) =>
+          materialEditing.execute({ id: material.id, color: value })
+        }
       />
     </div>
   );
