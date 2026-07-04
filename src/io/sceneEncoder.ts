@@ -140,9 +140,11 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
 
   const materials: Record<MaterialID, Material> = {};
 
-  Object.entries(threeAssetRegistry.materials).map(
-    ([id, m]) =>
-      (materials[id] = {
+  Object.entries(threeAssetRegistry.materials).map(([id, m]) => {
+    if (m.material.emissive.equals(new Color(0x000000))) {
+      m.material.emissiveIntensity = 0;
+    }
+    materials[id] = {
         id,
         name: m.material.name,
         color: m.material.color.clone(),
@@ -158,8 +160,8 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
           normalMap: m.material.normalMap?.image,
           roughnessMap: m.material.roughnessMap?.image,
         },
-      })
-  );
+    };
+  });
 
   return {
     id: randomUUID(),

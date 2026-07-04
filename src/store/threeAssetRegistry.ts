@@ -74,17 +74,10 @@ class ThreeAssetRegistry {
 
   setParam(id: MaterialID, params: Partial<Omit<MeshStandardMaterial, "id">>) {
     const material = this.materials[id].material;
-    if (params.emissiveIntensity != null && params.emissiveIntensity > 0) {
-      material.emissive.copy(material.color);
-    }
-    if (
-      params.color != null &&
-      ((params.emissiveIntensity && params.emissiveIntensity > 0) ||
-        material.emissiveIntensity > 0)
-    ) {
-      material.emissive.copy(params.color);
-    }
     material.setValues(params);
+    if (params.color) material.emissive.copy(params.color);
+    if (params.emissiveIntensity && params.emissiveIntensity > 0)
+      material.emissive.copy(material.color);
     material.needsUpdate = true;
   }
 
