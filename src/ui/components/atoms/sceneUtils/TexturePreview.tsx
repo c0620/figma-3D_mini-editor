@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
 import type { Texture } from "three";
 
+import textureIcon from "@/assets/images/icons/descriptive/texture.svg";
+import styles from "./TexturePreview.module.scss";
+
 type DataTextureImage = {
   data: ArrayLike<number>;
   width: number;
@@ -62,7 +65,21 @@ export function TexturePreview({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !texture?.image) return;
+    if (!canvas) return;
+
+    if (!texture?.image) {
+      const ctx = canvas?.getContext("2d");
+      const image = new Image();
+      const size = 64;
+      canvas.width = size;
+      canvas.height = size;
+      image.onload = () => {
+        ctx!.clearRect(0, 0, size, size);
+        ctx!.drawImage(image, 0, 0, size, size);
+      };
+      image.src = textureIcon;
+      return;
+    }
 
     const image = texture.image;
     if (isDrawableImageSource(image) && !image.width) {
@@ -77,5 +94,5 @@ export function TexturePreview({
     drawToCanvas(canvas, image);
   }, [texture]);
 
-  return <canvas ref={canvasRef} />;
+  return <canvas ref={canvasRef} className={styles.textureCanvas} />;
 }

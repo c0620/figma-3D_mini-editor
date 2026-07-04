@@ -1,0 +1,19 @@
+.texture-select-container {
+  display: flex;
+  gap: var(--margin-m);
+}
+
+.texture-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-xs);
+}
+
+.texture-button-row {
+  display: flex;
+  gap: var(--margin-m);
+}
+
+.active > canvas {
+  border: var(--border-weight) solid var(--common-color-common-accent);
+}

@@ -7,7 +7,7 @@
     height: var(--inputs-size-preview-height);
   }
   &.active > canvas {
-    outline: 3px solid var(--common-color-common-accent);
+    outline: var(--border-weight) solid var(--common-color-common-accent);
     border-radius: 100%;
   }
 }

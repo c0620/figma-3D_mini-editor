@@ -6,12 +6,16 @@ import pickFigma from "@/assets/images/icons/descriptive/pickTextureFigma.svg";
 import saveFigma from "@/assets/images/icons/descriptive/saveTextureFigma.svg";
 import saveLocal from "@/assets/images/icons/descriptive/saveTextureLocal.svg";
 import garbage from "@/assets/images/icons/descriptive/garbage.svg";
+
+import styles from "./TextureItem.module.scss";
+
 import { TexturePreview } from "../../atoms/sceneUtils/TexturePreview";
 import type { Texture } from "three";
 import type { MaterialID, TextureSlot } from "@/types/scene";
 import { useHandlers } from "@/app/ApplicationKernelContext";
+import clsx from "clsx";
 
-export function TextureSelect({
+export function TextureItem({
   materialId,
   slot,
   materialName,
@@ -31,12 +35,17 @@ export function TextureSelect({
   const { textureImport, textureExport } = useHandlers();
 
   return (
-    <div onClick={onClick}>
+    <div
+      className={clsx(styles.textureSelectContainer, {
+        [styles.active]: isActive,
+      })}
+      onClick={onClick}
+    >
       <TexturePreview texture={texture} />
-      <div>
+      <div className={styles.textureInfo}>
         <p className="t3">{materialName + " / " + slot}</p>
         {isActive && (
-          <div>
+          <div className={styles.textureButtonRow}>
             <SmallButton img={pickLocal} onClick={openImportModal} />
             <SmallButton
               img={saveLocal}

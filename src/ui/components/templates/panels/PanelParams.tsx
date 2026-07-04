@@ -11,8 +11,8 @@ import { MaterialPreview } from "../../atoms/sceneUtils/MaterialPreview.tsx";
 import { useState } from "react";
 import {
   TextureInput,
-  TextureSelect,
-} from "../../molecules/inputs/TextureSelect.tsx";
+  TextureItem,
+} from "../../molecules/inputs/TextureItem.tsx";
 import { ModalMini } from "../../organisms/ModalTextureImport.tsx";
 
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
@@ -88,7 +88,7 @@ function MeshParams({
         <div className={styles.panelScene}>
           <ScrollPanel isLong={true} text="Текстуры">
             {Object.values(TextureSlot).map((slot) => (
-              <TextureSelect
+              <TextureItem
                 key={slot}
                 materialId={activeMaterialID}
                 slot={slot}

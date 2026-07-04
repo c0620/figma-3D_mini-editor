@@ -10,6 +10,8 @@ import { useHandlers } from "@/app/ApplicationKernelContext";
 import { NumberFieldInput } from "../molecules/inputs/NumberFieldInput";
 import { ColorInput } from "../molecules/inputs/ColorInput";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
+import { SelectColor } from "../atoms/inputs/Selects";
+import { getMockFigmaVariables } from "./materialParamsInputs.mocks";
 
 export function MaterialParamsInputs({ material }: { material: Material }) {
   const mode = useContext(PanelSceneModeContext);
