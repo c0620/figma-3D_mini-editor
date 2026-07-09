@@ -9,7 +9,7 @@ import garbage from "@/assets/images/icons/descriptive/garbage.svg";
 
 import styles from "./TextureItem.module.scss";
 
-import { TexturePreview } from "../../atoms/sceneUtils/TexturePreview";
+import { TexturePreview } from "../../atoms/scene/TexturePreview";
 import type { Texture } from "three";
 import type { MaterialID, TextureSlot } from "@/types/scene";
 import { useHandlers } from "@/app/ApplicationKernelContext";

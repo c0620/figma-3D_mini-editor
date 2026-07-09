@@ -1,9 +1,9 @@
-import type { ObjectID, SceneGraph, SceneObject } from "@/types/scene";
+import type { ObjectID, SceneGraph, SceneGraphObject } from "@/types/scene";
 
 export function applyToSceneThreeNode(
   objID: ObjectID,
   graph: SceneGraph,
-  command: (obj: SceneObject) => void
+  command: (obj: SceneGraphObject) => void
 ) {
   command(graph.objects[objID]);
   if (graph.graphThree[objID].length != 0)

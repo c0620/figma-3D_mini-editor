@@ -1,4 +1,4 @@
-import type { SceneObject } from "../types/scene";
+import type { SceneGraphObject } from "../types/scene";
 import type { SceneStorage } from "../store/sceneStorage";
 import { CommandType, type HistoryEntry } from "@/types/commands";
 import { SceneToolHandler } from "./sceneToolHandler";
@@ -44,7 +44,7 @@ export class ObjectGraphToolsHandler extends SceneToolHandler<
     const obj = this.scene.findObjectById(resolvedId);
     if (!obj) return;
 
-    const patch: Partial<Pick<SceneObject, "visible" | "locked">> = {};
+    const patch: Partial<Pick<SceneGraphObject, "visible" | "locked">> = {};
     if (hasVisibility) patch.visible = visible;
     if (hasLock) patch.locked = locked;
 

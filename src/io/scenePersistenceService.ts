@@ -1,6 +1,6 @@
-import type { CameraState } from '../types/scene';
-import { FigmaHandler } from '../figma/figmaHandler';
-import { SceneNamingService } from './sceneNamingService';
+import type { SceneCamera } from "../types/scene";
+import { FigmaHandler } from "../figma/figmaHandler";
+import { SceneNamingService } from "./sceneNamingService";
 
 export class ScenePersistenceService {
   figmaHandler: FigmaHandler;
@@ -15,7 +15,7 @@ export class ScenePersistenceService {
     sceneId: string,
     glb: string,
     textureFrames: string[],
-    camera: CameraState,
+    camera: SceneCamera
   ): void {
     void sceneId;
     void glb;

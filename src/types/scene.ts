@@ -85,7 +85,7 @@ export interface SceneGroup extends BasicSceneObject {
   kind: "Group";
 }
 
-export interface CameraState extends Omit<BasicSceneObject, "visible"> {
+export interface SceneCamera extends Omit<BasicSceneObject, "visible"> {
   id: CameraID;
   kind: "Camera";
   type: "Perspective" | "Orthographic";
@@ -99,11 +99,13 @@ export interface EnvironmentState {
   shadowsEnabled: boolean;
 }
 
-export type SceneObject = SceneLight | SceneMesh | SceneGroup;
+export type SceneGraphObject = SceneLight | SceneMesh | SceneGroup;
+
+export type SceneObject = SceneGraphObject | SceneCamera;
 
 export interface SceneGraph {
   roots: ObjectID[];
-  objects: Record<ObjectID, SceneObject>;
+  objects: Record<ObjectID, SceneGraphObject>;
   graphThree: Record<ObjectID, ObjectID[]>;
 }
 
@@ -111,7 +113,7 @@ export interface Scene {
   id: string;
   materials: Record<MaterialID, Material>;
   sceneGraph: SceneGraph;
-  cameras: Record<CameraID, CameraState>;
+  cameras: Record<CameraID, SceneCamera>;
   environment: EnvironmentState;
 }
 
@@ -119,4 +121,4 @@ export type ObjectRef =
   | { kind: SceneUtilKind; id: CameraID }
   | { kind: SceneObjectKind; id: ObjectID };
 
-export type ActiveEntity = SceneMesh | SceneLight | SceneGroup | CameraState;
+export type ActiveEntity = SceneMesh | SceneLight | SceneGroup | SceneCamera;

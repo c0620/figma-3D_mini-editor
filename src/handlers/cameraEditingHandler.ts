@@ -1,4 +1,4 @@
-import type { CameraState } from "@/types/scene";
+import type { SceneCamera } from "@/types/scene";
 import type { CameraPatch } from "../store/sceneStore";
 import { SceneToolHandler } from "./sceneToolHandler";
 import { CommandType, type HistoryEntry } from "@/types/commands";
@@ -7,7 +7,7 @@ export interface CameraEditingHandlerPayload extends CameraPatch {}
 
 export class CameraEditingHandler extends SceneToolHandler<
   CameraEditingHandlerPayload,
-  CameraState
+  SceneCamera
 > {
   execute(payload: CameraEditingHandlerPayload): void {
     this.scene.patchCamera(payload as CameraPatch);
@@ -15,7 +15,7 @@ export class CameraEditingHandler extends SceneToolHandler<
 
   getStateBeforeExecute(
     payload: CameraEditingHandlerPayload
-  ): HistoryEntry<CameraState> {
+  ): HistoryEntry<SceneCamera> {
     const { id } = payload;
     var camera;
     if (id) camera = this.scene.findCameraById(id);

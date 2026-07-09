@@ -1,12 +1,13 @@
 import type {
   CameraID,
-  CameraState,
+  SceneCamera,
   EnvironmentState,
   Material,
   MaterialID,
   ObjectID,
   ObjectRef,
   Scene,
+  SceneGraphObject,
   SceneObject,
 } from "../types/scene";
 
@@ -49,7 +50,7 @@ export class SceneStorage {
     return useSceneStore.getState().scene?.environment ?? null;
   }
 
-  getActiveCamera(): CameraState {
+  getActiveCamera(): SceneCamera {
     const cameras = useSceneStore.getState().scene?.cameras;
     if (!cameras)
       throw new Error("getActiveCamera(SceneStorage): no camera at all");
@@ -60,13 +61,13 @@ export class SceneStorage {
     return useSceneStore.getState().scene?.materials[id];
   }
 
-  findObjectById(id: ObjectID): SceneObject | null {
+  findObjectById(id: ObjectID): SceneGraphObject | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;
     return scene.sceneGraph.objects[id];
   }
 
-  findCameraById(id: CameraID): CameraState | null {
+  findCameraById(id: CameraID): SceneCamera | null {
     const scene = useSceneStore.getState().scene;
     if (!scene || !scene.cameras) return null;
     return scene.cameras[id];
@@ -82,7 +83,7 @@ export class SceneStorage {
     useSceneStore.getState().clearScene();
   }
 
-  addObject(object: SceneObject): void {
+  addObject(object: SceneGraphObject): void {
     useSceneStore.getState().addObject(object);
   }
 

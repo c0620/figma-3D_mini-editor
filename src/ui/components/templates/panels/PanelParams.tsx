@@ -7,7 +7,7 @@ import { SelectIcon } from "../../atoms/inputs/Selects.tsx";
 import type { ActiveEntity, MaterialID, SceneMesh } from "@/types/scene.ts";
 import { TextureSlot } from "@/types/scene.ts";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry.ts";
-import { MaterialPreview } from "../../atoms/sceneUtils/MaterialPreview.tsx";
+import { MaterialPreview } from "../../atoms/scene/MaterialPreview.tsx";
 import { useState } from "react";
 import {
   TextureInput,

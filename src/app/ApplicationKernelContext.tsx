@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import type {
   ActiveEntity,
-  CameraState,
+  SceneCamera,
   EnvironmentState,
   SceneGroup,
   SceneLight,
@@ -16,10 +16,7 @@ import { useSceneStore } from "../store/sceneStore";
 import { useSessionStore } from "../store/sessionStore";
 import { findSceneObject } from "@/utils/findSceneObject";
 
-export type {
-  SceneEntityKind,
-  SceneEntitySummary,
-} from "../store/sceneEntityList";
+export type { SceneEntitySummary } from "../store/sceneEntityList";
 
 const AppKernelContext = createContext<AppKernel | null>(null);
 

@@ -1,3 +1,7 @@
+.hidden {
+  display: none !important;
+}
+
 .item-image {
   background-color: var(--interactive-color-interactive-background-tertiary);
   height: var(--button-size-button-mode-height);
@@ -16,6 +20,8 @@
   display: flex;
   color: var(--interactive-color-interactive-text-secondary);
   justify-content: space-between;
+  align-items: center;
+  gap: var(--margin-s);
 }
 
 .graph-info {
@@ -32,6 +38,34 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.dots {
+  display: flex;
+  gap: var(--margin-xs);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 100%;
+  border: var(--border-weight) solid
+    var(--interactive-color-interactive-background-tertiary);
+  background-color: transparent;
+}
+
+.dot-closed {
+  background-color: var(
+    --interactive-color-interactive-background-tertiary
+  ) !important;
+}
+
+.dot-closed-active {
+  background-color: var(--common-color-common-text) !important;
+}
+
+.dot-active {
+  border: var(--border-weight) solid var(--common-color-common-text);
 }
 
 .buttons {

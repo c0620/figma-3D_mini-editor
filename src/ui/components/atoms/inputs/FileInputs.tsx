@@ -1,7 +1,7 @@
 export function FileInput({
   onUpload,
-  error = null,
-  success = true,
+  error: _error = null,
+  success: _success = true,
 }: {
   onUpload: Function;
   error?: any;

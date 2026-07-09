@@ -125,7 +125,7 @@ function SceneNode({
         position={node.transform.position}
         rotation={node.transform.rotation}
         scale={node.transform.scale}
-        visible={node.visible}
+        visible={"visible" in node ? node.visible : true}
         name={node.name}
         ref={node.id === activeId ? ref : null}
       >

@@ -21,6 +21,7 @@ import { randomUUID } from "../lib/randomId";
 import type {
   Material,
   MaterialID,
+  ObjectID,
   Scene,
   SceneGraph,
   SceneGroup,
@@ -42,7 +43,7 @@ type ImportFileType = SceneFileType | "Figma";
 
 function parseObjectThree(
   node: Object3D,
-  parentID: string,
+  parentID: ObjectID | null,
   objectThree: SceneGraph["graphThree"],
   sceneObjects: SceneGraph["objects"]
 ) {
@@ -113,7 +114,7 @@ function parseObjectThree(
       pendingDelete: false,
     } as SceneGroup;
   }
-  if (parentID !== id) {
+  if (parentID) {
     if (parentID in objectThree) {
       objectThree[parentID]!.push(id);
     } else {
@@ -136,12 +137,12 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
 
   var parent: Object3D = threeRoot;
 
-  parseObjectThree(threeRoot, parent.uuid, graphThree, sceneObjects);
+  parseObjectThree(threeRoot, null, graphThree, sceneObjects);
 
   const materials: Record<MaterialID, Material> = {};
 
   Object.entries(threeAssetRegistry.materials).map(([id, m]) => {
-    if (m.material.emissive.equals(new Color(0x000000))) {
+    if (m.material.emissive?.equals(new Color(0x000000))) {
       m.material.emissiveIntensity = 0;
     }
     materials[id] = {
@@ -150,7 +151,7 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
       color: { type: "custom", value: m.material.color.clone() },
       roughness: m.material.roughness,
       metalness: m.material.metalness,
-      emissiveIntensity: m.material.emissive.equals(new Color(0x000000))
+      emissiveIntensity: m.material.emissive?.equals(new Color(0x000000))
         ? 0
         : m.material.emissiveIntensity,
       textures: {

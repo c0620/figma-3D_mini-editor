@@ -1,12 +1,13 @@
 import { findSceneObject } from "@/utils/findSceneObject";
 import type {
   ObjectRef,
-  CameraState,
+  SceneCamera,
   EnvironmentState,
   Scene,
   SceneGroup,
   SceneLight,
   SceneMesh,
+  SceneGraphObject,
   SceneObject,
   Transform,
   ObjectID,
@@ -42,7 +43,7 @@ type SceneObjectPatch =
       Pick<SceneGroup, "visible" | "locked" | "name" | "pendingDelete">
     > & { transform?: Partial<Transform> });
 
-export type CameraPatch = Partial<Omit<CameraState, "transform">> & {
+export type CameraPatch = Partial<Omit<SceneCamera, "transform">> & {
   transform?: Partial<Transform>;
 };
 
@@ -60,8 +61,8 @@ interface SceneActions {
   patchEnvironment(patch: EnvironmentPatch): void;
   traverseScene(): void; //toDo?
   patchMaterial(id: MaterialID, patch: Partial<Omit<Material, "id">>): void;
-  addObject(object: SceneLight | SceneMesh | SceneGroup): void;
-  addCamera(camera: CameraState): void;
+  addObject(object: SceneGraphObject): void;
+  addCamera(camera: SceneCamera): void;
   deleteObject(objectId: ObjectRef): void;
 }
 
@@ -75,7 +76,7 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
 
   traverseScene: () => {},
 
-  addObject: (newObject) =>
+  addObject: (newObject: SceneGraphObject) =>
     set((state) => {
       const newRoots = [...state.scene!.sceneGraph.roots];
       const newObjects = { ...state.scene!.sceneGraph.objects };
@@ -115,7 +116,7 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
         ...prev,
         ...patch,
         transform: nextTransform,
-      } as SceneObject;
+      } as SceneGraphObject;
       return {
         scene: {
           ...state.scene!,
@@ -145,7 +146,7 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
     }),
 
   addCamera: (
-    newCamera //toDo
+    _newCamera //toDo
   ) =>
     set((state) => {
       const newCameras = { ...state.scene!.cameras };
@@ -208,8 +209,8 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
           };
         }
       } else if (["Group", "Mesh", "Light"].includes(objectRef.kind)) {
-        const IDsToDelete: SceneObject[] = [];
-        const addToDelete = (obj: SceneObject) => IDsToDelete.push(obj);
+        const IDsToDelete: SceneGraphObject[] = [];
+        const addToDelete = (obj: SceneGraphObject) => IDsToDelete.push(obj);
         applyToSceneThreeNode(
           objectRef.id,
           state.scene.sceneGraph,
