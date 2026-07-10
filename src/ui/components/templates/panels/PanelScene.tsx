@@ -3,9 +3,9 @@ import { useSceneEntities, useHandlers } from "@/app/ApplicationKernelContext";
 import { ScrollPanel } from "../../atoms/outputs/ScrollPanel";
 import { Panel } from "./BasePanel";
 
-import meshIcon from "@/assets/images/icons/descriptive/mesh.svg";
-import lightIcon from "@/assets/images/icons/descriptive/lighting.svg";
-import sceneIcon from "@/assets/images/icons/descriptive/scene.svg";
+import meshIcon from "@/assets/images/icons/descriptive/mesh.svg?react";
+import lightIcon from "@/assets/images/icons/descriptive/lighting.svg?react";
+import sceneIcon from "@/assets/images/icons/descriptive/scene.svg?react";
 
 import { TransformInputs } from "../../organisms/TransformInputs";
 import styles from "./Panel.module.scss";

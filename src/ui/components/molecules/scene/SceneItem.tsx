@@ -6,15 +6,15 @@ import { SmallButton } from "../../atoms/buttons/Button";
 
 import styles from "./SceneItem.module.scss";
 
-import mesh from "@/assets/images/icons/descriptive/mesh.svg";
-import light from "@/assets/images/icons/descriptive/lighting.svg";
-import camera from "@/assets/images/icons/descriptive/cameraP.svg";
-import group from "@/assets/images/icons/descriptive/scene.svg";
-import show from "@/assets/images/icons/state/visibilityOn.svg";
-import hide from "@/assets/images/icons/state/visibilityOff.svg";
-import lock from "@/assets/images/icons/state/lockOn.svg";
-import free from "@/assets/images/icons/state/lockOff.svg";
-import garb from "@/assets/images/icons/descriptive/garbage.svg";
+import mesh from "@/assets/images/icons/descriptive/mesh.svg?react";
+import light from "@/assets/images/icons/descriptive/lighting.svg?react";
+import camera from "@/assets/images/icons/descriptive/cameraP.svg?react";
+import group from "@/assets/images/icons/descriptive/scene.svg?react";
+import show from "@/assets/images/icons/state/visibilityOn.svg?react";
+import hide from "@/assets/images/icons/state/visibilityOff.svg?react";
+import lock from "@/assets/images/icons/state/lockOn.svg?react";
+import free from "@/assets/images/icons/state/lockOff.svg?react";
+import garb from "@/assets/images/icons/descriptive/garbage.svg?react";
 import clsx from "clsx";
 
 export function GraphItem({
@@ -38,7 +38,7 @@ export function GraphItem({
   const changeLockHandler = useHandlers().lock;
   const deleteHandler = useHandlers().deletion;
 
-  const itemImg = (() => {
+  const ItemImg = (() => {
     switch (item.kind) {
       case "Mesh":
         return mesh;
@@ -86,7 +86,7 @@ export function GraphItem({
               item.locked || (item.kind != "Camera" && !item.visible),
           })}
         >
-          <img alt={item.kind} src={itemImg} />
+          {ItemImg && <ItemImg />}
         </div>
         {mode == "open" && <p>{item.label}</p>}
       </div>
@@ -95,7 +95,11 @@ export function GraphItem({
         (isActive ||
           item.locked ||
           (item.kind != "Camera" && !item.visible)) && (
-          <div className={styles.buttons}>
+          <div
+            className={clsx(styles.buttons, {
+              [styles.buttonsSecondary]: !isActive,
+            })}
+          >
             <SmallButton
               onClick={() => changeVisibilityHandler.execute({ id: item.id })}
               img={item.kind != "Camera" && item.visible ? show : hide}

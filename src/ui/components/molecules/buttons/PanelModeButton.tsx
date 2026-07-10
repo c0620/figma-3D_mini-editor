@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 import { ActionButton } from "../../atoms/buttons/Button";
+import type { IconComponent } from "../../types/icon";
 
 export function PanelModeButton({
   text,
@@ -8,7 +9,7 @@ export function PanelModeButton({
   onClick,
 }: {
   text?: string;
-  img?: string;
+  img?: IconComponent;
   onClick: () => void;
 }) {
   const mode = useContext(PanelSceneModeContext);

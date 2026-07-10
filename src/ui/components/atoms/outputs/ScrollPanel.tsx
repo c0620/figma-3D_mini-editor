@@ -3,16 +3,17 @@ import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 
 import styles from "./ScrollPanel.module.scss";
 import clsx from "clsx";
+import type { IconComponent } from "../../types/icon";
 
 export function ScrollPanel({
   isLong,
   text,
-  img,
+  img: Icon,
   children,
 }: {
   isLong: Boolean;
   text?: string;
-  img?: string;
+  img?: IconComponent;
   children: any;
 }) {
   const mode = useContext(PanelSceneModeContext);
@@ -24,9 +25,8 @@ export function ScrollPanel({
           {text}
         </h3>
       )}
-      {img && (
-        <img
-          src={img}
+      {Icon && (
+        <Icon
           className={clsx(styles.titleImg, { [styles.hide]: mode == "open" })}
         />
       )}

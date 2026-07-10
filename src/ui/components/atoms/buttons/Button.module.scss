@@ -8,8 +8,9 @@
   align-items: center;
 }
 
-.small-button > img {
+.small-button > svg {
   height: var(--button-size-button-icon-height);
+  width: auto;
   aspect-ratio: 1;
 }
 
@@ -38,9 +39,10 @@
   // }
 }
 
-.action-button > img,
-.square-button > img {
+.action-button > svg,
+.square-button > svg {
   height: var(--button-size-button-icon-height);
+  width: auto;
   aspect-ratio: 1;
 }
 

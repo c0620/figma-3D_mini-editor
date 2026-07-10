@@ -2,6 +2,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
+import svgr from "vite-plugin-svgr";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -17,7 +18,7 @@ export default defineConfig({
     },
     target: "esnext",
   },
-  plugins: [react(), viteSingleFile()],
+  plugins: [svgr(), react(), viteSingleFile()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

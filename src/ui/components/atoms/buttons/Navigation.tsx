@@ -4,8 +4,8 @@ import type { PanelMode } from "../../types/panel";
 import clsx from "clsx";
 
 import styles from "./Navigation.module.scss";
-import arrowL from "@/assets/images/icons/descriptive/arrowL.svg";
-import arrowR from "@/assets/images/icons/descriptive/arrowR.svg";
+import ArrowL from "@/assets/images/icons/descriptive/arrowL.svg?react";
+import ArrowR from "@/assets/images/icons/descriptive/arrowR.svg?react";
 
 export function PanelModeToggle({
   mode,
@@ -18,10 +18,10 @@ export function PanelModeToggle({
   text: string;
   setMode: Dispatch<SetStateAction<PanelMode>>;
 }) {
-  var closeArrow, openArrow;
+  let CloseArrow, OpenArrow;
   if (panel == "Left") {
-    closeArrow = arrowL;
-    openArrow = arrowR;
+    CloseArrow = ArrowL;
+    OpenArrow = ArrowR;
 
     return (
       <div className={styles.modeToggle}>
@@ -31,7 +31,7 @@ export function PanelModeToggle({
             mode == "open" ? setMode("close") : setMode("open");
           }}
         >
-          {mode == "open" ? <img src={closeArrow} /> : <img src={openArrow} />}
+          {mode == "open" ? <CloseArrow /> : <OpenArrow />}
         </button>
         <h2
           className={clsx("h2", styles.modeToggleText, {
@@ -43,8 +43,8 @@ export function PanelModeToggle({
       </div>
     );
   } else {
-    closeArrow = arrowR;
-    openArrow = arrowL;
+    CloseArrow = ArrowR;
+    OpenArrow = ArrowL;
 
     return (
       <div className={styles.modeToggle}>
@@ -61,7 +61,7 @@ export function PanelModeToggle({
             mode == "open" ? setMode("close") : setMode("open");
           }}
         >
-          {mode == "open" ? <img src={closeArrow} /> : <img src={openArrow} />}
+          {mode == "open" ? <CloseArrow /> : <OpenArrow />}
         </button>
       </div>
     );

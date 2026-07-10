@@ -4,7 +4,12 @@ import { ScrollPanel } from "../../atoms/outputs/ScrollPanel.tsx";
 import { MaterialParamsInputs } from "../../organisms/MaterialParamsInputs.tsx";
 import { useSceneStore } from "@/store/sceneStore";
 import { SelectIcon } from "../../atoms/inputs/Selects.tsx";
-import type { ActiveEntity, MaterialID, SceneMesh } from "@/types/scene.ts";
+import type {
+  ActiveEntity,
+  MaterialID,
+  SceneGroup,
+  SceneMesh,
+} from "@/types/scene.ts";
 import { TextureSlot } from "@/types/scene.ts";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry.ts";
 import { MaterialPreview } from "../../atoms/scene/MaterialPreview.tsx";
@@ -17,6 +22,8 @@ import { ModalMini } from "../../organisms/ModalTextureImport.tsx";
 
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
   switch (activeObj.kind) {
+    case "Group":
+      return <GroupParams activeGroup={activeObj} />;
     case "Mesh":
       const materials = threeAssetRegistry.getAssetData(
         activeObj.id
@@ -43,6 +50,30 @@ export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
         </Panel>
       );
   }
+}
+
+function GroupParams({ activeGroup }: { activeGroup: SceneGroup }) {
+  const { scene } = useSceneStore();
+  let graph = scene!.sceneGraph.graphThree;
+  let groupChildren = graph[activeGroup.id];
+  let childrenCount = 0;
+  if (groupChildren) {
+    childrenCount += groupChildren.length;
+    let childrenStack = [...groupChildren];
+    while (childrenStack && childrenStack.length != 0) {
+      let currentChild = childrenStack.pop()!;
+      let children = graph[currentChild];
+      childrenCount += children.length;
+      for (const child of children) {
+        childrenStack.push(child);
+      }
+    }
+  }
+  return (
+    <Panel panel="Right" text="Параметры">
+      <div>{childrenCount}</div>
+    </Panel>
+  );
 }
 
 function MeshParams({

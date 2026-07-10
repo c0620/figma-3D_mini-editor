@@ -3,11 +3,12 @@ import { Link } from "react-router";
 import styles from "./Button.module.scss";
 import clsx from "clsx";
 import { useState } from "react";
+import type { IconComponent } from "../../types/icon";
 
 export interface ButtonProps {
   onClick: () => void;
   text?: string;
-  img?: string;
+  img?: IconComponent;
   deactivated?: boolean;
 }
 
@@ -28,22 +29,27 @@ export function MainButton({
   }
 }
 
-export function ActionButton({ onClick, text, img }: ButtonProps) {
+export function ActionButton({ onClick, text, img: Icon }: ButtonProps) {
   return (
     <div className={clsx(styles.actionButton, "h4")} onClick={onClick}>
       {text}
-      {img && <img src={img} alt={text} />}
+      {Icon && <Icon title={text} />}
     </div>
   );
 }
 
-export function SquareButton({ onClick, text, img, deactivated }: ButtonProps) {
+export function SquareButton({
+  onClick,
+  text,
+  img: Icon,
+  deactivated,
+}: ButtonProps) {
   return (
     <div
       className={clsx(styles.squareButton, { [styles.frozen]: deactivated })}
       onClick={onClick}
     >
-      {img && <img src={img} alt={text} />}
+      {Icon && <Icon title={text} />}
     </div>
   );
 }
@@ -54,11 +60,11 @@ export function SquareStateButton({
   active,
 }: {
   onClick: () => void;
-  imgs: { active: string; inactive: string };
+  imgs: { active: IconComponent; inactive: IconComponent };
   active?: boolean;
 }) {
   const [isActive, setActive] = useState(active ? active : false);
-  const img = isActive ? imgs.active : imgs.inactive;
+  const Icon = isActive ? imgs.active : imgs.inactive;
 
   const handleClick = () => {
     setActive(!isActive);
@@ -72,7 +78,7 @@ export function SquareStateButton({
       })}
       onClick={handleClick}
     >
-      <img src={img} />
+      <Icon />
     </div>
   );
 }
@@ -91,17 +97,17 @@ export function OptionButton() {
 
 export function SmallButton({
   text,
-  img,
+  img: Icon,
   onClick,
 }: {
   text?: string;
-  img?: string;
+  img?: IconComponent;
   onClick: () => void;
 }) {
   return (
     <button className={styles.smallButton} onClick={onClick}>
       {text}
-      {img && <img src={img} />}
+      {Icon && <Icon title={text} />}
     </button>
   );
 }

@@ -1,90 +1,97 @@
 .hidden {
-  display: none !important;
+    display: none !important;
 }
 
 .item-image {
-  background-color: var(--interactive-color-interactive-background-tertiary);
-  height: var(--button-size-button-mode-height);
-  aspect-ratio: 1;
-  border-radius: var(--border-radius-s);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    background-color: var(--interactive-color-interactive-background-tertiary);
+    height: var(--button-size-button-mode-height);
+    aspect-ratio: 1;
+    border-radius: var(--border-radius-s);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.item-image > img {
-  height: var(--button-size-button-icon-height);
+.item-image>svg {
+    height: var(--button-size-button-icon-height);
+    width: auto;
+    aspect-ratio: 1;
 }
 
 .scene-graph {
-  display: flex;
-  color: var(--interactive-color-interactive-text-secondary);
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--margin-s);
+    display: flex;
+    color: var(--interactive-color-interactive-text-secondary);
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--margin-s);
 }
 
 .graph-info {
-  display: flex;
-  gap: var(--margin-m);
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  align-items: center;
+    display: flex;
+    gap: var(--margin-m);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    align-items: center;
 }
 
-.graph-info > p {
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.graph-info>p {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .dots {
-  display: flex;
-  gap: var(--margin-xs);
+    display: flex;
+    gap: var(--margin-xs);
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 100%;
-  border: var(--border-weight) solid
-    var(--interactive-color-interactive-background-tertiary);
-  background-color: transparent;
+    width: 8px;
+    height: 8px;
+    border-radius: 100%;
+    border: var(--border-weight) solid var(--interactive-color-interactive-background-tertiary);
+    background-color: transparent;
 }
 
 .dot-closed {
-  background-color: var(
-    --interactive-color-interactive-background-tertiary
-  ) !important;
+    background-color: var( --interactive-color-interactive-background-tertiary) !important;
 }
 
 .dot-closed-active {
-  background-color: var(--common-color-common-text) !important;
+    background-color: var(--common-color-common-text) !important;
 }
 
 .dot-active {
-  border: var(--border-weight) solid var(--common-color-common-text);
+    border: var(--border-weight) solid var(--common-color-common-text);
 }
 
 .buttons {
-  display: flex;
-  gap: var(--margin-s);
+    display: flex;
+    gap: var(--margin-s);
 }
 
 .text-active {
-  color: var(--common-color-common-text);
+    color: var(--common-color-common-text);
 }
 
 .text-disabled {
-  color: var(--interactive-color-interactive-text-secondary);
+    color: var(--interactive-color-interactive-text-secondary);
 }
 
 .image-active {
-  background-color: var(--common-color-common-accent);
+    background-color: var(--common-color-common-accent);
 }
 
 .image-disabled {
-  background-color: var(--interactive-color-interactive-background-primary);
+    background-color: var(--interactive-color-interactive-background-primary);
+}
+
+.buttons-secondary>button {
+    background-color: var(--interactive-color-interactive-background-tertiary);
+}
+
+.buttons-secondary>button>svg {
+    color: var(--interactive-color-interactive-background-primary);
 }

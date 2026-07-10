@@ -1,11 +1,11 @@
 import { useRef } from "react";
 import { SmallButton } from "../../atoms/buttons/Button";
 
-import pickLocal from "@/assets/images/icons/descriptive/pickTextureLocal.svg";
-import pickFigma from "@/assets/images/icons/descriptive/pickTextureFigma.svg";
-import saveFigma from "@/assets/images/icons/descriptive/saveTextureFigma.svg";
-import saveLocal from "@/assets/images/icons/descriptive/saveTextureLocal.svg";
-import garbage from "@/assets/images/icons/descriptive/garbage.svg";
+import pickLocal from "@/assets/images/icons/descriptive/pickTextureLocal.svg?react";
+import pickFigma from "@/assets/images/icons/descriptive/pickTextureFigma.svg?react";
+import saveFigma from "@/assets/images/icons/descriptive/saveTextureFigma.svg?react";
+import saveLocal from "@/assets/images/icons/descriptive/saveTextureLocal.svg?react";
+import garbage from "@/assets/images/icons/descriptive/garbage.svg?react";
 
 import styles from "./TextureItem.module.scss";
 

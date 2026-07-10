@@ -14,3 +14,7 @@ body {
   background: var(--editor-utils-color-panel-background);
   backdrop-filter: blur(24px);
 }
+
+svg {
+  color: var(--common-color-common-white);
+}

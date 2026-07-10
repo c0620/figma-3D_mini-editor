@@ -19,8 +19,9 @@
   align-items: center;
 }
 
-.mode-toggle-button > img {
+.mode-toggle-button > svg {
   height: var(--button-size-button-icon-height);
+  width: auto;
   aspect-ratio: 1;
 }
 
