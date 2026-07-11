@@ -1,20 +1,11 @@
 import { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 
-import type {
-  ActiveEntity,
-  SceneCamera,
-  EnvironmentState,
-  SceneGroup,
-  SceneLight,
-  SceneMesh,
-  SceneObject,
-} from "../types/scene";
+import type { ActiveEntity } from "../types/scene";
 import type { AppHandlers, AppKernel } from "./compositionRoot";
 import { buildSceneEntityList } from "../store/sceneEntityList";
 import { useSceneStore } from "../store/sceneStore";
 import { useSessionStore } from "../store/sessionStore";
-import { findSceneObject } from "@/utils/findSceneObject";
 
 export type { SceneEntitySummary } from "../store/sceneEntityList";
 
@@ -87,11 +78,8 @@ export function useSceneEntities() {
 export function useActiveObject(): ActiveEntity | null {
   const activeObjectRef = useSessionStore((s) => s.activeObjectRef);
   const scene = useSceneStore((s) => s.scene);
-
-  return useMemo(() => {
-    if (!activeObjectRef || !scene) return null;
-    return findSceneObject(activeObjectRef, scene);
-  }, [activeObjectRef, scene]);
+  if (!activeObjectRef || !scene) return null;
+  return scene.sceneGraph.objects[activeObjectRef.id];
 }
 
 export function useActiveObjectRef() {

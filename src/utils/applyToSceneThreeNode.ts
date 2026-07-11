@@ -6,7 +6,7 @@ export function applyToSceneThreeNode(
   command: (obj: SceneGraphObject) => void
 ) {
   command(graph.objects[objID]);
-  if (graph.graphThree[objID].length != 0)
+  if (graph.graphThree[objID]?.length != 0)
     graph.graphThree[objID].forEach((nodeID) =>
       applyToSceneThreeNode(nodeID, graph, command)
     );

@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 import type { Notification } from "../types/ui";
 import type { ObjectRef, ObjectID } from "@/types/scene";
+import { IDs } from "@/io/sceneEncoder";
 
 type colorTheme = "Light" | "Dark";
 type windowSize = "Small" | "Large";
@@ -11,6 +12,7 @@ export interface UiState {
   colorTheme: colorTheme;
   windowSize: windowSize;
   activeObjectRef: ObjectRef | null;
+  activeCameraID: ObjectID;
   projectName: string;
   notifications: Notification[];
   canUndo: boolean;
@@ -21,7 +23,8 @@ export interface UiState {
 interface UiActions {
   setColorTheme(theme: colorTheme): void;
   setWindowSize(size: windowSize): void;
-  setActiveObjectRef(id: ObjectRef | null): void;
+  setActiveObjectRef(ref: ObjectRef | null): void;
+  setActiveCameraID(id: ObjectID): void;
   setProjectName(name: string): void;
   pushNotification(notification: Notification): void;
   removeNotification(id: string): void;
@@ -33,6 +36,7 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
   colorTheme: "Dark",
   windowSize: "Large",
   activeObjectRef: null,
+  activeCameraID: IDs.PluginCamera,
   projectName: "",
   notifications: [],
   canUndo: false,
@@ -41,7 +45,8 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
 
   setColorTheme: (theme) => set({ colorTheme: theme }),
   setWindowSize: (size) => set({ windowSize: size }),
-  setActiveObjectRef: (id) => set({ activeObjectRef: id }),
+  setActiveObjectRef: (ref) => set({ activeObjectRef: ref }),
+  setActiveCameraID: (id) => set({ activeCameraID: id }),
   setProjectName: (name) => set({ projectName: name }),
   pushNotification: (notification) =>
     set((s) => ({ notifications: [...s.notifications, notification] })),

@@ -50,12 +50,5 @@ export function buildSceneEntityList(
     buildRecursiveSceneList(root, 0);
   }
 
-  for (const cameraID in scene.cameras) {
-    const camera = scene.cameras[cameraID];
-    if (!camera.pendingDelete) {
-      entityList.push({ ...camera, level: 0, label: camera.type + " camera" });
-    }
-  }
-
   return entityList;
 }

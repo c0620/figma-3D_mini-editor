@@ -14,6 +14,9 @@ import {
   Light,
   DirectionalLight,
   SpotLight,
+  Camera,
+  PerspectiveCamera,
+  OrthographicCamera,
 } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
@@ -23,6 +26,7 @@ import type {
   MaterialID,
   ObjectID,
   Scene,
+  SceneCamera,
   SceneGraph,
   SceneGroup,
   SceneLight,
@@ -35,6 +39,10 @@ import { threeAssetRegistry } from "../store/threeAssetRegistry";
 type SceneFileType = "OBJ" | "FBX" | "GLB";
 type ImportFileType = SceneFileType | "Figma";
 
+export enum IDs {
+  PluginCamera = "plugin-camera-id",
+}
+
 /**
  * Обход графа Three: каждый Mesh → SceneObject (плоский), геометрия и материал
  * уходят в threeAssetRegistry под тем же id. Сама Three-структура остаётся
@@ -45,7 +53,8 @@ function parseObjectThree(
   node: Object3D,
   parentID: ObjectID | null,
   objectThree: SceneGraph["graphThree"],
-  sceneObjects: SceneGraph["objects"]
+  sceneObjects: SceneGraph["objects"],
+  hasLight: boolean
 ) {
   // const worldPos = new Vector3();
   // const worldQuat = new Quaternion();
@@ -66,8 +75,19 @@ function parseObjectThree(
   };
 
   const id = node.uuid;
-
-  if (node instanceof Mesh) {
+  if (node instanceof PerspectiveCamera || node instanceof OrthographicCamera) {
+    sceneObjects[id] = {
+      id,
+      kind: "Camera",
+      type: node instanceof PerspectiveCamera ? "Perspective" : "Orthographic",
+      zoom: node.zoom,
+      transform: transform,
+      locked: false,
+      name: node.name,
+      pendingDelete: false,
+      parentId: parentID,
+    } as SceneCamera;
+  } else if (node instanceof Mesh) {
     threeAssetRegistry.register(id, {
       geometry: node.geometry,
       materials: node.material,
@@ -88,6 +108,7 @@ function parseObjectThree(
         : [node.material.uuid],
     } as SceneMesh;
   } else if (node instanceof Light) {
+    hasLight = true;
     const type = node instanceof SpotLight ? "Spot" : "Ambient";
     sceneObjects[id] = {
       id: id,
@@ -122,7 +143,7 @@ function parseObjectThree(
     }
   }
   node.children.forEach((c) =>
-    parseObjectThree(c, id, objectThree, sceneObjects)
+    parseObjectThree(c, id, objectThree, sceneObjects, hasLight)
   );
 }
 
@@ -136,8 +157,9 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
   threeRoot.updateMatrixWorld(true);
 
   var parent: Object3D = threeRoot;
+  let hasLight = false;
 
-  parseObjectThree(threeRoot, null, graphThree, sceneObjects);
+  parseObjectThree(threeRoot, null, graphThree, sceneObjects, hasLight);
 
   const materials: Record<MaterialID, Material> = {};
 
@@ -164,31 +186,34 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     };
   });
 
+  let pluginCamera = {
+    name: "Plugin Camera",
+    kind: "Camera",
+    id: IDs.PluginCamera,
+    type: "Perspective",
+    zoom: 1,
+    locked: false,
+    pendingDelete: false,
+    parentId: null,
+    transform: {
+      position: [0, 0, 5],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+    },
+  } as SceneCamera;
+
+  if (!hasLight) {
+    // var pluginAmbientLight: SceneLight = {};
+    // var pluginSpotLight: SceneLight = {};
+  }
   return {
     id: randomUUID(),
     sceneGraph: {
-      objects: sceneObjects,
+      objects: { ...sceneObjects, [pluginCamera.id]: pluginCamera },
       graphThree,
-      roots: [threeRoot.uuid],
+      roots: [threeRoot.uuid, pluginCamera.id],
     },
     materials,
-    cameras: {
-      "1": {
-        name: "Camera-1",
-        kind: "Camera",
-        id: "1",
-        type: "Perspective",
-        zoom: 1,
-        locked: false,
-        pendingDelete: false,
-        parentId: null,
-        transform: {
-          position: [0, 0, 5],
-          rotation: [0, 0, 0],
-          scale: [1, 1, 1],
-        },
-      },
-    },
     environment: { backgroundColor: null, shadowsEnabled: false },
   };
 }

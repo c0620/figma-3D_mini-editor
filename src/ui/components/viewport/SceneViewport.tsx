@@ -3,16 +3,12 @@ import { Canvas } from "@react-three/fiber";
 
 import { useSceneStore } from "../../../store/sceneStore";
 import { threeAssetRegistry } from "../../../store/threeAssetRegistry";
-import type {
-  CameraID,
-  ObjectID,
-  ObjectRef,
-  SceneObject,
-} from "../../../types/scene";
+import type { ObjectID, ObjectRef, SceneObject } from "../../../types/scene";
 import { useSessionStore, type ObjectToolMode } from "@/store/sessionStore";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import { Mesh, Object3D } from "three";
 import React, { type RefObject, useRef } from "react";
+import { IDs } from "@/io/sceneEncoder";
 
 function SceneObjectMesh({
   object,
@@ -109,7 +105,7 @@ function SceneNode({
   ref,
 }: {
   id: ObjectID;
-  activeId: ObjectID | CameraID | undefined;
+  activeId: ObjectID | undefined;
   ref: RefObject<Object3D | null>;
 }) {
   const node = useSceneStore((s) => s.scene!.sceneGraph.objects[id]);
@@ -147,15 +143,20 @@ function SceneNode({
 
 export function SceneRenderer() {
   const scene = useSceneStore((s) => s.scene);
-  const activeRef = useSessionStore((s) => s.activeObjectRef);
   if (!scene) return null;
+  const activeRef = useSessionStore((s) => s.activeObjectRef);
+  const activeCameraID = useSessionStore((s) => s.activeCameraID);
+  const activeCamera = scene.sceneGraph.objects[activeCameraID];
 
   const nodeRef = useRef<Object3D | null>(null);
 
   return (
     <div className="canvas" style={{ width: "100%", height: "100%" }}>
-      {/* hardcode camera id */}
-      <Canvas camera={{ position: scene.cameras["1"].transform.position }}>
+      <Canvas
+        camera={{
+          position: activeCamera.transform.position,
+        }}
+      >
         <CameraControls makeDefault />
         <ambientLight intensity={1} />
         <directionalLight position={[5, 5, 5]} intensity={1} />

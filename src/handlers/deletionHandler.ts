@@ -1,9 +1,9 @@
-import type { CameraID, ObjectID, SceneObjectKind } from "@/types/scene";
+import type { ObjectID, SceneObjectKind } from "@/types/scene";
 import { SceneToolHandler } from "./sceneToolHandler";
 import { CommandType, type HistoryEntry } from "@/types/commands";
 
 export interface DeletionHandlerPayload {
-  id: ObjectID | CameraID;
+  id: ObjectID;
   isDelete: boolean;
   kind: SceneObjectKind;
 }
@@ -20,14 +20,14 @@ export class DeletionHandler extends SceneToolHandler<
     else this.restore(id);
   }
 
-  softDelete(id: ObjectID | CameraID): void {
+  softDelete(id: ObjectID): void {
     this.scene.patchObject(id, {
       pendingDelete: true,
       visible: false,
     });
   }
 
-  restore(id: ObjectID | CameraID): void {
+  restore(id: ObjectID): void {
     this.scene.patchObject(id, {
       pendingDelete: false,
       visible: true,

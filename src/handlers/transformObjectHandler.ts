@@ -27,10 +27,8 @@ export class TransformObjectHandler extends SceneToolHandler<
 
     switch (objectRef.kind) {
       case "Camera":
-        this.scene.patchCamera({ transform: transformPatch });
+        this.scene.patchCamera({ id: objectRef.id, transform: transformPatch });
         return;
-      case "Environment":
-        throw new Error("transformObjectHandler: Environment not impl");
       case "Light":
       case "Mesh":
       case "Group":

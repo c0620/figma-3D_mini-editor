@@ -1,5 +1,5 @@
+import { IDs } from "@/io/sceneEncoder";
 import type {
-  CameraID,
   SceneCamera,
   EnvironmentState,
   Material,
@@ -51,10 +51,9 @@ export class SceneStorage {
   }
 
   getActiveCamera(): SceneCamera {
-    const cameras = useSceneStore.getState().scene?.cameras;
-    if (!cameras)
-      throw new Error("getActiveCamera(SceneStorage): no camera at all");
-    return cameras[Object.keys(cameras)[0]]; //toDo: now method returns 1st camera
+    const objects = useSceneStore.getState().scene!.sceneGraph.objects;
+    const camera = objects[useSessionStore.getState().activeCameraID];
+    return camera as SceneCamera;
   }
 
   getMaterial(id: MaterialID): Material | undefined {
@@ -67,10 +66,12 @@ export class SceneStorage {
     return scene.sceneGraph.objects[id];
   }
 
-  findCameraById(id: CameraID): SceneCamera | null {
+  findCameraById(id: ObjectID): SceneCamera | null {
     const scene = useSceneStore.getState().scene;
-    if (!scene || !scene.cameras) return null;
-    return scene.cameras[id];
+    if (!scene) return null;
+    const camera = scene.sceneGraph.objects[id];
+    if (!camera || camera.kind != "Camera") return null;
+    return camera;
   }
 
   // --- Scene: запись ---

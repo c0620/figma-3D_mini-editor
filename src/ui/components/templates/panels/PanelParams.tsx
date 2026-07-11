@@ -7,6 +7,7 @@ import { SelectIcon } from "../../atoms/inputs/Selects.tsx";
 import type {
   ActiveEntity,
   MaterialID,
+  SceneCamera,
   SceneGroup,
   SceneMesh,
 } from "@/types/scene.ts";
@@ -19,6 +20,7 @@ import {
   TextureItem,
 } from "../../molecules/inputs/TextureItem.tsx";
 import { ModalMini } from "../../organisms/ModalTextureImport.tsx";
+import { useSessionStore } from "@/store/sessionStore.ts";
 
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
   switch (activeObj.kind) {

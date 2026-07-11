@@ -1,4 +1,3 @@
-import { findSceneObject } from "@/utils/findSceneObject";
 import type {
   ObjectRef,
   SceneCamera,
@@ -19,6 +18,7 @@ import { create } from "zustand";
 import { applyToSceneThreeNode } from "@/utils/applyToSceneThreeNode";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
 import { Color } from "three";
+import { produce } from "immer";
 
 type SceneMaterialPatch = Pick<Material, "id"> &
   Partial<Omit<Material, "id" | "color">> & { color?: Color };
@@ -43,9 +43,10 @@ type SceneObjectPatch =
       Pick<SceneGroup, "visible" | "locked" | "name" | "pendingDelete">
     > & { transform?: Partial<Transform> });
 
-export type CameraPatch = Partial<Omit<SceneCamera, "transform">> & {
-  transform?: Partial<Transform>;
-};
+export type CameraPatch = Pick<SceneCamera, "id"> &
+  Partial<Omit<SceneCamera, "transform" | "id">> & {
+    transform?: Partial<Transform>;
+  };
 
 export type EnvironmentPatch = Partial<EnvironmentState>;
 
@@ -149,7 +150,8 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
     _newCamera //toDo
   ) =>
     set((state) => {
-      const newCameras = { ...state.scene!.cameras };
+      const newCameras = { ...state.scene?.sceneGraph.objects };
+      throw new Error("addCamera(sceneStore): not implemented");
       return {
         scene: {
           ...state.scene!,
@@ -162,19 +164,22 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
     set((state) => {
       if (!state.scene) return state;
       if (!patch.id) throw new Error("patchCamera(sceneStore): no id provided");
-      const prev = state.scene.cameras;
+      const prev = state.scene.sceneGraph.objects;
 
       const toPatch = prev[patch.id];
       const nextTransform = patch.transform
         ? { ...toPatch.transform, ...patch.transform }
         : toPatch.transform;
 
-      const newCamera = { ...toPatch, ...patch, transform: nextTransform };
+      const newScene = produce(state.scene, (scene) => {
+        scene.sceneGraph.objects[patch.id] = {
+          ...toPatch,
+          ...patch,
+          transform: nextTransform,
+        } as SceneCamera;
+      });
       return {
-        scene: {
-          ...state.scene,
-          cameras: { ...prev, newCamera },
-        },
+        scene: newScene,
       };
     }),
 
@@ -194,19 +199,18 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
     set((state) => {
       if (!state.scene) return state;
 
-      const toDelete = findSceneObject(objectRef, state.scene);
+      const toDelete = state.scene.sceneGraph.objects[objectRef.id];
       if (!toDelete) return state;
-
       if (objectRef.kind == "Camera") {
-        if (Object.keys(state.scene.cameras).length > 1) {
-          const newCameras = { ...state.scene.cameras };
-          delete newCameras[objectRef.id];
-          return {
-            scene: {
-              ...state.scene,
-              cameras: { ...newCameras },
-            },
-          };
+        {
+          const newSceneState = produce(state.scene, (scene) => {
+            delete scene.sceneGraph.objects[objectRef.id];
+            const toDel = scene.sceneGraph.roots.findIndex(
+              (v) => v == objectRef.id
+            );
+            if (toDel !== -1) scene.sceneGraph.roots.splice(toDel, 1);
+          });
+          return { scene: newSceneState };
         }
       } else if (["Group", "Mesh", "Light"].includes(objectRef.kind)) {
         const IDsToDelete: SceneGraphObject[] = [];
@@ -218,14 +222,16 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
         );
         const newGraphThree = state.scene.sceneGraph.graphThree;
         const newObjects = state.scene.sceneGraph.objects;
-        const newRoots = state.scene.sceneGraph.roots;
+        let newRoots = state.scene.sceneGraph.roots;
         IDsToDelete.forEach((node) => {
           delete newGraphThree[node.id];
           if (node.parentId) {
-            newGraphThree[node.parentId].filter((nodeID) => nodeID != node.id);
+            newGraphThree[node.parentId] = newGraphThree[node.parentId].filter(
+              (nodeID) => nodeID != node.id
+            );
           }
           delete newObjects[node.id];
-          newRoots.filter((rootID) => rootID != node.id);
+          newRoots = newRoots.filter((rootID) => rootID != node.id);
           if (node.kind == "Group" || node.kind == "Mesh") {
             //is Group necessary?
             threeAssetRegistry.delete(node.id);

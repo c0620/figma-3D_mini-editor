@@ -27,7 +27,6 @@ import {
   type TextureImportPayload,
 } from "../handlers/textureImportHandler";
 import {
-  ObjectGraphToolsHandler,
   ToggleLockHandler,
   ToggleVisibilityHandler,
   type ToggleLockPayload,
@@ -72,8 +71,6 @@ type HandlerProxy<P extends object = object> = {
 export interface AppHandlers {
   /** Выделение объекта — без истории, вызывается напрямую */
   selection: SelectionHandler;
-  /** Видимость/блокировка мешей: см. {@link ObjectGraphToolsHandler.execute} */
-  graphTools: ObjectGraphToolsHandler;
   /** Управление камерой — без истории, вызывается напрямую */
   camera: CameraEditingHandler;
 
@@ -174,7 +171,6 @@ export function buildKernel(): AppKernel {
     textureLocal,
     textureFigma
   );
-  const graphToolsHandler = new ObjectGraphToolsHandler(sceneStorage);
   const toggleVisibilityHandler = new ToggleVisibilityHandler(sceneStorage);
   const toggleLockHandler = new ToggleLockHandler(sceneStorage);
 
@@ -205,7 +201,6 @@ export function buildKernel(): AppKernel {
 
   const handlers: AppHandlers = {
     selection: selectionHandler,
-    graphTools: graphToolsHandler,
     camera: cameraHandler,
 
     environment: environmentHandler,

@@ -10,8 +10,10 @@ import { useEffect } from "react";
 export default function EditorPage() {
   const activeObj = useActiveObject();
   const renderService = useRender();
-
-  useEffect(() => () => renderService.disposeMaterialPreview(), [renderService]);
+  useEffect(
+    () => () => renderService.disposeMaterialPreview(),
+    [renderService]
+  );
   return (
     <div style={{ width: "100%", height: "100%" }}>
       <div style={{ position: "absolute" }}>

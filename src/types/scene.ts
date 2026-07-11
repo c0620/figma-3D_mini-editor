@@ -6,7 +6,7 @@ import type {
 } from "three";
 
 export type ObjectID = string;
-export type CameraID = string;
+export type EnvironmentID = string;
 export type MaterialID = string;
 export type TextureMiniature = Texture["image"] | null;
 
@@ -86,7 +86,7 @@ export interface SceneGroup extends BasicSceneObject {
 }
 
 export interface SceneCamera extends Omit<BasicSceneObject, "visible"> {
-  id: CameraID;
+  id: ObjectID;
   kind: "Camera";
   type: "Perspective" | "Orthographic";
   zoom: number;
@@ -99,7 +99,11 @@ export interface EnvironmentState {
   shadowsEnabled: boolean;
 }
 
-export type SceneGraphObject = SceneLight | SceneMesh | SceneGroup;
+export type SceneGraphObject =
+  | SceneLight
+  | SceneMesh
+  | SceneGroup
+  | SceneCamera;
 
 export type SceneObject = SceneGraphObject | SceneCamera;
 
@@ -113,12 +117,10 @@ export interface Scene {
   id: string;
   materials: Record<MaterialID, Material>;
   sceneGraph: SceneGraph;
-  cameras: Record<CameraID, SceneCamera>;
+  // cameras: Record<CameraID, SceneCamera>;
   environment: EnvironmentState;
 }
 
-export type ObjectRef =
-  | { kind: SceneUtilKind; id: CameraID }
-  | { kind: SceneObjectKind; id: ObjectID };
+export type ObjectRef = { kind: SceneObjectKind; id: ObjectID };
 
 export type ActiveEntity = SceneMesh | SceneLight | SceneGroup | SceneCamera;
