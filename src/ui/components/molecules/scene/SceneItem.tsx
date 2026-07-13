@@ -56,6 +56,7 @@ export function GraphItem({
   for (var i = 0; i < item.level + 1; i++) {
     dots.push(
       <div
+        key={i}
         className={clsx(styles.dot, {
           [styles.dotActive]: isActive,
           [styles.dotClosedActive]: isActive && hidden,
@@ -72,13 +73,16 @@ export function GraphItem({
         [styles.textActive]: isActive,
       })}
     >
-      <div
-        className={styles.dots}
-        onClick={isParent ? onToggleBranch : undefined}
-      >
-        {dots}
-      </div>
-      <div className={styles.graphInfo} onClick={onSelect}>
+      {mode == "open" && (
+        <div
+          className={styles.dots}
+          onClick={isParent ? onToggleBranch : undefined}
+          role="button"
+        >
+          {dots}
+        </div>
+      )}
+      <div className={styles.graphInfo} onClick={onSelect} role="button">
         <div
           className={clsx(styles.itemImage, {
             [styles.imageActive]: isActive,

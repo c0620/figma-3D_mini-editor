@@ -1,5 +1,6 @@
 import { SquareButton, SquareStateButton } from "../../atoms/buttons/Button";
 import styles from "./Tools.module.scss";
+import clsx from "clsx";
 
 import leave from "@/assets/images/icons/descriptive/leave.svg?react";
 import del from "@/assets/images/icons/descriptive/garbage.svg?react";
@@ -9,16 +10,17 @@ import shadowsOff from "@/assets/images/icons/state/shadowsOff.svg?react";
 import shadowsOn from "@/assets/images/icons/state/shadowsOn.svg?react";
 import info from "@/assets/images/icons/descriptive/info.svg?react";
 import render from "@/assets/images/icons/descriptive/render.svg?react";
+import { useNavigate } from "react-router";
 
 export function TopTools() {
+  let navigate = useNavigate();
   return (
     <div className={styles.toolsRow}>
       <div className={styles.tool}>
-        <SquareButton onClick={() => console.log("delete")} img={leave} />
+        <SquareButton onClick={() => navigate("/")} img={leave} />
         <SquareButton onClick={() => console.log("delete")} img={del} />
       </div>
       <div className={styles.tool}>
-        {" "}
         <SquareStateButton
           onClick={() => console.log("delete")}
           imgs={{ active: bgOff, inactive: bgOn }}
@@ -29,7 +31,7 @@ export function TopTools() {
         />
         <SquareButton onClick={() => console.log("delete")} img={info} />
       </div>
-      <div className={(styles.tool, styles.toolAccent)}>
+      <div className={clsx(styles.tool, styles.toolAccent)}>
         <SquareButton onClick={() => console.log("delete")} img={render} />
       </div>
     </div>

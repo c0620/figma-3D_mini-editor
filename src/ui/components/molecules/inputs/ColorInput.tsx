@@ -8,19 +8,22 @@ export function ColorInput({
   onChange,
   onPalette,
   value,
+  mode,
 }: {
   title: string;
   onChange: (value: Material["color"]) => void;
   onPalette?: (value: Material["color"]) => void;
   value: Color;
+  mode: "open" | "close";
 }) {
   return (
     <div className={styles.colorInputContainer}>
-      <p className="t3">{title}</p>
+      {mode == "open" && <p className="t3">{title}</p>}
       <InputColorPicker
         onChange={onChange}
         value={value}
         onPalette={onPalette}
+        isDetailed={mode == "open"}
       />
     </div>
   );

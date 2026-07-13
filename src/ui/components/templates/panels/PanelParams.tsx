@@ -21,6 +21,9 @@ import {
 } from "../../molecules/inputs/TextureItem.tsx";
 import { ModalMini } from "../../organisms/ModalTextureImport.tsx";
 import { useSessionStore } from "@/store/sessionStore.ts";
+import clsx from "clsx";
+import materialsIcon from "@/assets/images/icons/descriptive/materials.svg?react";
+import texturesIcon from "@/assets/images/icons/descriptive/texturesP.svg?react";
 
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
   switch (activeObj.kind) {
@@ -40,11 +43,7 @@ export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
         );
       return null;
     case "Camera":
-      return (
-        <Panel panel="Right" text="Параметры">
-          <div>{activeObj.kind}</div>
-        </Panel>
-      );
+      return <CameraParams activeCamera={activeObj} />;
     case "Light":
       return (
         <Panel panel="Right" text="Параметры">
@@ -104,8 +103,8 @@ function MeshParams({
   return (
     <>
       <Panel panel="Right" text="Параметры">
-        <div className={styles.panelScene}>
-          <ScrollPanel isLong={true} text="Материалы меша">
+        <div className={clsx(styles.panelScene, styles.meshMaterials)}>
+          <ScrollPanel isLong={true} text="Материалы меша" img={materialsIcon}>
             {materialIDs.map((id) => (
               <MaterialPreview
                 key={id}
@@ -119,7 +118,7 @@ function MeshParams({
         </div>
         <MaterialParamsInputs material={activeMaterial} />
         <div className={styles.panelScene}>
-          <ScrollPanel isLong={true} text="Текстуры">
+          <ScrollPanel isLong={true} text="Текстуры" img={texturesIcon}>
             {Object.values(TextureSlot).map((slot) => (
               <TextureItem
                 key={slot}
@@ -144,5 +143,22 @@ function MeshParams({
         <TextureInput materialId={activeMaterialID} slot={activeTextureSlot} />
       </ModalMini>
     </>
+  );
+}
+
+function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
+  const { activeCameraID } = useSessionStore();
+  const isActive = activeCamera.id === activeCameraID;
+  return (
+    <Panel panel="Right" text="Параметры">
+      <div className={styles.panelScene}>
+        <ScrollPanel isLong={false} text="Тип камеры">
+          <p>Перспективная</p>
+          <p>Орт</p>
+        </ScrollPanel>
+      </div>
+      <div>Параметры камеры (отд к)</div>
+      <div>пресеты ракурсов камеры (отд к)</div>
+    </Panel>
   );
 }

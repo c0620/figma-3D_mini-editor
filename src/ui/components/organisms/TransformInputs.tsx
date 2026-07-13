@@ -70,7 +70,7 @@ export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
       );
     }
     transforms.push(
-      <div>
+      <div key={transform}>
         <p className="t3">{transform}</p>
         <div
           className={clsx(styles.inputRow, {

@@ -4,7 +4,16 @@
   gap: var(--margin-m);
 }
 
+.material-params-closed {
+  width: 100%;
+  align-items: center;
+}
+
 .params-row {
   display: flex;
   gap: var(--margin-m);
+}
+
+.params-row-closed {
+  flex-direction: column;
 }

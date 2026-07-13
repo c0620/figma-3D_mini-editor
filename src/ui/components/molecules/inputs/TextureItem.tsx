@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useContext, useRef } from "react";
 import { SmallButton } from "../../atoms/buttons/Button";
 
 import pickLocal from "@/assets/images/icons/descriptive/pickTextureLocal.svg?react";
@@ -14,6 +14,7 @@ import type { Texture } from "three";
 import type { MaterialID, TextureSlot } from "@/types/scene";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import clsx from "clsx";
+import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 
 export function TextureItem({
   materialId,
@@ -32,20 +33,28 @@ export function TextureItem({
   onClick: () => void;
   openImportModal: () => void;
 }) {
+  const mode = useContext(PanelSceneModeContext);
+
   const { textureImport, textureExport } = useHandlers();
 
   return (
     <div
       className={clsx(styles.textureSelectContainer, {
         [styles.active]: isActive,
+        [styles.textureSelectContainerClosed]: mode == "close",
       })}
       onClick={onClick}
+      role="button"
     >
       <TexturePreview texture={texture} />
       <div className={styles.textureInfo}>
-        <p className="t3">{materialName + " / " + slot}</p>
+        {mode == "open" && <p className="t3">{materialName + " / " + slot}</p>}
         {isActive && (
-          <div className={styles.textureButtonRow}>
+          <div
+            className={clsx(styles.textureButtonRow, {
+              [styles.textureButtonRowClosed]: mode == "close",
+            })}
+          >
             <SmallButton img={pickLocal} onClick={openImportModal} />
             <SmallButton
               img={saveLocal}

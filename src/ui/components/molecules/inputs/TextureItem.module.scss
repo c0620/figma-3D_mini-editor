@@ -3,6 +3,10 @@
   gap: var(--margin-m);
 }
 
+.texture-select-container-closed {
+  flex-direction: column;
+}
+
 .texture-info {
   display: flex;
   flex-direction: column;
@@ -12,6 +16,12 @@
 .texture-button-row {
   display: flex;
   gap: var(--margin-m);
+}
+
+.texture-button-row-closed {
+  flex-direction: column;
+  gap: var(--margin-s);
+  margin-bottom: var(--margin-s);
 }
 
 .active > canvas {

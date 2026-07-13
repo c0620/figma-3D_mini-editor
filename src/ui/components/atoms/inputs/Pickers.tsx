@@ -13,10 +13,12 @@ export function InputColorPicker({
   value,
   onChange,
   onPalette,
+  isDetailed,
 }: {
   value: Color;
   onChange: (value: Material["color"]) => void;
   onPalette?: (value: Material["color"]) => void;
+  isDetailed: boolean;
 }) {
   const [cachedValue, setCachedValue] = useState(value.getHexString());
   const [cachedHEXValue, setCachedHEXValue] = useState(cachedValue);
@@ -127,37 +129,41 @@ export function InputColorPicker({
             value={"#" + cachedValue}
             onInput={handleChange}
           />
-          <input
-            type="text"
-            className={styles.hexInput}
-            onInput={handleChange}
-            value={cachedHEXValue}
-            onBlur={onBlurHex}
-          />
-          <div className={styles.rgbInputContainer}>
-            <label className={styles.rgbInputLabel}>RGB:</label>
-            <input
-              id="color-r"
-              type="number"
-              className={styles.rgbInputField}
-              onInput={handleChange}
-              value={r.toString()}
-            />
-            <input
-              id="color-g"
-              type="number"
-              className={styles.rgbInputField}
-              onInput={handleChange}
-              value={g.toString()}
-            />
-            <input
-              id="color-b"
-              type="number"
-              className={styles.rgbInputField}
-              onInput={handleChange}
-              value={b.toString()}
-            />
-          </div>
+          {isDetailed && (
+            <>
+              <input
+                type="text"
+                className={styles.hexInput}
+                onInput={handleChange}
+                value={cachedHEXValue}
+                onBlur={onBlurHex}
+              />
+              <div className={styles.rgbInputContainer}>
+                <label className={styles.rgbInputLabel}>RGB:</label>
+                <input
+                  id="color-r"
+                  type="number"
+                  className={styles.rgbInputField}
+                  onInput={handleChange}
+                  value={r.toString()}
+                />
+                <input
+                  id="color-g"
+                  type="number"
+                  className={styles.rgbInputField}
+                  onInput={handleChange}
+                  value={g.toString()}
+                />
+                <input
+                  id="color-b"
+                  type="number"
+                  className={styles.rgbInputField}
+                  onInput={handleChange}
+                  value={b.toString()}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>

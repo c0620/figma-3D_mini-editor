@@ -6,6 +6,7 @@ import { PanelParams } from "../templates/panels/PanelParams";
 import { TopTools } from "../templates/tools/TopTools";
 import { BottomTools } from "../templates/tools/BottomTools";
 import { useEffect } from "react";
+import styles from "./EditorPageScreen.module.scss";
 
 export default function EditorPage() {
   const activeObj = useActiveObject();
@@ -16,39 +17,15 @@ export default function EditorPage() {
   );
   return (
     <div style={{ width: "100%", height: "100%" }}>
-      <div style={{ position: "absolute" }}>
-        <NavLink to="/">Main</NavLink>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          top: "5%",
-          display: "flex",
-          justifyContent: "space-between",
-          userSelect: "none",
-        }}
-      >
+      <div className={styles.pannels}>
         <PanelScene activeObj={activeObj} />
         {activeObj && <PanelParams activeObj={activeObj} />}
       </div>
-      <div
-        style={{
-          position: "absolute",
-          width: "100%",
-          top: "5%",
-          height: "90%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "space-between",
-          userSelect: "none",
-        }}
-      >
+      <div className={styles.tools}>
         <TopTools />
         <BottomTools activeObj={activeObj} />
       </div>
-      <div style={{ width: "100vw", height: "100vh" }}>
+      <div className={styles.renderer}>
         <SceneRenderer />
       </div>
     </div>

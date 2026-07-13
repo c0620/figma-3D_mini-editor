@@ -1,0 +1,26 @@
+.tools {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  padding: var(--padding-outer);
+}
+
+.renderer {
+  width: 100vw;
+  height: 100vh;
+}
+
+.pannels {
+  position: absolute;
+  width: 100%;
+  top: 5%;
+  display: flex;
+  justify-content: space-between;
+  user-select: none;
+  padding: 0 var(--padding-outer);
+}

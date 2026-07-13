@@ -17,7 +17,6 @@ export function ScrollPanel({
   children: any;
 }) {
   const mode = useContext(PanelSceneModeContext);
-
   return (
     <>
       {text && (
