@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Slider, SliderCentered } from "../../atoms/inputs/Sliders";
+import { Slider } from "../../atoms/inputs/Sliders";
 import {
   InputNumbers,
   type InputNumbersField,
 } from "../../atoms/inputs/TextInputs";
-import styles from "./NumberFieldInput.module.scss";
+import styles from "./Common.module.scss";
 
 export function NumberFieldInput({
   title,
@@ -12,6 +12,7 @@ export function NumberFieldInput({
 }: {
   title?: string;
   field: Omit<InputNumbersField, "setValue" | "value"> & { value: number };
+  pair?: boolean;
 }) {
   const [value, setValue] = useState("" + field.value);
   useEffect(() => setValue("" + field.value), [field.value]);
@@ -21,22 +22,13 @@ export function NumberFieldInput({
     setValue: setValue,
   };
   return (
-    <div className={styles.numberInputContainer}>
+    <div className={styles.commonContainer}>
       <p className="t3">{title}</p>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--margin-s)",
-        }}
-      >
+      <div className={styles.commonInputRow}>
         <InputNumbers field={inputField} />
-        {field.range &&
-          (field.range.variant == "default" ? (
-            <Slider field={inputField} />
-          ) : (
-            <SliderCentered field={inputField} />
-          ))}
+        {field.range && field.range.variant == "default" && (
+          <Slider field={inputField} />
+        )}
       </div>
     </div>
   );

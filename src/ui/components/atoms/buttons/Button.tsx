@@ -10,6 +10,7 @@ export interface ButtonProps {
   text?: string;
   img?: IconComponent;
   deactivated?: boolean;
+  isIconFirst?: boolean;
 }
 
 export function MainButton({
@@ -29,11 +30,17 @@ export function MainButton({
   }
 }
 
-export function ActionButton({ onClick, text, img: Icon }: ButtonProps) {
+export function ActionButton({
+  onClick,
+  text,
+  img: Icon,
+  isIconFirst,
+}: ButtonProps) {
   return (
     <div className={clsx(styles.actionButton, "h4")} onClick={onClick}>
+      {Icon && isIconFirst && <Icon title={text} />}
       {text}
-      {Icon && <Icon title={text} />}
+      {Icon && !isIconFirst && <Icon title={text} />}
     </div>
   );
 }

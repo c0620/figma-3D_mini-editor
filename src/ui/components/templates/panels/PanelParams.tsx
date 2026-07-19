@@ -3,7 +3,6 @@ import styles from "./Panel.module.scss";
 import { ScrollPanel } from "../../atoms/outputs/ScrollPanel.tsx";
 import { MaterialParamsInputs } from "../../organisms/MaterialParamsInputs.tsx";
 import { useSceneStore } from "@/store/sceneStore";
-import { SelectIcon } from "../../atoms/inputs/Selects.tsx";
 import type {
   ActiveEntity,
   MaterialID,
@@ -20,16 +19,20 @@ import {
   TextureItem,
 } from "../../molecules/inputs/TextureItem.tsx";
 import { ModalMini } from "../../organisms/ModalTextureImport.tsx";
-import { useSessionStore } from "@/store/sessionStore.ts";
 import clsx from "clsx";
 import materialsIcon from "@/assets/images/icons/descriptive/materials.svg?react";
 import texturesIcon from "@/assets/images/icons/descriptive/texturesP.svg?react";
+import perspectiveCameraIcon from "@/assets/images/icons/descriptive/cameraP.svg?react";
+import orthographicCameraIcon from "@/assets/images/icons/descriptive/cameraO.svg?react";
+import { CameraParamsInputs } from "../../organisms/CameraParamsInputs.tsx";
+import { SwitchItem } from "../../molecules/inputs/SwitchItem.tsx";
+import { SelectAngleOption } from "../../molecules/inputs/SelectAngleOption.tsx";
 
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
   switch (activeObj.kind) {
     case "Group":
       return <GroupParams activeGroup={activeObj} />;
-    case "Mesh":
+    case "Mesh": {
       const materials = threeAssetRegistry.getAssetData(
         activeObj.id
       )?.materials;
@@ -42,6 +45,7 @@ export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
           />
         );
       return null;
+    }
     case "Camera":
       return <CameraParams activeCamera={activeObj} />;
     case "Light":
@@ -55,15 +59,15 @@ export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
 
 function GroupParams({ activeGroup }: { activeGroup: SceneGroup }) {
   const { scene } = useSceneStore();
-  let graph = scene!.sceneGraph.graphThree;
-  let groupChildren = graph[activeGroup.id];
+  const graph = scene!.sceneGraph.graphThree;
+  const groupChildren = graph[activeGroup.id];
   let childrenCount = 0;
   if (groupChildren) {
     childrenCount += groupChildren.length;
-    let childrenStack = [...groupChildren];
-    while (childrenStack && childrenStack.length != 0) {
-      let currentChild = childrenStack.pop()!;
-      let children = graph[currentChild];
+    const childrenStack = [...groupChildren];
+    while (childrenStack.length != 0) {
+      const currentChild = childrenStack.pop()!;
+      const children = graph[currentChild];
       childrenCount += children.length;
       for (const child of children) {
         childrenStack.push(child);
@@ -147,18 +151,31 @@ function MeshParams({
 }
 
 function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
-  const { activeCameraID } = useSessionStore();
-  const isActive = activeCamera.id === activeCameraID;
   return (
     <Panel panel="Right" text="Параметры">
-      <div className={styles.panelScene}>
+      <div className={styles.panelItems}>
         <ScrollPanel isLong={false} text="Тип камеры">
-          <p>Перспективная</p>
-          <p>Орт</p>
+          <SwitchItem
+            text="Перспективная камера"
+            icon={perspectiveCameraIcon}
+            onClick={() => console.log("test")}
+            isActive={activeCamera.type == "Perspective"}
+          />
+          <SwitchItem
+            text="Ортогональная камера"
+            icon={orthographicCameraIcon}
+            onClick={() => console.log("test")}
+            isActive={activeCamera.type == "Orthographic"}
+          />
         </ScrollPanel>
+        <CameraParamsInputs camera={activeCamera} />
       </div>
-      <div>Параметры камеры (отд к)</div>
-      <div>пресеты ракурсов камеры (отд к)</div>
+
+      <SelectAngleOption
+        title="Пресеты вида камеры"
+        value={activeCamera.transform.rotation}
+        onClick={(value) => console.log(value)}
+      />
     </Panel>
   );
 }

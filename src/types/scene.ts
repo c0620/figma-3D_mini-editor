@@ -100,10 +100,7 @@ export interface EnvironmentState {
 }
 
 export type SceneGraphObject =
-  | SceneLight
-  | SceneMesh
-  | SceneGroup
-  | SceneCamera;
+  SceneLight | SceneMesh | SceneGroup | SceneCamera;
 
 export type SceneObject = SceneGraphObject | SceneCamera;
 

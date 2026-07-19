@@ -1,0 +1,10 @@
+@use "./../../atoms/inputs/InputCommon.module.scss";
+.common-container {
+  @extend .common-input-outer;
+}
+
+.common-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-s);
+}

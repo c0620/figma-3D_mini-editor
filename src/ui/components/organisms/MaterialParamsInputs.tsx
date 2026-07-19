@@ -1,18 +1,15 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { PanelSceneModeContext } from "../templates/panels/BasePanel";
 
-import { activeEntityEditorHeading } from "./TransformInputs";
-import { Slider } from "../atoms/inputs/Sliders";
-
 import styles from "./MaterialParamsInputs.module.scss";
-import type { Material, SceneMesh } from "@/types/scene";
+import type { Material } from "@/types/scene";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import { NumberFieldInput } from "../molecules/inputs/NumberFieldInput";
-import { ColorInput } from "../molecules/inputs/ColorInput";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
 import { SelectColor } from "../atoms/inputs/Selects";
 import { getMockFigmaVariables } from "./materialParamsInputs.mocks";
 import clsx from "clsx";
+import { PickerColor } from "../molecules/inputs/PickerColor";
 
 export function MaterialParamsInputs({ material }: { material: Material }) {
   const mode = useContext(PanelSceneModeContext);
@@ -120,7 +117,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
               : undefined,
         }}
       />
-      <ColorInput
+      <PickerColor
         title="Основной цвет"
         value={material.color.value}
         onChange={(value: Material["color"]) =>

@@ -3,6 +3,26 @@ import { useState } from "react";
 
 import styles from "./Selects.module.scss";
 import { Color } from "three";
+import type { IconComponent } from "../../types/icon";
+import clsx from "clsx";
+
+export type SelectIconVariable = {
+  icon: IconComponent;
+  id: string;
+  title: string;
+  variable: number;
+};
+export type SelectIconVariables = Record<
+  SelectIconVariable["id"],
+  SelectIconVariable
+>;
+
+export type FigmaVariableListItem = {
+  id: string;
+  name: string;
+  resolvedType: VariableResolvedDataType;
+  valuesByMode: Record<string, VariableValue>;
+};
 
 function variableColorToCss(value: unknown): string | undefined {
   if (typeof value !== "object" || value === null || !("r" in value)) {
@@ -15,17 +35,47 @@ function variableColorToCss(value: unknown): string | undefined {
   return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
 }
 
-export type FigmaVariableListItem = {
-  id: string;
-  name: string;
-  resolvedType: VariableResolvedDataType;
-  valuesByMode: Record<string, VariableValue>;
-};
+export function SelectIcon({
+  variables,
+  value,
+  onChange,
+}: {
+  variables: SelectIconVariables;
+  value: string;
+  onChange: (value: SelectIconVariable["id"]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(value);
+  const currentVariable = variables[selectedId] ?? variables[value];
 
-export function SelectIcon() {
   return (
-    <div>
-      <img alt="material" />
+    <div className={styles.selectContainer + " t3"}>
+      {!open ? (
+        <button className={styles.selectTrigger} onClick={() => setOpen(true)}>
+          <currentVariable.icon />
+          {currentVariable.title}
+        </button>
+      ) : (
+        <ul
+          className={styles.selectDropdown}
+          onPointerLeave={() => setOpen(false)}
+        >
+          {Object.entries(variables).map(([id, variable]) => (
+            <li
+              key={variable.id}
+              className={styles.selectItem}
+              onClick={() => {
+                setSelectedId(id);
+                onChange(id);
+                setOpen(false);
+              }}
+            >
+              <variable.icon />
+              {variable.title}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -104,7 +154,30 @@ export function SelectColor({
   );
 }
 
-export function ModeSelect() {}
-export function MeshMaterialSelect() {}
+export type OptionType = {
+  icon?: IconComponent;
+  text: string;
+  value: number[];
+  isActive: boolean;
+  onClick: () => void;
+};
 
-export function Options() {}
+export function Option({
+  icon: Icon,
+  text,
+  onClick,
+  isActive,
+}: Omit<OptionType, "value">) {
+  return (
+    <div
+      className={clsx("t3", styles.option, {
+        [styles.optionActive]: isActive,
+        accent: isActive,
+      })}
+      onClick={onClick}
+    >
+      {Icon && <Icon />}
+      {text}
+    </div>
+  );
+}

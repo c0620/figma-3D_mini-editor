@@ -1,10 +1,7 @@
 import type { ChangeEvent } from "react";
 
 import styles from "./TextInputs.module.scss";
-import { useContext, useEffect, useState } from "react";
-
-import clsx from "clsx";
-import { Slider, SliderCentered } from "./Sliders";
+import { useId } from "react";
 
 export type InputNumbersField = {
   onChange: (value: number) => void;
@@ -21,7 +18,17 @@ export type InputNumbersField = {
   };
 };
 
+export type InputPairNumbersField = {
+  onChange: (value: number[]) => void;
+  value1: number;
+  value2: number;
+  setValues: React.Dispatch<React.SetStateAction<number[]>>;
+  isActive: boolean;
+};
+
 export function InputNumbers({ field }: { field: InputNumbersField }) {
+  const id = useId();
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     field.setValue(e.target.value.replace(",", "."));
   };
@@ -35,10 +42,13 @@ export function InputNumbers({ field }: { field: InputNumbersField }) {
   return (
     <div className={styles.inputText}>
       {field.label ? (
-        <label className={styles.inputTextLabel}>{field.label}</label>
+        <label className={styles.inputTextLabel} htmlFor={id}>
+          {field.label}
+        </label>
       ) : null}
       <input
         className={styles.inputTextField}
+        id={id}
         type="number"
         style={field.isActive ? { color: "orange" } : { color: "white" }}
         onInput={handleChange}
@@ -47,6 +57,23 @@ export function InputNumbers({ field }: { field: InputNumbersField }) {
         }}
         value={field.value}
         onBlur={setChange}
+      />
+    </div>
+  );
+}
+
+export function InputPairNumbers({ field }: { field: InputPairNumbersField }) {
+  return (
+    <div className={styles.pairRow} role="group">
+      <input
+        className={styles.inputTextField}
+        value={field.value1}
+        onChange={(e) => field.onChange([+e.target.value, field.value2])}
+      />
+      <input
+        className={styles.inputTextField}
+        value={field.value2}
+        onChange={(e) => field.onChange([field.value1, +e.target.value])}
       />
     </div>
   );

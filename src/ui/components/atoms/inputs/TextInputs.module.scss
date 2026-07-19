@@ -46,3 +46,12 @@ input[type="number"] {
 .vertical {
   flex-direction: column;
 }
+
+.pair-row {
+  display: flex;
+  max-width: 90px;
+  clip-path: inset(0 round var(--border-radius-s));
+  & > .input-text-field {
+    border-radius: 0;
+  }
+}

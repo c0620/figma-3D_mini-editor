@@ -1,0 +1,40 @@
+.toggle-container {
+  display: flex;
+  gap: var(--margin-m);
+  align-items: center;
+}
+
+.toggle {
+  appearance: none;
+  width: 60px;
+  height: var(--inputs-size-toggle-height);
+  border-radius: var(--border-radius-s);
+  background: var(--interactive-color-interactive-background-primary);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  padding: 0 4px;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+    left: 6px;
+    aspect-ratio: 1;
+    height: 70%;
+    border-radius: 50%;
+    background: var(--common-color-common-text);
+    transition: transform 0.2s ease;
+  }
+  &:checked {
+    background: var(--common-color-common-accent); // «iOS-зелёный»
+  }
+  &:checked::before {
+    transform: translate(calc(60px - 6px - 100%), -50%);
+  }
+  &:focus-visible {
+    // не забываем про клавиатуру
+    outline: 2px solid #007aff;
+    outline-offset: 2px;
+  }
+}

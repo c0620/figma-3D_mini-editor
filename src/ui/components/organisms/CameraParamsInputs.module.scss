@@ -1,0 +1,15 @@
+.camera-params {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+}
+
+.params-row {
+  display: flex;
+  gap: var(--margin-m);
+}
+
+.params-row > div > p {
+  line-height: 120%;
+  margin-bottom: var(--margin-s);
+}

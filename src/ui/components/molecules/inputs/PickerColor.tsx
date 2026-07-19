@@ -1,9 +1,9 @@
 import type { Color } from "three";
 import { InputColorPicker } from "../../atoms/inputs/Pickers";
-import styles from "./ColorInput.module.scss";
+import styles from "./Common.module.scss";
 import type { Material } from "@/types/scene";
 
-export function ColorInput({
+export function PickerColor({
   title,
   onChange,
   onPalette,
@@ -17,7 +17,7 @@ export function ColorInput({
   mode: "open" | "close";
 }) {
   return (
-    <div className={styles.colorInputContainer}>
+    <div className={styles.commonContainer}>
       {mode == "open" && <p className="t3">{title}</p>}
       <InputColorPicker
         onChange={onChange}

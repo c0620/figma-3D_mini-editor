@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+}
+
+.option-container {
+  display: flex;
+  align-self: flex-start;
+  gap: var(--margin-s);
+  flex-wrap: wrap;
+}
