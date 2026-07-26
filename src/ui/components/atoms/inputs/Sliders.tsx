@@ -14,7 +14,7 @@ function getCenteredSliderProgressStyle(
   value: number
 ) {
   const center = (min + max) / 2;
-  const progress = 50 - ((value - center) / (max - min)) * 100;
+  const progress = 50 + ((value - center) / (max - min)) * 100;
   return {
     "--slider-progress-start": `${Math.min(50, progress)}%`,
     "--slider-progress-end": `${Math.max(50, progress)}%`,
@@ -65,7 +65,7 @@ export function SliderCentered({
     <label className={styles.sliderCenteredLabel}>
       <input
         className={styles.sliderCentered}
-        style={getCenteredSliderProgressStyle(max, min, value)}
+        style={getCenteredSliderProgressStyle(min, max, value)}
         type="range"
         min={min}
         max={max}
