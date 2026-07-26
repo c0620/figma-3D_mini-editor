@@ -4,7 +4,7 @@ import { useContext, useState } from "react";
 import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 import { SmallButton } from "../../atoms/buttons/Button";
 
-import styles from "./SceneItem.module.scss";
+import styles from "./GraphItem.module.scss";
 
 import mesh from "@/assets/images/icons/descriptive/mesh.svg?react";
 import light from "@/assets/images/icons/descriptive/lighting.svg?react";

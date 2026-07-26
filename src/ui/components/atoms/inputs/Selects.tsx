@@ -10,7 +10,7 @@ export type SelectIconVariable = {
   icon: IconComponent;
   id: string;
   title: string;
-  variable: number;
+  value: number;
 };
 export type SelectIconVariables = Record<
   SelectIconVariable["id"],
@@ -41,12 +41,15 @@ export function SelectIcon({
   onChange,
 }: {
   variables: SelectIconVariables;
-  value: string;
-  onChange: (value: SelectIconVariable["id"]) => void;
+  value: number;
+  onChange: (value: SelectIconVariable["value"]) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(value);
-  const currentVariable = variables[selectedId] ?? variables[value];
+  const currentVariable = Object.hasOwn(variables, value)
+    ? variables[value]
+    : null;
+  if (!currentVariable)
+    throw new Error("SelectIcon(Selects): unknown current value for select");
 
   return (
     <div className={styles.selectContainer + " t3"}>
@@ -62,11 +65,10 @@ export function SelectIcon({
         >
           {Object.entries(variables).map(([id, variable]) => (
             <li
-              key={variable.id}
+              key={id}
               className={styles.selectItem}
               onClick={() => {
-                setSelectedId(id);
-                onChange(id);
+                onChange(variable.value);
                 setOpen(false);
               }}
             >
@@ -157,17 +159,11 @@ export function SelectColor({
 export type OptionType = {
   icon?: IconComponent;
   text: string;
-  value: number[];
   isActive: boolean;
   onClick: () => void;
 };
 
-export function Option({
-  icon: Icon,
-  text,
-  onClick,
-  isActive,
-}: Omit<OptionType, "value">) {
+export function Option({ icon: Icon, text, onClick, isActive }: OptionType) {
   return (
     <div
       className={clsx("t3", styles.option, {

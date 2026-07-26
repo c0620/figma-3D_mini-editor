@@ -13,6 +13,11 @@
   gap: var(--margin-l);
 }
 
+.free-long {
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
 .panel.close {
   width: var(--editor-size-editor-panel-width-closed);
   align-items: center;
@@ -24,6 +29,13 @@
   gap: var(--margin-m);
   flex: 1 1 0;
   min-height: 0;
+}
+
+.panel-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-l);
+  height: max-content;
 }
 
 .panel-items {

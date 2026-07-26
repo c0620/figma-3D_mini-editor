@@ -7,8 +7,13 @@ import frontIcon from "@/assets/images/icons/descriptive/cameraPFront.svg?react"
 import leftIcon from "@/assets/images/icons/descriptive/cameraPLeft.svg?react";
 import rightIcon from "@/assets/images/icons/descriptive/cameraPRight.svg?react";
 import topIcon from "@/assets/images/icons/descriptive/cameraPTop.svg?react";
+import customIcon from "@/assets/images/icons/descriptive/cameraPUser.svg?react";
 import saveIcon from "@/assets/images/icons/descriptive/cameraPSave.svg?react";
 import { ActionButton } from "../../atoms/buttons/Button";
+import { useContext, useState } from "react";
+import { produce } from "immer";
+import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
+import { useSessionStore } from "@/store/sessionStore";
 
 export function SelectAngleOption({
   title,
@@ -16,16 +21,27 @@ export function SelectAngleOption({
   onClick,
 }: {
   title: string;
-  value: number[];
-  onClick: (value: number[]) => void;
+  value: { azimuth: number; polar: number };
+  onClick: (azimuth: number, polar: number) => void;
 }) {
-  const options: Omit<OptionType, "onClick" | "isActive">[] = [
-    { value: [0, 0, 0], text: "Верх", icon: topIcon },
-    { value: [0, 0, 1], text: "Низ", icon: bottomIcon },
-    { value: [1, 0, 1], text: "Лево", icon: leftIcon },
-    { value: [0, 0, 1], text: "Право", icon: rightIcon },
-    { value: [0, 1, 1], text: "Спереди", icon: frontIcon },
-    { value: [1, 1, 1], text: "Сзади", icon: backIcon },
+  const mode = useContext(PanelSceneModeContext);
+  const customAngle = useSessionStore((s) => s.cameraCustomAngle);
+  const setCustomAngle = useSessionStore((s) => s.setCameraCustomAngle);
+  const options: (Omit<OptionType, "onClick" | "isActive"> & {
+    azimuth: number;
+    polar: number;
+  })[] = [
+    { azimuth: 0, polar: 0, text: "Сверху", icon: topIcon },
+    { azimuth: 0, polar: Math.PI, text: "Снизу", icon: bottomIcon },
+    { azimuth: Math.PI / 2, polar: Math.PI / 2, text: "Слева", icon: leftIcon },
+    {
+      azimuth: -Math.PI / 2,
+      polar: Math.PI / 2,
+      text: "Справа",
+      icon: rightIcon,
+    },
+    { azimuth: 0, polar: Math.PI / 2, text: "Спереди", icon: frontIcon },
+    { azimuth: Math.PI, polar: Math.PI / 2, text: "Сзади", icon: backIcon },
   ];
   return (
     <div className={styles.container}>
@@ -34,16 +50,34 @@ export function SelectAngleOption({
         {options.map((option) => (
           <Option
             key={option.text}
-            icon={option.icon}
+            icon={mode == "close" ? option.icon : undefined}
             text={option.text}
-            onClick={() => onClick(option.value)}
-            isActive={JSON.stringify(value) === JSON.stringify(option.value)}
+            onClick={() => onClick(option.azimuth, option.polar)}
+            isActive={
+              value.azimuth == option.azimuth && value.polar == option.polar
+            }
           />
         ))}
+        {customAngle && (
+          <Option
+            key={`customAngle-${customAngle.azimuth}-${customAngle.polar}`}
+            icon={mode == "close" ? customIcon : undefined}
+            text="Кастомный"
+            onClick={() => onClick(customAngle.azimuth, customAngle.polar)}
+            isActive={
+              value.azimuth == customAngle.azimuth &&
+              value.polar == customAngle.polar
+            }
+          />
+        )}
       </div>
       <ActionButton
-        onClick={() => console.log("save camera angle")}
-        text="Сохранить текущий ракурс"
+        onClick={() => {
+          setCustomAngle(value.azimuth, value.polar);
+        }}
+        text={
+          customAngle ? "Заменить текущий ракурс" : "Сохранить текущий ракурс"
+        }
         img={saveIcon}
         isIconFirst
       />

@@ -18,6 +18,8 @@ export interface UiState {
   canUndo: boolean;
   canRedo: boolean;
   activeObjectTool: ObjectToolMode | null;
+  isCameraPreview: boolean;
+  cameraCustomAngle: { azimuth: number; polar: number } | null;
 }
 
 interface UiActions {
@@ -30,6 +32,8 @@ interface UiActions {
   removeNotification(id: string): void;
   setHistoryFlags(canUndo: boolean, canRedo: boolean): void;
   setActiveObjectTool(tool: ObjectToolMode | null): void;
+  toggleCameraPreview(): void;
+  setCameraCustomAngle(azimuth: number, polar: number): void;
 }
 
 export const useSessionStore = create<UiState & UiActions>((set) => ({
@@ -42,6 +46,8 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
   canUndo: false,
   canRedo: false,
   activeObjectTool: null,
+  isCameraPreview: false,
+  cameraCustomAngle: null,
 
   setColorTheme: (theme) => set({ colorTheme: theme }),
   setWindowSize: (size) => set({ windowSize: size }),
@@ -54,4 +60,10 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
     set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) })),
   setHistoryFlags: (canUndo, canRedo) => set({ canUndo, canRedo }),
   setActiveObjectTool: (tool) => set({ activeObjectTool: tool }),
+  toggleCameraPreview: () =>
+    set((state) => ({
+      isCameraPreview: !state.isCameraPreview,
+    })),
+  setCameraCustomAngle: (azimuth, polar) =>
+    set({ cameraCustomAngle: { azimuth, polar } }),
 }));

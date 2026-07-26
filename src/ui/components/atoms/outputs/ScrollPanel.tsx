@@ -18,7 +18,11 @@ export function ScrollPanel({
 }) {
   const mode = useContext(PanelSceneModeContext);
   return (
-    <>
+    <div
+      className={clsx(styles.scrollPanelContainer, {
+        [styles.closed]: mode == "close",
+      })}
+    >
       {text && (
         <h3 className={clsx("h3", { [styles.hide]: mode == "close" })}>
           {text}
@@ -38,6 +42,6 @@ export function ScrollPanel({
       >
         {children}
       </div>
-    </>
+    </div>
   );
 }

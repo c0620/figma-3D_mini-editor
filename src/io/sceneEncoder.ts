@@ -33,7 +33,7 @@ import type {
   SceneMesh,
   SceneObject,
 } from "../types/scene";
-import { TextureSlot } from "../types/scene";
+import { CameraType, TextureSlot } from "../types/scene";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
@@ -79,13 +79,17 @@ function parseObjectThree(
     sceneObjects[id] = {
       id,
       kind: "Camera",
-      type: node instanceof PerspectiveCamera ? "Perspective" : "Orthographic",
+      type:
+        node instanceof PerspectiveCamera
+          ? CameraType.Perspective
+          : CameraType.Orthographic,
       zoom: node.zoom,
       transform: transform,
       locked: false,
       name: node.name,
       pendingDelete: false,
       parentId: parentID,
+      dolly: 1,
     } as SceneCamera;
   } else if (node instanceof Mesh) {
     threeAssetRegistry.register(id, {
@@ -190,7 +194,7 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     name: "Plugin Camera",
     kind: "Camera",
     id: IDs.PluginCamera,
-    type: "Perspective",
+    type: CameraType.Perspective,
     zoom: 1,
     locked: false,
     pendingDelete: false,
@@ -200,6 +204,13 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
     },
+    near: 0.1,
+    far: 2000,
+    fov: 50,
+    aspect: [1, 1],
+    dolly: 1,
+    azimuth: 0,
+    polar: Math.PI / 2,
   } as SceneCamera;
 
   if (!hasLight) {

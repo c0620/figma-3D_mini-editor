@@ -3,8 +3,10 @@ import styles from "./Toggles.module.scss";
 export function Toggle({
   label,
   onChange,
+  value,
 }: {
   label: string;
+  value: boolean;
   onChange: () => void;
 }) {
   return (
@@ -13,6 +15,7 @@ export function Toggle({
         className={styles.toggle}
         type="checkbox"
         role="switch"
+        checked={value}
         onChange={onChange}
       />
       <p className="t4">{label}</p>

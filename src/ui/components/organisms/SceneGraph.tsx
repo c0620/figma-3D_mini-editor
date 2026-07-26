@@ -2,7 +2,7 @@ import { useHandlers, useSceneEntities } from "@/app/ApplicationKernelContext";
 import { useSceneStore } from "@/store/sceneStore";
 import type { ActiveEntity, ObjectID } from "@/types/scene";
 import { useState } from "react";
-import { GraphItem } from "../molecules/scene/SceneItem";
+import { GraphItem } from "../molecules/scene/GraphItem";
 import { produce } from "immer";
 import { useSessionStore } from "@/store/sessionStore";
 import { enableMapSet } from "immer";

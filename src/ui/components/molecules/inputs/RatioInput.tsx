@@ -62,7 +62,7 @@ export function RatioInput({
           max={1}
           step={0.01}
           onChange={(value) => {
-            field.setValues(findRatio(value));
+            field.onChange(findRatio(value));
           }}
         />
       </div>

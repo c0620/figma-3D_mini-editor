@@ -10,7 +10,7 @@ import type {
   SceneGroup,
   SceneMesh,
 } from "@/types/scene.ts";
-import { TextureSlot } from "@/types/scene.ts";
+import { CameraType, TextureSlot } from "@/types/scene.ts";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry.ts";
 import { MaterialPreview } from "../../atoms/scene/MaterialPreview.tsx";
 import { useState } from "react";
@@ -24,9 +24,11 @@ import materialsIcon from "@/assets/images/icons/descriptive/materials.svg?react
 import texturesIcon from "@/assets/images/icons/descriptive/texturesP.svg?react";
 import perspectiveCameraIcon from "@/assets/images/icons/descriptive/cameraP.svg?react";
 import orthographicCameraIcon from "@/assets/images/icons/descriptive/cameraO.svg?react";
+import lensIcon from "@/assets/images/icons/descriptive/lens.svg?react";
 import { CameraParamsInputs } from "../../organisms/CameraParamsInputs.tsx";
 import { SwitchItem } from "../../molecules/inputs/SwitchItem.tsx";
 import { SelectAngleOption } from "../../molecules/inputs/SelectAngleOption.tsx";
+import { useHandlers } from "@/app/ApplicationKernelContext.tsx";
 
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
   switch (activeObj.kind) {
@@ -151,31 +153,46 @@ function MeshParams({
 }
 
 function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
+  const { camera } = useHandlers();
   return (
     <Panel panel="Right" text="Параметры">
-      <div className={styles.panelItems}>
-        <ScrollPanel isLong={false} text="Тип камеры">
-          <SwitchItem
-            text="Перспективная камера"
-            icon={perspectiveCameraIcon}
-            onClick={() => console.log("test")}
-            isActive={activeCamera.type == "Perspective"}
-          />
-          <SwitchItem
-            text="Ортогональная камера"
-            icon={orthographicCameraIcon}
-            onClick={() => console.log("test")}
-            isActive={activeCamera.type == "Orthographic"}
-          />
-        </ScrollPanel>
-        <CameraParamsInputs camera={activeCamera} />
-      </div>
+      <div className={clsx(styles.panelItems, styles.freeLong)}>
+        <div className={styles.panelGroup}>
+          <ScrollPanel isLong={false} text="Тип камеры" img={lensIcon}>
+            <SwitchItem
+              text="Перспективная камера"
+              icon={perspectiveCameraIcon}
+              onClick={() =>
+                camera.execute({
+                  id: activeCamera.id,
+                  type: CameraType.Perspective,
+                })
+              }
+              isActive={activeCamera.type == CameraType.Perspective}
+            />
+            <SwitchItem
+              text="Ортогональная камера"
+              icon={orthographicCameraIcon}
+              onClick={() =>
+                camera.execute({
+                  id: activeCamera.id,
+                  type: CameraType.Orthographic,
+                })
+              }
+              isActive={activeCamera.type == CameraType.Orthographic}
+            />
+          </ScrollPanel>
+          <CameraParamsInputs activeCamera={activeCamera} />
+        </div>
 
-      <SelectAngleOption
-        title="Пресеты вида камеры"
-        value={activeCamera.transform.rotation}
-        onClick={(value) => console.log(value)}
-      />
+        <SelectAngleOption
+          title="Пресеты вида камеры"
+          value={{ azimuth: activeCamera.azimuth, polar: activeCamera.polar }}
+          onClick={(azimuth, polar) =>
+            camera.execute({ id: activeCamera.id, azimuth, polar })
+          }
+        />
+      </div>
     </Panel>
   );
 }

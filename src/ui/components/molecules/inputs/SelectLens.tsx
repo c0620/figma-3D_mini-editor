@@ -14,50 +14,58 @@ export function SelectLens({
   title,
   value,
   mode,
+  onClick,
 }: {
   title: string;
-  value: string;
+  value: number;
   mode: "open" | "close";
+  onClick: (value: number) => void;
 }) {
   const fovPresets: SelectIconVariables = {
-    "15mm": {
+    120: {
       id: "15mm",
       icon: fov15Icon,
       title: "Рыбий глаз (15 mm)",
-      variable: 180,
+      value: 120,
     },
-    "35mm": {
+    63: {
       id: "35mm",
       icon: fov35Icon,
       title: "Стандарт (35 mm)",
-      variable: 63,
+      value: 63,
     },
-    "50mm": {
+    50: {
       id: "50mm",
       icon: fov50Icon,
       title: "Портретный (50 mm)",
-      variable: 47,
+      value: 50,
     },
-    "70mm": {
+    34: {
       id: "70mm",
       icon: fov70Icon,
       title: "Узкий (70 mm)",
-      variable: 34,
+      value: 34,
     },
-    "400mm": {
+    6: {
       id: "400mm",
       icon: fov400Icon,
       title: "Ультраузкий (400 mm)",
-      variable: 6,
+      value: 6,
     },
   };
+
+  if (!Object.hasOwn(fovPresets, value)) {
+    console.warn("SelectLens(SelectLens): unknown value for Lens preset");
+    value = fovPresets[50].value;
+  }
+
   return (
     <div className={styles.commonContainer}>
       {mode == "open" && <p className="t3">{title}</p>}
       <SelectIcon
         variables={fovPresets}
         value={value}
-        onChange={(v) => console.log(v)}
+        onChange={(v) => onClick(v)}
       />
     </div>
   );

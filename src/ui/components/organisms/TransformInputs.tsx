@@ -1,6 +1,6 @@
 import { useHandlers, useSceneEntities } from "@/app/ApplicationKernelContext";
 import { useSceneStore } from "@/store/sceneStore";
-import type { ActiveEntity, Transform } from "@/types/scene";
+import { CameraType, type ActiveEntity, type Transform } from "@/types/scene";
 import { useCallback, useContext, useMemo } from "react";
 import { PanelSceneModeContext } from "../templates/panels/BasePanel";
 
@@ -19,7 +19,7 @@ export function activeEntityEditorHeading(active: ActiveEntity): string {
           ? "Окружающий свет"
           : "HDRI";
     case "Camera":
-      return active.type === "Perspective"
+      return active.type === CameraType.Perspective
         ? "Камера (перспектива)"
         : "Камера (ортография)";
     case "Group":

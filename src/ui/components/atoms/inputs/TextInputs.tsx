@@ -22,7 +22,6 @@ export type InputPairNumbersField = {
   onChange: (value: number[]) => void;
   value1: number;
   value2: number;
-  setValues: React.Dispatch<React.SetStateAction<number[]>>;
   isActive: boolean;
 };
 

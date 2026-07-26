@@ -18,6 +18,11 @@ export enum TextureSlot {
   Emissive = "emissiveMap",
 }
 
+export enum CameraType {
+  Perspective = "PerspectiveCamera",
+  Orthographic = "OrthographicCamera",
+}
+
 export interface FigmaColor {
   type: "figma";
   id: Variable["id"];
@@ -88,10 +93,18 @@ export interface SceneGroup extends BasicSceneObject {
 export interface SceneCamera extends Omit<BasicSceneObject, "visible"> {
   id: ObjectID;
   kind: "Camera";
-  type: "Perspective" | "Orthographic";
+  type: CameraType;
   zoom: number;
   transform: Transform;
   locked: boolean;
+  isActive: boolean;
+  near: number;
+  far: number;
+  fov: number;
+  aspect: number[];
+  dolly: number;
+  azimuth: number;
+  polar: number;
 }
 
 export interface EnvironmentState {
