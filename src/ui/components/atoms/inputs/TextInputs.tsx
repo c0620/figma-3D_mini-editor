@@ -61,9 +61,15 @@ export function InputNumbers({ field }: { field: InputNumbersField }) {
   );
 }
 
-export function InputPairNumbers({ field }: { field: InputPairNumbersField }) {
+export function InputPairNumbers({
+  field,
+  vertical = false,
+}: {
+  field: InputPairNumbersField;
+  vertical?: boolean;
+}) {
   return (
-    <div className={styles.pairRow} role="group">
+    <div className={vertical ? styles.vertical : styles.pairRow} role="group">
       <input
         className={styles.inputTextField}
         value={field.value1}

@@ -9,6 +9,7 @@ import { SelectLens } from "../molecules/inputs/SelectLens";
 import { PanelSceneModeContext } from "../templates/panels/BasePanel";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import { useSessionStore } from "@/store/sessionStore";
+import clsx from "clsx";
 
 export function CameraParamsInputs({
   activeCamera,
@@ -30,7 +31,7 @@ export function CameraParamsInputs({
         </h3>
       )}
       <NumberFieldInput
-        title={mode == "open" ? "Приближение" : undefined}
+        title="Приближение"
         field={{
           onChange: (value) =>
             activeCamera.type == CameraType.Perspective
@@ -50,7 +51,11 @@ export function CameraParamsInputs({
         }}
         isOpen={mode == "open"}
       />
-      <div className={styles.paramsRow}>
+      <div
+        className={clsx(styles.paramsRow, {
+          [styles.toColumn]: mode == "close",
+        })}
+      >
         <NumberFieldInput
           title="Ближняя граница видимости"
           field={{
@@ -106,6 +111,7 @@ export function CameraParamsInputs({
         label="Режим предпросмотра"
         onChange={toggleCameraPreview}
         value={isCameraPreview}
+        isOpen={mode == "open"}
       />
       <RatioInput
         title="Соотношение сторон рендера"
@@ -116,6 +122,7 @@ export function CameraParamsInputs({
           value1: activeCamera.aspect[0],
           value2: activeCamera.aspect[1],
         }}
+        isOpen={mode == "open"}
       />
     </div>
   );

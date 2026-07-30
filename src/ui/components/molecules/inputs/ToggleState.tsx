@@ -6,16 +6,22 @@ export function ToggleState({
   label,
   onChange,
   value,
+  isOpen = true,
 }: {
   title: string;
   label: string;
   onChange: () => void;
   value: boolean;
+  isOpen?: boolean;
 }) {
   return (
     <div className={styles.toggleState}>
-      <p className="t3">{title}</p>
-      <Toggle label={label} onChange={onChange} value={value} />
+      {isOpen && <p className="t3">{title}</p>}
+      <Toggle
+        label={isOpen ? label : undefined}
+        onChange={onChange}
+        value={value}
+      />
     </div>
   );
 }

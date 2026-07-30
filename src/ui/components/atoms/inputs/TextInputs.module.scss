@@ -45,6 +45,12 @@ input[type="number"] {
 
 .vertical {
   flex-direction: column;
+  & > .input-text-field:first-child {
+    border-radius: var(--border-radius-s) var(--border-radius-s) 0 0;
+  }
+  & > .input-text-field:last-child {
+    border-radius: 0 0 var(--border-radius-s) var(--border-radius-s);
+  }
 }
 
 .pair-row {

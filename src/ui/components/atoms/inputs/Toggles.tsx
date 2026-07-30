@@ -5,7 +5,7 @@ export function Toggle({
   onChange,
   value,
 }: {
-  label: string;
+  label?: string;
   value: boolean;
   onChange: () => void;
 }) {
@@ -18,7 +18,7 @@ export function Toggle({
         checked={value}
         onChange={onChange}
       />
-      <p className="t4">{label}</p>
+      {label && <p className="t4">{label}</p>}
     </div>
   );
 }

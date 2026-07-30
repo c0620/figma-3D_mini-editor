@@ -60,6 +60,10 @@
   & > svg {
     color: var(--common-color-common-text);
     height: var(--button-size-button-icon-height);
+    width: auto;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    max-width: none;
   }
 }
 

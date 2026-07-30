@@ -47,24 +47,28 @@ function pairToSlider(w: number, h: number): number {
 export function RatioInput({
   title,
   field,
+  isOpen = true,
 }: {
   title?: string;
   field: InputPairNumbersField;
+  isOpen?: boolean;
 }) {
   return (
     <div className={styles.commonContainer}>
-      <p className="t3">{title}</p>
+      {isOpen && <p className="t3">{title}</p>}
       <div className={styles.commonInputRow}>
-        <InputPairNumbers field={field} />
-        <SliderCentered
-          value={pairToSlider(field.value1, field.value2)}
-          min={-1}
-          max={1}
-          step={0.01}
-          onChange={(value) => {
-            field.onChange(findRatio(value));
-          }}
-        />
+        <InputPairNumbers field={field} vertical={!isOpen} />
+        {isOpen && (
+          <SliderCentered
+            value={pairToSlider(field.value1, field.value2)}
+            min={-1}
+            max={1}
+            step={0.01}
+            onChange={(value) => {
+              field.onChange(findRatio(value));
+            }}
+          />
+        )}
       </div>
     </div>
   );

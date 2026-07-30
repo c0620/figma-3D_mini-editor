@@ -39,10 +39,12 @@ export function SelectIcon({
   variables,
   value,
   onChange,
+  isOpen = true,
 }: {
   variables: SelectIconVariables;
   value: number;
   onChange: (value: SelectIconVariable["value"]) => void;
+  isOpen?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const currentVariable = Object.hasOwn(variables, value)
@@ -56,7 +58,7 @@ export function SelectIcon({
       {!open ? (
         <button className={styles.selectTrigger} onClick={() => setOpen(true)}>
           <currentVariable.icon />
-          {currentVariable.title}
+          {isOpen && currentVariable.title}
         </button>
       ) : (
         <ul
@@ -73,7 +75,7 @@ export function SelectIcon({
               }}
             >
               <variable.icon />
-              {variable.title}
+              {isOpen && variable.title}
             </li>
           ))}
         </ul>
@@ -163,7 +165,13 @@ export type OptionType = {
   onClick: () => void;
 };
 
-export function Option({ icon: Icon, text, onClick, isActive }: OptionType) {
+export function Option({
+  icon: Icon,
+  text,
+  onClick,
+  isActive,
+  isLong = true,
+}: OptionType & { isLong?: boolean }) {
   return (
     <div
       className={clsx("t3", styles.option, {
@@ -173,7 +181,7 @@ export function Option({ icon: Icon, text, onClick, isActive }: OptionType) {
       onClick={onClick}
     >
       {Icon && <Icon />}
-      {text}
+      {isLong && text}
     </div>
   );
 }

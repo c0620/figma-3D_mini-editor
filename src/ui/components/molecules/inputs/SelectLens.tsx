@@ -66,6 +66,7 @@ export function SelectLens({
         variables={fovPresets}
         value={value}
         onChange={(v) => onClick(v)}
+        isOpen={mode == "open"}
       />
     </div>
   );

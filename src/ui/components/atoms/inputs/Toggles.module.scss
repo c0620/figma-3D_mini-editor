@@ -24,13 +24,16 @@
     height: 70%;
     border-radius: 50%;
     background: var(--common-color-common-text);
-    transition: transform 0.2s ease;
+    transition:
+      left 0.2s ease,
+      transform 0.2s ease;
   }
   &:checked {
     background: var(--common-color-common-accent); // «iOS-зелёный»
   }
   &:checked::before {
-    transform: translate(calc(60px - 6px - 100%), -50%);
+    left: calc(100% - 6px);
+    transform: translate(-100%, -50%);
   }
   &:focus-visible {
     // не забываем про клавиатуру

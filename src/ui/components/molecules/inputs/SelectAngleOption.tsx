@@ -10,8 +10,7 @@ import topIcon from "@/assets/images/icons/descriptive/cameraPTop.svg?react";
 import customIcon from "@/assets/images/icons/descriptive/cameraPUser.svg?react";
 import saveIcon from "@/assets/images/icons/descriptive/cameraPSave.svg?react";
 import { ActionButton } from "../../atoms/buttons/Button";
-import { useContext, useState } from "react";
-import { produce } from "immer";
+import { useContext } from "react";
 import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 import { useSessionStore } from "@/store/sessionStore";
 
@@ -45,7 +44,7 @@ export function SelectAngleOption({
   ];
   return (
     <div className={styles.container}>
-      <h3 className="h3">{title}</h3>
+      {mode == "open" && <h3 className="h3">{title}</h3>}
       <div className={styles.optionContainer}>
         {options.map((option) => (
           <Option
@@ -56,6 +55,7 @@ export function SelectAngleOption({
             isActive={
               value.azimuth == option.azimuth && value.polar == option.polar
             }
+            isLong={mode == "open"}
           />
         ))}
         {customAngle && (
@@ -68,6 +68,7 @@ export function SelectAngleOption({
               value.azimuth == customAngle.azimuth &&
               value.polar == customAngle.polar
             }
+            isLong={mode == "open"}
           />
         )}
       </div>
@@ -76,9 +77,13 @@ export function SelectAngleOption({
           setCustomAngle(value.azimuth, value.polar);
         }}
         text={
-          customAngle ? "Заменить текущий ракурс" : "Сохранить текущий ракурс"
+          mode == "close"
+            ? undefined
+            : customAngle
+              ? "Заменить текущий ракурс"
+              : "Сохранить текущий ракурс"
         }
-        img={saveIcon}
+        img={mode == "close" ? saveIcon : undefined}
         isIconFirst
       />
     </div>
