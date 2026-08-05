@@ -1,6 +1,7 @@
 import type { ObjectRef, Transform } from "../types/scene";
 import { CommandType, type HistoryEntry } from "@/types/commands";
 import { SceneToolHandler } from "./sceneToolHandler";
+import { normalizeCameraPatch } from "@/lib/cameraOrbit";
 
 export interface TransformObjectHandlerPayload extends Partial<Transform> {
   objectRef: ObjectRef;
@@ -26,9 +27,14 @@ export class TransformObjectHandler extends SceneToolHandler<
     if (Object.keys(transformPatch).length === 0) return;
 
     switch (objectRef.kind) {
-      case "Camera":
-        this.scene.patchCamera({ id: objectRef.id, transform: transformPatch });
+      case "Camera": {
+        const camera = this.scene.findCameraById(objectRef.id);
+        const patch = { id: objectRef.id, transform: transformPatch };
+        this.scene.patchCamera(
+          camera ? normalizeCameraPatch(camera, patch) : patch
+        );
         return;
+      }
       case "Light":
       case "Mesh":
       case "Group":

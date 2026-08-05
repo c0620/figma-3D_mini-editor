@@ -187,9 +187,18 @@ function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
 
         <SelectAngleOption
           title="Пресеты вида камеры"
-          value={{ azimuth: activeCamera.azimuth, polar: activeCamera.polar }}
-          onClick={(azimuth, polar) =>
-            camera.execute({ id: activeCamera.id, azimuth, polar })
+          value={{
+            azimuth: activeCamera.azimuth,
+            polar: activeCamera.polar,
+            target: activeCamera.target,
+          }}
+          onClick={(value) =>
+            camera.execute({
+              id: activeCamera.id,
+              azimuth: value.azimuth,
+              polar: value.polar,
+              target: value.target,
+            })
           }
         />
       </div>

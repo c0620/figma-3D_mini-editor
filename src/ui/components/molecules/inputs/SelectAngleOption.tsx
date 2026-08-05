@@ -13,6 +13,7 @@ import { ActionButton } from "../../atoms/buttons/Button";
 import { useContext } from "react";
 import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 import { useSessionStore } from "@/store/sessionStore";
+import type { SceneCamera } from "@/types/scene";
 
 export function SelectAngleOption({
   title,
@@ -20,27 +21,50 @@ export function SelectAngleOption({
   onClick,
 }: {
   title: string;
-  value: { azimuth: number; polar: number };
-  onClick: (azimuth: number, polar: number) => void;
+  value: Pick<SceneCamera, "azimuth" | "polar" | "target">;
+  onClick: (value: Pick<SceneCamera, "azimuth" | "polar" | "target">) => void;
 }) {
   const mode = useContext(PanelSceneModeContext);
   const customAngle = useSessionStore((s) => s.cameraCustomAngle);
   const setCustomAngle = useSessionStore((s) => s.setCameraCustomAngle);
-  const options: (Omit<OptionType, "onClick" | "isActive"> & {
-    azimuth: number;
-    polar: number;
-  })[] = [
-    { azimuth: 0, polar: 0, text: "Сверху", icon: topIcon },
-    { azimuth: 0, polar: Math.PI, text: "Снизу", icon: bottomIcon },
-    { azimuth: Math.PI / 2, polar: Math.PI / 2, text: "Слева", icon: leftIcon },
+  const options: (Omit<OptionType, "onClick" | "isActive"> &
+    Pick<SceneCamera, "azimuth" | "polar" | "target">)[] = [
+    { azimuth: 0, polar: 0, text: "Сверху", icon: topIcon, target: [0, 0, 0] },
+    {
+      azimuth: 0,
+      polar: Math.PI,
+      text: "Снизу",
+      icon: bottomIcon,
+      target: [0, 0, 0],
+    },
+    {
+      azimuth: Math.PI / 2,
+      polar: Math.PI / 2,
+      text: "Слева",
+      icon: leftIcon,
+      target: [0, 0, 0],
+    },
     {
       azimuth: -Math.PI / 2,
       polar: Math.PI / 2,
       text: "Справа",
       icon: rightIcon,
+      target: [0, 0, 0],
     },
-    { azimuth: 0, polar: Math.PI / 2, text: "Спереди", icon: frontIcon },
-    { azimuth: Math.PI, polar: Math.PI / 2, text: "Сзади", icon: backIcon },
+    {
+      azimuth: 0,
+      polar: Math.PI / 2,
+      text: "Спереди",
+      icon: frontIcon,
+      target: [0, 0, 0],
+    },
+    {
+      azimuth: Math.PI,
+      polar: Math.PI / 2,
+      text: "Сзади",
+      icon: backIcon,
+      target: [0, 0, 0],
+    },
   ];
   return (
     <div className={styles.container}>
@@ -51,7 +75,13 @@ export function SelectAngleOption({
             key={option.text}
             icon={mode == "close" ? option.icon : undefined}
             text={option.text}
-            onClick={() => onClick(option.azimuth, option.polar)}
+            onClick={() =>
+              onClick({
+                azimuth: option.azimuth,
+                polar: option.polar,
+                target: option.target,
+              })
+            }
             isActive={
               value.azimuth == option.azimuth && value.polar == option.polar
             }
@@ -63,10 +93,19 @@ export function SelectAngleOption({
             key={`customAngle-${customAngle.azimuth}-${customAngle.polar}`}
             icon={mode == "close" ? customIcon : undefined}
             text="Кастомный"
-            onClick={() => onClick(customAngle.azimuth, customAngle.polar)}
+            onClick={() =>
+              onClick({
+                azimuth: customAngle.azimuth,
+                polar: customAngle.polar,
+                target: customAngle.target,
+              })
+            }
             isActive={
               value.azimuth == customAngle.azimuth &&
-              value.polar == customAngle.polar
+              value.polar == customAngle.polar &&
+              value.target[0] == customAngle.target[0] &&
+              value.target[1] == customAngle.target[1] &&
+              value.target[2] == customAngle.target[2]
             }
             isLong={mode == "open"}
           />
@@ -74,7 +113,11 @@ export function SelectAngleOption({
       </div>
       <ActionButton
         onClick={() => {
-          setCustomAngle(value.azimuth, value.polar);
+          setCustomAngle({
+            azimuth: value.azimuth,
+            polar: value.polar,
+            target: value.target,
+          });
         }}
         text={
           mode == "close"

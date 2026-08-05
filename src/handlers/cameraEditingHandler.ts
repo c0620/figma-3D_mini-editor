@@ -2,8 +2,10 @@ import type { SceneCamera } from "@/types/scene";
 import type { CameraPatch } from "../store/sceneStore";
 import { SceneToolHandler } from "./sceneToolHandler";
 import { CommandType, type HistoryEntry } from "@/types/commands";
+import { normalizeCameraPatch } from "@/lib/cameraOrbit";
 
-export interface CameraEditingHandlerPayload extends CameraPatch {}
+export type CameraEditingHandlerPayload = Pick<SceneCamera, "id"> &
+  Partial<Omit<SceneCamera, "id">>;
 
 export class CameraEditingHandler extends SceneToolHandler<
   CameraEditingHandlerPayload,
@@ -23,6 +25,7 @@ export class CameraEditingHandler extends SceneToolHandler<
       throw new Error(
         "getStateBeforeExecute(cameraEditingHandler): no id/camera to revert"
       );
-    return { type: CommandType.EditCamera, snapshot: camera };
+    const snapshot = { ...camera };
+    return { type: CommandType.EditCamera, snapshot };
   }
 }

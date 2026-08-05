@@ -12,10 +12,15 @@ export function NumberFieldInput({
   isOpen = true,
 }: {
   title?: string;
-  field: Omit<InputNumbersField, "setValue" | "value"> & { value: number };
+  field: Omit<InputNumbersField, "setValue" | "value"> & {
+    value: number | null;
+  };
   isOpen?: boolean;
 }) {
-  const [value, setValue] = useState("" + field.value);
+  if (field.value == null)
+    console.warn("NumberFieldInput: provided value is null");
+
+  const [value, setValue] = useState("" + (field.value ?? 0));
   useEffect(() => setValue("" + field.value), [field.value]);
   const inputField: InputNumbersField = {
     ...field,

@@ -63,7 +63,7 @@ export interface Transform {
   scale: [number, number, number];
 }
 
-interface BasicSceneObject {
+export interface BasicSceneObject {
   id: ObjectID;
   name: string;
   kind: SceneObjectKind;
@@ -94,17 +94,17 @@ export interface SceneCamera extends Omit<BasicSceneObject, "visible"> {
   id: ObjectID;
   kind: "Camera";
   type: CameraType;
-  zoom: number;
+  zoom: number | null;
   transform: Transform;
   locked: boolean;
-  isActive: boolean;
   near: number;
   far: number;
   fov: number;
   aspect: number[];
-  dolly: number;
+  dolly: number | null;
   azimuth: number;
   polar: number;
+  target: [number, number, number];
 }
 
 export interface EnvironmentState {

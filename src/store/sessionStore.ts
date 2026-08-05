@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import type { Notification } from "../types/ui";
-import type { ObjectRef, ObjectID } from "@/types/scene";
+import type { ObjectRef, ObjectID, SceneCamera } from "@/types/scene";
 import { IDs } from "@/io/sceneEncoder";
 
 type colorTheme = "Light" | "Dark";
@@ -19,7 +19,7 @@ export interface UiState {
   canRedo: boolean;
   activeObjectTool: ObjectToolMode | null;
   isCameraPreview: boolean;
-  cameraCustomAngle: { azimuth: number; polar: number } | null;
+  cameraCustomAngle: Pick<SceneCamera, "azimuth" | "polar" | "target"> | null;
 }
 
 interface UiActions {
@@ -33,7 +33,9 @@ interface UiActions {
   setHistoryFlags(canUndo: boolean, canRedo: boolean): void;
   setActiveObjectTool(tool: ObjectToolMode | null): void;
   toggleCameraPreview(): void;
-  setCameraCustomAngle(azimuth: number, polar: number): void;
+  setCameraCustomAngle(
+    value: Pick<SceneCamera, "azimuth" | "polar" | "target">
+  ): void;
 }
 
 export const useSessionStore = create<UiState & UiActions>((set) => ({
@@ -64,6 +66,12 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
     set((state) => ({
       isCameraPreview: !state.isCameraPreview,
     })),
-  setCameraCustomAngle: (azimuth, polar) =>
-    set({ cameraCustomAngle: { azimuth, polar } }),
+  setCameraCustomAngle: (value) =>
+    set({
+      cameraCustomAngle: {
+        azimuth: value.azimuth,
+        polar: value.polar,
+        target: value.target,
+      },
+    }),
 }));

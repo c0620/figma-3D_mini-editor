@@ -9,6 +9,7 @@ import {
   Vector3,
   Quaternion,
   Euler,
+  Spherical,
   type Material as ThreeMaterial,
   Group,
   Light,
@@ -43,27 +44,27 @@ export enum IDs {
   PluginCamera = "plugin-camera-id",
 }
 
-/**
- * Обход графа Three: каждый Mesh → SceneObject (плоский), геометрия и материал
- * уходят в threeAssetRegistry под тем же id. Сама Three-структура остаётся
- * вне стора.
- */
+function cameraTargetFromThree(
+  camera: PerspectiveCamera | OrthographicCamera,
+  distance = 5
+): [number, number, number] {
+  camera.updateWorldMatrix(true, false);
+  const origin = new Vector3();
+  const target = new Vector3();
+  camera.getWorldPosition(origin);
+  camera.getWorldDirection(target);
+  target.multiplyScalar(distance).add(origin);
+  return target.toArray() as [number, number, number];
+}
 
 function parseObjectThree(
   node: Object3D,
   parentID: ObjectID | null,
   objectThree: SceneGraph["graphThree"],
   sceneObjects: SceneGraph["objects"],
+  cameras: Scene["cameras"],
   hasLight: boolean
 ) {
-  // const worldPos = new Vector3();
-  // const worldQuat = new Quaternion();
-  // const worldScale = new Vector3();
-  // const worldEuler = new Euler();
-
-  // node.matrixWorld.decompose(worldPos, worldQuat, worldScale);
-  // worldEuler.setFromQuaternion(worldQuat);
-
   const transform = {
     position: node.position.toArray() as [number, number, number],
     rotation: [node.rotation.x, node.rotation.y, node.rotation.z] as [
@@ -76,21 +77,36 @@ function parseObjectThree(
 
   const id = node.uuid;
   if (node instanceof PerspectiveCamera || node instanceof OrthographicCamera) {
-    sceneObjects[id] = {
+    const isPerspective = node instanceof PerspectiveCamera;
+    const distance = 5;
+    const target = cameraTargetFromThree(node, distance);
+    const orbit = new Spherical().setFromVector3(
+      new Vector3()
+        .fromArray(transform.position)
+        .sub(new Vector3().fromArray(target))
+    );
+
+    const camera: SceneCamera = {
       id,
       kind: "Camera",
-      type:
-        node instanceof PerspectiveCamera
-          ? CameraType.Perspective
-          : CameraType.Orthographic,
+      type: isPerspective ? CameraType.Perspective : CameraType.Orthographic,
       zoom: node.zoom,
       transform: transform,
       locked: false,
       name: node.name,
       pendingDelete: false,
       parentId: parentID,
-      dolly: 1,
-    } as SceneCamera;
+      near: node.near,
+      far: node.far,
+      fov: isPerspective ? node.fov : 50,
+      aspect: [1, 1],
+      dolly: distance,
+      azimuth: orbit.theta,
+      polar: orbit.phi,
+      target,
+    };
+
+    cameras[id] = camera;
   } else if (node instanceof Mesh) {
     threeAssetRegistry.register(id, {
       geometry: node.geometry,
@@ -190,12 +206,12 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     };
   });
 
-  let pluginCamera = {
+  let pluginCamera: SceneCamera = {
     name: "Plugin Camera",
     kind: "Camera",
     id: IDs.PluginCamera,
     type: CameraType.Perspective,
-    zoom: 1,
+    zoom: null,
     locked: false,
     pendingDelete: false,
     parentId: null,
@@ -208,10 +224,11 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     far: 2000,
     fov: 50,
     aspect: [1, 1],
-    dolly: 1,
+    dolly: null,
     azimuth: 0,
     polar: Math.PI / 2,
-  } as SceneCamera;
+    target: [0, 0, 0],
+  };
 
   if (!hasLight) {
     // var pluginAmbientLight: SceneLight = {};
