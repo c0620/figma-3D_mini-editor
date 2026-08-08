@@ -2,11 +2,11 @@ import type {
   SceneCamera,
   ObjectID,
   Scene,
-  SceneGraphObject,
   SceneGroup,
   SceneLight,
   SceneMesh,
 } from "../types/scene";
+import { findSceneObject } from "./sceneStorage";
 
 type SceneEntityListMeta = {
   label: string;
@@ -29,15 +29,15 @@ export function buildSceneEntityList(
 ): SceneEntitySummary[] {
   if (!scene) return [];
 
-  const sceneGraph = scene.sceneGraph.graphThree;
-  const roots = scene.sceneGraph.roots;
-  const sceneObjs = scene.sceneGraph.objects;
+  const currentScene = scene;
+  const sceneGraph = currentScene.sceneGraph.graphThree;
+  const roots = currentScene.sceneGraph.roots;
 
   const entityList: SceneEntitySummary[] = [];
 
   function buildRecursiveSceneList(id: ObjectID, level: number) {
     const node = sceneGraph[id];
-    const sceneObj = sceneObjs[id];
+    const sceneObj = findSceneObject(currentScene, id);
 
     if (!sceneObj || sceneObj.pendingDelete) return;
 

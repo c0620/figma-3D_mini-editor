@@ -1,4 +1,3 @@
-import type { SceneGraphObject } from "../types/scene";
 import type { SceneStorage } from "../store/sceneStorage";
 import { CommandType, type HistoryEntry } from "@/types/commands";
 import { SceneToolHandler } from "./sceneToolHandler";

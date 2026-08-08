@@ -17,7 +17,7 @@ import {
   type SceneObject,
 } from "../../../types/scene";
 import { useSessionStore } from "@/store/sessionStore";
-import { useHandlers } from "@/app/ApplicationKernelContext";
+import { useHandlers, useSceneObject } from "@/app/ApplicationKernelContext";
 import {
   Box3,
   Object3D,
@@ -144,7 +144,8 @@ function SceneNode({
   activeId: ObjectID | undefined;
   ref: RefObject<Object3D | null>;
 }) {
-  const node = useSceneStore((s) => s.scene!.sceneGraph.objects[id]);
+  const node = useSceneObject(id);
+
   const childrenIDs = useSceneStore((s) => s.scene!.sceneGraph.graphThree[id]);
 
   if (!node || node.pendingDelete) return null;
@@ -183,7 +184,11 @@ export function SceneRenderer() {
   const activeRef = useSessionStore((s) => s.activeObjectRef);
   const isCameraPreview = useSessionStore((s) => s.isCameraPreview);
   const activeCameraID = useSessionStore((s) => s.activeCameraID);
-  const activeCamera = scene.sceneGraph.objects[activeCameraID] as SceneCamera; //ToDO: change to current camera
+
+  const activeCamera =
+    activeRef?.kind == "Camera"
+      ? (scene.cameras[activeRef.id] as SceneCamera)
+      : (scene.cameras[activeCameraID] as SceneCamera);
 
   const { camera } = useHandlers();
 

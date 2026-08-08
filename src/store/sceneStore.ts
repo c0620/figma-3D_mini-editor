@@ -6,7 +6,6 @@ import type {
   SceneGroup,
   SceneLight,
   SceneMesh,
-  SceneGraphObject,
   SceneObject,
   Transform,
   ObjectID,
@@ -23,30 +22,33 @@ import { produce } from "immer";
 type SceneMaterialPatch = Pick<Material, "id"> &
   Partial<Omit<Material, "id" | "color">> & { color?: Color };
 
-type SceneObjectPatch =
-  | (Partial<
-      Pick<SceneMesh, "visible" | "locked" | "name" | "pendingDelete">
-    > & { transform?: Partial<Transform> })
-  | (Partial<
-      Pick<
-        SceneLight,
-        | "visible"
-        | "locked"
-        | "name"
-        | "pendingDelete"
-        | "color"
-        | "intensity"
-        | "type"
-      >
-    > & { transform?: Partial<Transform> })
-  | (Partial<
-      Pick<SceneGroup, "visible" | "locked" | "name" | "pendingDelete">
-    > & { transform?: Partial<Transform> });
+export type MeshPatch = Partial<
+  Pick<SceneMesh, "visible" | "locked" | "name" | "pendingDelete" | "materials">
+> & { transform?: Partial<Transform> };
 
-export type CameraPatch = Pick<SceneCamera, "id"> &
-  Partial<Omit<SceneCamera, "transform" | "id">> & {
-    transform?: Partial<Transform>;
-  };
+export type LightPatch = Partial<
+  Pick<
+    SceneLight,
+    | "visible"
+    | "locked"
+    | "name"
+    | "pendingDelete"
+    | "color"
+    | "intensity"
+    | "type"
+  >
+> & { transform?: Partial<Transform> };
+
+export type GroupPatch = Partial<
+  Pick<SceneGroup, "visible" | "locked" | "name" | "pendingDelete">
+> & { transform?: Partial<Transform> };
+
+export type CameraPatch = Partial<Omit<SceneCamera, "transform" | "id">> & {
+  transform?: Partial<Transform>;
+};
+
+/** @deprecated use MeshPatch | LightPatch | GroupPatch */
+export type SceneObjectPatch = MeshPatch | LightPatch | GroupPatch;
 
 export type EnvironmentPatch = Partial<EnvironmentState>;
 
@@ -57,17 +59,50 @@ interface SceneState {
 interface SceneActions {
   loadScene(scene: Scene): void;
   clearScene(): void;
-  patchObject(objectId: string, patch: SceneObjectPatch): void;
-  patchCamera(patch: CameraPatch): void;
-  patchEnvironment(patch: EnvironmentPatch): void;
-  traverseScene(): void; //toDo?
-  patchMaterial(id: MaterialID, patch: Partial<Omit<Material, "id">>): void;
-  addObject(object: SceneGraphObject): void;
+  addMesh(object: SceneMesh): void;
+  addLight(object: SceneLight): void;
+  addGroup(object: SceneGroup): void;
   addCamera(camera: SceneCamera): void;
-  deleteObject(objectId: ObjectRef): void;
+  patchMesh(id: ObjectID, patch: MeshPatch): void;
+  patchLight(id: ObjectID, patch: LightPatch): void;
+  patchGroup(id: ObjectID, patch: GroupPatch): void;
+  patchCamera(id: ObjectID, patch: CameraPatch): void;
+  patchEnvironment(patch: EnvironmentPatch): void;
+  traverseScene(): void; // TODO
+  patchMaterial(id: MaterialID, patch: Partial<Omit<Material, "id">>): void;
+  deleteObject(objectRef: ObjectRef): void;
 }
 
-export type { SceneObjectPatch };
+function linkIntoGraph(
+  scene: Scene,
+  object: { id: ObjectID; parentId: ObjectID | null }
+): void {
+  const { roots, graphThree } = scene.sceneGraph;
+  if (object.parentId) {
+    if (object.parentId in graphThree) graphThree[object.parentId].push(object.id);
+    else graphThree[object.parentId] = [object.id];
+  } else {
+    roots.push(object.id);
+  }
+}
+
+function unlinkFromGraph(
+  scene: Scene,
+  id: ObjectID,
+  parentId: ObjectID | null
+): void {
+  const { roots, graphThree } = scene.sceneGraph;
+  scene.sceneGraph.roots = roots.filter((rootID) => rootID !== id);
+
+  if (parentId && graphThree[parentId]) {
+    graphThree[parentId] = graphThree[parentId].filter(
+      (childID) => childID !== id
+    );
+    if (graphThree[parentId].length === 0) delete graphThree[parentId];
+  }
+
+  delete graphThree[id];
+}
 
 export const useSceneStore = create<SceneState & SceneActions>((set) => ({
   scene: null,
@@ -77,52 +112,121 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
 
   traverseScene: () => {},
 
-  addObject: (newObject: SceneGraphObject) =>
+  addMesh: (newObject) =>
     set((state) => {
-      const newRoots = [...state.scene!.sceneGraph.roots];
-      const newObjects = { ...state.scene!.sceneGraph.objects };
-      const newGraphThree = { ...state.scene!.sceneGraph.graphThree };
+      if (!state.scene) return state;
+      return {
+        scene: produce(state.scene, (scene) => {
+          linkIntoGraph(scene, newObject);
+          scene.meshes[newObject.id] = newObject;
+        }),
+      };
+    }),
 
-      if (newObject.parentId) {
-        if (newObject.parentId in newGraphThree)
-          newGraphThree[newObject.parentId].push(newObject.id);
-        else newGraphThree[newObject.parentId] = [newObject.id];
-      } else {
-        newRoots.push(newObject.id);
-      }
-      newObjects[newObject.id] = newObject;
+  addLight: (newObject) =>
+    set((state) => {
+      if (!state.scene) return state;
+      return {
+        scene: produce(state.scene, (scene) => {
+          linkIntoGraph(scene, newObject);
+          scene.lights[newObject.id] = newObject;
+        }),
+      };
+    }),
+
+  addGroup: (newObject) =>
+    set((state) => {
+      if (!state.scene) return state;
+      return {
+        scene: produce(state.scene, (scene) => {
+          linkIntoGraph(scene, newObject);
+          scene.groups[newObject.id] = newObject;
+        }),
+      };
+    }),
+
+  addCamera: (newCamera) =>
+    set((state) => {
+      if (!state.scene) return state;
+      return {
+        scene: produce(state.scene, (scene) => {
+          linkIntoGraph(scene, newCamera);
+          scene.cameras[newCamera.id] = newCamera;
+        }),
+      };
+    }),
+
+  patchMesh: (id, patch) =>
+    set((state) => {
+      const prev = state.scene?.meshes[id];
+      if (!state.scene || !prev) return state;
+      const nextTransform = patch.transform
+        ? { ...prev.transform, ...patch.transform }
+        : prev.transform;
       return {
         scene: {
-          ...state.scene!,
-          sceneGraph: {
-            roots: newRoots,
-            objects: newObjects,
-            graphThree: newGraphThree,
+          ...state.scene,
+          meshes: {
+            ...state.scene.meshes,
+            [id]: { ...prev, ...patch, transform: nextTransform },
           },
         },
       };
     }),
 
-  patchObject: (id, patch) =>
+  patchLight: (id, patch) =>
     set((state) => {
-      const g = state.scene?.sceneGraph;
-      const prev = g?.objects[id];
-      if (!g || !prev) return state;
-
+      const prev = state.scene?.lights[id];
+      if (!state.scene || !prev) return state;
       const nextTransform = patch.transform
         ? { ...prev.transform, ...patch.transform }
         : prev.transform;
-
-      const next = {
-        ...prev,
-        ...patch,
-        transform: nextTransform,
-      } as SceneGraphObject;
       return {
         scene: {
-          ...state.scene!,
-          sceneGraph: { ...g, objects: { ...g.objects, [id]: next } },
+          ...state.scene,
+          lights: {
+            ...state.scene.lights,
+            [id]: { ...prev, ...patch, transform: nextTransform },
+          },
         },
+      };
+    }),
+
+  patchGroup: (id, patch) =>
+    set((state) => {
+      const prev = state.scene?.groups[id];
+      if (!state.scene || !prev) return state;
+      const nextTransform = patch.transform
+        ? { ...prev.transform, ...patch.transform }
+        : prev.transform;
+      return {
+        scene: {
+          ...state.scene,
+          groups: {
+            ...state.scene.groups,
+            [id]: { ...prev, ...patch, transform: nextTransform },
+          },
+        },
+      };
+    }),
+
+  patchCamera: (id, patch) =>
+    set((state) => {
+      if (!state.scene) return state;
+      const toPatch = state.scene.cameras[id];
+      if (!toPatch) return state;
+      const nextTransform = patch.transform
+        ? { ...toPatch.transform, ...patch.transform }
+        : toPatch.transform;
+
+      return {
+        scene: produce(state.scene, (scene) => {
+          scene.cameras[id] = {
+            ...toPatch,
+            ...patch,
+            transform: nextTransform,
+          } as SceneCamera;
+        }),
       };
     }),
 
@@ -146,43 +250,6 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
       };
     }),
 
-  addCamera: (
-    _newCamera //toDo
-  ) =>
-    set((state) => {
-      const newCameras = { ...state.scene?.sceneGraph.objects };
-      throw new Error("addCamera(sceneStore): not implemented");
-      return {
-        scene: {
-          ...state.scene!,
-          cameras: newCameras,
-        },
-      };
-    }),
-
-  patchCamera: (patch) =>
-    set((state) => {
-      if (!state.scene) return state;
-      if (!patch.id) throw new Error("patchCamera(sceneStore): no id provided");
-      const prev = state.scene.sceneGraph.objects;
-
-      const toPatch = prev[patch.id];
-      const nextTransform = patch.transform
-        ? { ...toPatch.transform, ...patch.transform }
-        : toPatch.transform;
-
-      const newScene = produce(state.scene, (scene) => {
-        scene.sceneGraph.objects[patch.id] = {
-          ...toPatch,
-          ...patch,
-          transform: nextTransform,
-        } as SceneCamera;
-      });
-      return {
-        scene: newScene,
-      };
-    }),
-
   patchEnvironment: (patch) =>
     set((state) => {
       if (!state.scene) return state;
@@ -195,65 +262,35 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
     }),
 
   deleteObject: (objectRef) => {
-    //toDo: delete for Environment
+    // TODO: delete for Environment
     set((state) => {
       if (!state.scene) return state;
 
-      const toDelete = state.scene.sceneGraph.objects[objectRef.id];
-      if (!toDelete) return state;
-      if (objectRef.kind == "Camera") {
-        {
-          const newSceneState = produce(state.scene, (scene) => {
-            delete scene.sceneGraph.objects[objectRef.id];
-            const toDel = scene.sceneGraph.roots.findIndex(
-              (v) => v == objectRef.id
-            );
-            if (toDel !== -1) scene.sceneGraph.roots.splice(toDel, 1);
-          });
-          return { scene: newSceneState };
-        }
-      } else if (["Group", "Mesh", "Light"].includes(objectRef.kind)) {
-        const IDsToDelete: SceneGraphObject[] = [];
-        const addToDelete = (obj: SceneGraphObject) => IDsToDelete.push(obj);
-        applyToSceneThreeNode(
-          objectRef.id,
-          state.scene.sceneGraph,
-          addToDelete
-        );
-        const newGraphThree = state.scene.sceneGraph.graphThree;
-        const newObjects = state.scene.sceneGraph.objects;
-        let newRoots = state.scene.sceneGraph.roots;
+      const IDsToDelete: SceneObject[] = [];
+      const addToDelete = (obj: SceneObject) => IDsToDelete.push(obj);
+      applyToSceneThreeNode(objectRef.id, state.scene, addToDelete);
+
+      const newSceneState = produce(state.scene, (scene) => {
         IDsToDelete.forEach((node) => {
-          delete newGraphThree[node.id];
-          if (node.parentId) {
-            newGraphThree[node.parentId] = newGraphThree[node.parentId].filter(
-              (nodeID) => nodeID != node.id
-            );
-          }
-          delete newObjects[node.id];
-          newRoots = newRoots.filter((rootID) => rootID != node.id);
-          if (node.kind == "Group" || node.kind == "Mesh") {
-            //is Group necessary?
-            threeAssetRegistry.delete(node.id);
+          unlinkFromGraph(scene, node.id, node.parentId);
+          switch (node.kind) {
+            case "Light":
+              delete scene.lights[node.id];
+              break;
+            case "Mesh":
+              threeAssetRegistry.delete(node.id);
+              delete scene.meshes[node.id];
+              break;
+            case "Group":
+              delete scene.groups[node.id];
+              break;
+            case "Camera":
+              delete scene.cameras[node.id];
           }
         });
-        return {
-          scene: {
-            ...state.scene,
-            sceneGraph: {
-              graphThree: newGraphThree,
-              objects: newObjects,
-              roots: newRoots,
-            },
-          },
-        };
-      }
+      });
 
-      return {
-        scene: {
-          ...state.scene,
-        },
-      };
+      return { scene: newSceneState };
     });
   },
 }));

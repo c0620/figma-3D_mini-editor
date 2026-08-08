@@ -1,4 +1,3 @@
-import { IDs } from "@/io/sceneEncoder";
 import type {
   SceneCamera,
   EnvironmentState,
@@ -7,18 +6,43 @@ import type {
   ObjectID,
   ObjectRef,
   Scene,
-  SceneGraphObject,
   SceneObject,
+  SceneMesh,
+  SceneLight,
+  SceneGroup,
+  Transform,
 } from "../types/scene";
 
 import { useSceneStore } from "./sceneStore";
 import type {
   CameraPatch,
   EnvironmentPatch,
-  SceneObjectPatch,
+  GroupPatch,
+  LightPatch,
+  MeshPatch,
 } from "./sceneStore";
 import { useSessionStore } from "./sessionStore";
 import type { ObjectToolMode } from "./sessionStore";
+
+type CommonObjectPatch = { transform?: Partial<Transform> } & (
+  | Partial<Omit<SceneMesh, "id" | "transform">>
+  | Partial<Omit<SceneLight, "id" | "transform">>
+  | Partial<Omit<SceneGroup, "id" | "transform">>
+  | Partial<Omit<SceneCamera, "id" | "transform">>
+);
+
+export function findSceneObject(
+  scene: Scene,
+  id: ObjectID
+): SceneObject | null {
+  return (
+    scene.meshes[id] ??
+    scene.lights[id] ??
+    scene.groups[id] ??
+    scene.cameras[id] ??
+    null
+  );
+}
 
 /**
  * Imperative-фасад над `sceneStore` и `sessionStore` для non-React слоя
@@ -51,8 +75,8 @@ export class SceneStorage {
   }
 
   getActiveCamera(): SceneCamera {
-    const objects = useSceneStore.getState().scene!.sceneGraph.objects;
-    const camera = objects[useSessionStore.getState().activeCameraID];
+    const cameras = useSceneStore.getState().scene!.cameras;
+    const camera = cameras[useSessionStore.getState().activeCameraID];
     return camera as SceneCamera;
   }
 
@@ -60,16 +84,16 @@ export class SceneStorage {
     return useSceneStore.getState().scene?.materials[id];
   }
 
-  findObjectById(id: ObjectID): SceneGraphObject | null {
+  findObjectById(id: ObjectID): SceneObject | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;
-    return scene.sceneGraph.objects[id];
+    return findSceneObject(scene, id);
   }
 
   findCameraById(id: ObjectID): SceneCamera | null {
     const scene = useSceneStore.getState().scene;
     if (!scene) return null;
-    const camera = scene.sceneGraph.objects[id];
+    const camera = scene.cameras[id];
     if (!camera || camera.kind != "Camera") return null;
     return camera;
   }
@@ -84,24 +108,68 @@ export class SceneStorage {
     useSceneStore.getState().clearScene();
   }
 
-  addObject(object: SceneGraphObject): void {
-    useSceneStore.getState().addObject(object);
+  addObject(object: SceneObject): void {
+    const store = useSceneStore.getState();
+    switch (object.kind) {
+      case "Mesh":
+        store.addMesh(object);
+        break;
+      case "Light":
+        store.addLight(object);
+        break;
+      case "Group":
+        store.addGroup(object);
+        break;
+      case "Camera":
+        store.addCamera(object);
+    }
   }
 
-  patchObject(objectId: string, patch: SceneObjectPatch): void {
-    useSceneStore.getState().patchObject(objectId, patch);
+  patchObject(objectId: string, patch: CommonObjectPatch): void {
+    const scene = useSceneStore.getState().scene;
+    if (!scene) return;
+    const store = useSceneStore.getState();
+
+    if (objectId in scene.meshes) {
+      store.patchMesh(objectId, patch as MeshPatch);
+    } else if (objectId in scene.lights) {
+      store.patchLight(objectId, patch as LightPatch);
+    } else if (objectId in scene.groups) {
+      store.patchGroup(objectId, patch as GroupPatch);
+    } else if (objectId in scene.cameras) {
+      store.patchCamera(objectId, patch as CameraPatch);
+    }
   }
 
   patchMaterial(id: MaterialID, patch: Partial<Omit<Material, "id">>): void {
     useSceneStore.getState().patchMaterial(id, patch);
   }
 
-  patchCamera(patch: CameraPatch): void {
-    useSceneStore.getState().patchCamera(patch);
-  }
-
   patchEnvironment(patch: EnvironmentPatch): void {
     useSceneStore.getState().patchEnvironment(patch);
+  }
+
+  softDeleteObject(objectRef: ObjectRef): void {
+    if (objectRef.kind == "Camera") {
+      const cameras = useSceneStore.getState().scene!.cameras;
+      if (Object.keys(cameras).length == 1)
+        throw new Error(
+          "softDeleteObject(sceneStorage): can't delete only camera in scene"
+        );
+      useSessionStore
+        .getState()
+        .setActiveCameraID(
+          Object.keys(cameras).filter((cid) => cid != objectRef.id)[0]
+        );
+      this.patchObject(objectRef.id, { pendingDelete: true });
+    } else {
+      this.patchObject(objectRef.id, {
+        visible: false,
+        pendingDelete: true,
+      });
+    }
+    useSessionStore.getState().setActiveObjectRef(null);
+    useSessionStore.getState().setActiveObjectTool(null);
   }
 
   deleteObject(objectRef: ObjectRef): void {
@@ -126,7 +194,7 @@ export class SceneStorage {
 
   // --- Session: запись ---
 
-  setActiveObjectId(objectRef: ObjectRef | null): void {
+  setActiveObjectRef(objectRef: ObjectRef | null): void {
     useSessionStore.getState().setActiveObjectRef(objectRef);
   }
 

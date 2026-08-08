@@ -1,9 +1,10 @@
 import { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 
-import type { ActiveEntity } from "../types/scene";
+import type { ActiveEntity, ObjectID, SceneObject } from "../types/scene";
 import type { AppHandlers, AppKernel } from "./compositionRoot";
 import { buildSceneEntityList } from "../store/sceneEntityList";
+import { findSceneObject } from "../store/sceneStorage";
 import { useSceneStore } from "../store/sceneStore";
 import { useSessionStore } from "../store/sessionStore";
 
@@ -75,11 +76,15 @@ export function useSceneEntities() {
   return useMemo(() => buildSceneEntityList(scene), [scene]);
 }
 
+export function useSceneObject(id: ObjectID | null): SceneObject | null {
+  return useSceneStore((s) =>
+    id && s.scene ? findSceneObject(s.scene, id) : null
+  );
+}
+
 export function useActiveObject(): ActiveEntity | null {
   const activeObjectRef = useSessionStore((s) => s.activeObjectRef);
-  const scene = useSceneStore((s) => s.scene);
-  if (!activeObjectRef || !scene) return null;
-  return scene.sceneGraph.objects[activeObjectRef.id];
+  return useSceneObject(activeObjectRef?.id ?? null) as ActiveEntity | null;
 }
 
 export function useActiveObjectRef() {

@@ -28,7 +28,7 @@ export class LightAdditionHandler extends SceneToolHandler<
       kind: "Light",
       pendingDelete: false,
       parentId: null,
-      name: `Light${Object.values(this.scene.getScene().sceneGraph.objects).filter((o) => o.kind == "Light").length}`,
+      name: `Light${Object.values(this.scene.getScene().lights).filter((o) => o.kind == "Light").length}`,
       transform: incoming.transform ?? {
         position: [0, 5, 0],
         rotation: [0, 0, 0],

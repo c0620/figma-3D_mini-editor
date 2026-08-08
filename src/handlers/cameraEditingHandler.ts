@@ -12,7 +12,14 @@ export class CameraEditingHandler extends SceneToolHandler<
   SceneCamera
 > {
   execute(payload: CameraEditingHandlerPayload): void {
-    this.scene.patchCamera(payload as CameraPatch);
+    const { id, ...rest } = payload;
+    const patch = rest as CameraPatch;
+    const camera = this.scene.findCameraById(id);
+
+    this.scene.patchObject(
+      id,
+      camera ? normalizeCameraPatch(camera, patch) : patch
+    );
   }
 
   getStateBeforeExecute(

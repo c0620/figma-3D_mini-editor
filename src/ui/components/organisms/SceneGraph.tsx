@@ -11,8 +11,9 @@ enableMapSet();
 
 export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
   const { selection } = useHandlers();
+  const activeCameraID = useSessionStore((s) => s.activeCameraID);
   const sceneEntities = useSceneEntities();
-  const sceneThree = useSceneStore().scene!.sceneGraph.graphThree;
+  const sceneThree = useSceneStore((s) => s.scene!.sceneGraph.graphThree);
   const activeID = activeObj?.id;
   const [hiddenNodes, setHiddenNodes] = useState<Set<ObjectID>>(new Set());
   const graphItems = [];
@@ -37,8 +38,8 @@ export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
             }
             onSelect={() => {
               entity.id === activeID
-                ? selection.execute({ id: null })
-                : selection.execute({ id: entity.id });
+                ? selection.execute(null)
+                : selection.execute({ id: entity.id, kind: entity.kind });
             }}
             onToggleBranch={() => {
               if (hiddenNodes.has(entity.id))

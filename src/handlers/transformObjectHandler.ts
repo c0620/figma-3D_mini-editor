@@ -29,8 +29,9 @@ export class TransformObjectHandler extends SceneToolHandler<
     switch (objectRef.kind) {
       case "Camera": {
         const camera = this.scene.findCameraById(objectRef.id);
-        const patch = { id: objectRef.id, transform: transformPatch };
-        this.scene.patchCamera(
+        const patch = { transform: transformPatch };
+        this.scene.patchObject(
+          objectRef.id,
           camera ? normalizeCameraPatch(camera, patch) : patch
         );
         return;

@@ -112,23 +112,24 @@ export interface EnvironmentState {
   shadowsEnabled: boolean;
 }
 
-export type SceneGraphObject =
-  SceneLight | SceneMesh | SceneGroup | SceneCamera;
+export type SceneGraphObject = SceneLight | SceneMesh | SceneGroup;
 
 export type SceneObject = SceneGraphObject | SceneCamera;
 
 export interface SceneGraph {
   roots: ObjectID[];
-  objects: Record<ObjectID, SceneGraphObject>;
   graphThree: Record<ObjectID, ObjectID[]>;
 }
 
 export interface Scene {
   id: string;
   materials: Record<MaterialID, Material>;
-  sceneGraph: SceneGraph;
-  // cameras: Record<CameraID, SceneCamera>;
+  meshes: Record<ObjectID, SceneMesh>;
+  lights: Record<ObjectID, SceneLight>;
+  groups: Record<ObjectID, SceneGroup>;
+  cameras: Record<ObjectID, SceneCamera>;
   environment: EnvironmentState;
+  sceneGraph: SceneGraph;
 }
 
 export type ObjectRef = { kind: SceneObjectKind; id: ObjectID };

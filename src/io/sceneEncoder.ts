@@ -3,19 +3,13 @@ import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import {
   Mesh,
-  MeshStandardMaterial,
   Color,
   Object3D,
   Vector3,
-  Quaternion,
-  Euler,
   Spherical,
-  type Material as ThreeMaterial,
   Group,
   Light,
-  DirectionalLight,
   SpotLight,
-  Camera,
   PerspectiveCamera,
   OrthographicCamera,
 } from "three";
@@ -32,9 +26,8 @@ import type {
   SceneGroup,
   SceneLight,
   SceneMesh,
-  SceneObject,
 } from "../types/scene";
-import { CameraType, TextureSlot } from "../types/scene";
+import { CameraType } from "../types/scene";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
@@ -61,7 +54,9 @@ function parseObjectThree(
   node: Object3D,
   parentID: ObjectID | null,
   objectThree: SceneGraph["graphThree"],
-  sceneObjects: SceneGraph["objects"],
+  meshes: Scene["meshes"],
+  lights: Scene["lights"],
+  groups: Scene["groups"],
   cameras: Scene["cameras"],
   hasLight: boolean
 ) {
@@ -114,7 +109,7 @@ function parseObjectThree(
     });
     objectThree[id] = [];
 
-    sceneObjects[id] = {
+    meshes[id] = {
       id: id,
       parentId: parentID,
       kind: "Mesh",
@@ -130,7 +125,7 @@ function parseObjectThree(
   } else if (node instanceof Light) {
     hasLight = true;
     const type = node instanceof SpotLight ? "Spot" : "Ambient";
-    sceneObjects[id] = {
+    lights[id] = {
       id: id,
       parentId: parentID,
       kind: "Light",
@@ -144,7 +139,7 @@ function parseObjectThree(
       pendingDelete: false,
     } as SceneLight;
   } else if (node instanceof Group || node instanceof Object3D) {
-    sceneObjects[id] = {
+    groups[id] = {
       id: id,
       parentId: parentID,
       kind: "Group",
@@ -163,7 +158,16 @@ function parseObjectThree(
     }
   }
   node.children.forEach((c) =>
-    parseObjectThree(c, id, objectThree, sceneObjects, hasLight)
+    parseObjectThree(
+      c,
+      id,
+      objectThree,
+      meshes,
+      lights,
+      groups,
+      cameras,
+      hasLight
+    )
   );
 }
 
@@ -172,14 +176,25 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
 
   const threeRoot = "scene" in root ? root.scene : root;
   const graphThree: SceneGraph["graphThree"] = {};
-  const sceneObjects: SceneGraph["objects"] = {};
+  const meshes: Scene["meshes"] = {};
+  const lights: Scene["lights"] = {};
+  const groups: Scene["groups"] = {};
+  const cameras: Scene["cameras"] = {};
 
   threeRoot.updateMatrixWorld(true);
 
-  var parent: Object3D = threeRoot;
-  let hasLight = false;
+  let hasLight = false; //is not working without wrapping in obj
 
-  parseObjectThree(threeRoot, null, graphThree, sceneObjects, hasLight);
+  parseObjectThree(
+    threeRoot,
+    null,
+    graphThree,
+    meshes,
+    lights,
+    groups,
+    cameras,
+    hasLight
+  );
 
   const materials: Record<MaterialID, Material> = {};
 
@@ -236,12 +251,15 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
   }
   return {
     id: randomUUID(),
+    meshes,
+    lights,
+    groups,
     sceneGraph: {
-      objects: { ...sceneObjects, [pluginCamera.id]: pluginCamera },
       graphThree,
       roots: [threeRoot.uuid, pluginCamera.id],
     },
     materials,
+    cameras: { ...cameras, [pluginCamera.id]: pluginCamera },
     environment: { backgroundColor: null, shadowsEnabled: false },
   };
 }

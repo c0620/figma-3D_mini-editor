@@ -1,28 +1,32 @@
 import { CommandType, type HistoryEntry } from "@/types/commands";
 import { SceneToolHandler } from "./sceneToolHandler";
+import type { ObjectRef } from "@/types/scene";
 
-type SelectionHandlerPayload = { id: string | null };
+type SelectionHandlerPayload = ObjectRef | null;
 
 export class SelectionHandler extends SceneToolHandler<
   SelectionHandlerPayload,
   SelectionHandlerPayload
 > {
   execute(payload: SelectionHandlerPayload): void {
-    const { id } = payload;
-    const newObject = id ? this.scene.getScene().sceneGraph.objects[id] : null;
-    const newRef = newObject
-      ? { id: id as string, kind: newObject.kind }
-      : null;
-    this.scene.setActiveObjectId(newRef);
+    if (!payload) {
+      this.scene.setActiveObjectRef(null);
+      return;
+    }
+
+    const { id, kind } = payload!;
+    const found = this.scene.findObjectById(id);
+    if (!found || found.kind !== kind) return;
+    this.scene.setActiveObjectRef({ id: found.id, kind: found.kind });
   }
 
   getStateBeforeExecute(
     _payload: SelectionHandlerPayload
-  ): HistoryEntry<SelectionHandlerPayload> {
+  ): HistoryEntry<SelectionHandlerPayload | null> {
     const ref = this.scene.getActiveObjectRef();
     return {
       type: CommandType.SelectObject,
-      snapshot: { id: ref?.id ?? null },
+      snapshot: ref,
     };
   }
 }
