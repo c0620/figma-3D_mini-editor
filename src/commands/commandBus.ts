@@ -28,6 +28,8 @@ export class CommandBus {
     const evicted = this.history.pushUndoAction(snapshot);
 
     this.executor.run(type, payload);
+
+    this.history.future.forEach((f) => this.deletionGc.purgeIfEvicted(f));
     this.history.clearRedo();
 
     this.deletionGc.purgeIfEvicted(evicted);

@@ -13,7 +13,8 @@ export class DeletionGarbageCollector {
     if (!entry) return;
     if (entry.type == CommandType.DeleteObject) {
       const { id, kind, isDelete } = entry.snapshot as DeletionHandlerSnapshot;
-      if (isDelete) {
+      const objectToDelete = this.scene.findObjectById(id);
+      if (objectToDelete && objectToDelete.pendingDelete && !isDelete) {
         this.scene.deleteObject({ id, kind });
       }
     }
