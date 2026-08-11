@@ -42,10 +42,14 @@
 }
 
 .action-button > svg,
-.square-button > svg {
+.square-button > svg,
+.square-button > svg,
+.choice-button > svg,
+.choice-option > svg {
   height: var(--button-size-button-icon-height);
-  width: auto;
-  aspect-ratio: 1;
+  min-width: max-content;
+  flex-shrink: 0;
+  flex-basis: content;
 }
 
 .active {
@@ -54,4 +58,86 @@
 
 .frozen {
   background-color: var(--interactive-color-interactive-background-tertiary);
+}
+
+.choice-button-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.choice-button {
+  background-color: var(--common-color-common-black);
+  color: var(--common-color-common-white);
+  border-radius: var(--border-radius-s);
+  height: var(--button-size-button-main-midi-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--margin-l);
+  width: 100%;
+}
+
+.choice-button-short {
+  width: var(--size-input-top-panel);
+}
+
+.choice-options-container {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 100%;
+  padding-left: var(--margin-s);
+}
+
+.choice-options {
+  background-color: var(--common-color-common-black);
+  color: var(--common-color-common-white);
+  border-radius: var(--border-radius-s);
+  display: flex;
+  flex-direction: column;
+  padding: var(--margin-m) var(--margin-m);
+  gap: var(--margin-xs);
+  width: max-content;
+}
+
+.choice-option {
+  display: flex;
+  gap: var(--margin-s);
+  padding: var(--margin-xs) var(--margin-s);
+  align-items: center;
+  border-radius: var(--border-radius-s);
+}
+
+.choice-option:hover {
+  background-color: var(--common-color-common-accent);
+}
+
+.midi-button {
+  background-color: var(--common-color-common-accent);
+  color: var(--common-color-common-white);
+  border-radius: var(--border-radius-m);
+  height: var(--button-size-button-main-midi-height);
+  padding: 0 var(--margin-l);
+  line-height: var(--button-size-button-main-midi-height);
+}
+
+.option-button {
+  background-color: var(--common-color-common-black);
+  color: var(--common-color-common-white);
+  border-radius: var(--border-radius-m);
+  height: var(--button-size-button-main-mini-height);
+  line-height: calc(var(--button-size-button-main-mini-height) - 8px);
+  padding: 4px;
+  & > div {
+    background-color: var(--common-color-common-black);
+    border-radius: var(--border-radius-m);
+    padding: 0 var(--margin-l);
+  }
+}
+
+.active-option {
+  background-image: var(--accent-gradient);
 }

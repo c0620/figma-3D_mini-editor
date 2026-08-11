@@ -55,6 +55,7 @@ export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
 
   for (const transform in activeObjTrans) {
     var valueTransforms = [];
+    if (activeObj.kind == "Camera" && transform == "scale") continue;
     for (const i in activeObjTrans[transform as keyof Transform]) {
       valueTransforms.push(
         <NumberFieldInput

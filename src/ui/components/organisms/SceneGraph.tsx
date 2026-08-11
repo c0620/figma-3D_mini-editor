@@ -18,6 +18,11 @@ export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
   const [hiddenNodes, setHiddenNodes] = useState<Set<ObjectID>>(new Set());
   const graphItems = [];
 
+  const hideCameraDelete =
+    Object.values(useSceneStore((s) => s.scene?.cameras)!).filter(
+      (c) => c.pendingDelete != true
+    ).length == 1;
+
   var hiddenLevel = null;
 
   for (const entity of sceneEntities) {
@@ -32,6 +37,10 @@ export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
             key={entity.id}
             item={entity}
             isActive={activeID == entity.id}
+            isDisabled={
+              entity.locked ||
+              (entity.kind == "Camera" && entity.id !== activeCameraID)
+            }
             isParent={
               sceneThree[entity.id] !== undefined &&
               sceneThree[entity.id].length > 0
@@ -54,6 +63,7 @@ export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
                 );
             }}
             hidden={hiddenNodes.has(entity.id)}
+            hideDelete={entity.kind == "Camera" ? hideCameraDelete : false}
           />
         );
       }

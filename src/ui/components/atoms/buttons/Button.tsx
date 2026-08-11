@@ -35,12 +35,76 @@ export function ActionButton({
   text,
   img: Icon,
   isIconFirst,
+  deactivated = false,
 }: ButtonProps) {
   return (
-    <div className={clsx(styles.actionButton, "h4")} onClick={onClick}>
+    <div
+      className={clsx(styles.actionButton, "h4", {
+        [styles.frozen]: deactivated,
+      })}
+      onClick={onClick}
+    >
       {Icon && isIconFirst && <Icon title={text} />}
       {text}
       {Icon && !isIconFirst && <Icon title={text} />}
+    </div>
+  );
+}
+
+export function ChoiceButton({
+  text,
+  img: Icon,
+  choices,
+  isLong,
+}: Omit<ButtonProps, "onClick"> & {
+  choices: { name: string; Icon: IconComponent; onClick: () => void }[];
+  isLong: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div
+      className={clsx(styles.choiceButtonContainer)}
+      onPointerOver={() => setIsOpen(true)}
+      onPointerLeave={() => setIsOpen(false)}
+    >
+      <div
+        className={clsx(styles.choiceButton, "h4", {
+          [styles.choiceButtonShort]: !isLong,
+        })}
+      >
+        {text}
+        {Icon && <Icon title={text} />}
+      </div>
+      {isOpen && (
+        <div className={styles.choiceOptionsContainer}>
+          <div className={styles.choiceOptions}>
+            {choices.map((c) => (
+              <div
+                className={clsx("h4", styles.choiceOption)}
+                onClick={c.onClick}
+              >
+                <c.Icon />
+                {c.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function MidiButton({
+  onClick,
+  text,
+}: {
+  onClick: () => void;
+  text: string;
+}) {
+  return (
+    <div className={clsx("t3", styles.midiButton)} onClick={onClick}>
+      {text}
     </div>
   );
 }
@@ -98,8 +162,25 @@ export function NavLinkButton({ to }: { to: string }) {
   );
 }
 
-export function OptionButton() {
-  return <div>OptionButton</div>;
+export function OptionButton({
+  text,
+  onClick,
+}: {
+  text: string;
+  onClick: () => void;
+}) {
+  const [isActive, setIsActive] = useState(false);
+  return (
+    <div
+      className={clsx(styles.optionButton, { [styles.activeOption]: isActive })}
+      onClick={() => {
+        onClick;
+        setIsActive((s) => !s);
+      }}
+    >
+      <div>{text}</div>
+    </div>
+  );
 }
 
 export function SmallButton({

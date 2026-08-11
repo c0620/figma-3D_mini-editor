@@ -23,7 +23,7 @@ export function BottomTools({ activeObj }: { activeObj: ActiveEntity | null }) {
 
   return (
     <div className={styles.toolsRow}>
-      {activeObj && (
+      {activeObj && activeObj.kind != "Camera" && (
         <div className={styles.tool}>
           <SquareStateButton
             onClick={() => toggleActiveTool("translate")}

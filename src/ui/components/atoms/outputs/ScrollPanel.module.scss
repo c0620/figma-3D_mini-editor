@@ -42,6 +42,11 @@
   scrollbar-width: none;
 }
 
+.panel-fixed {
+  height: var(--outputs-size-scene-graph-height);
+  flex-grow: 0;
+}
+
 // .scroll-panel > div + * {
 //   margin-top: var(--margin-s);
 // }
@@ -55,7 +60,7 @@
 }
 
 .closed {
-//   padding: var(--margin-m) var(--margin-s);
+  // padding: var(--margin-m) var(--margin-s);
   display: flex;
   flex: 1 1 auto;
   width: max-content;

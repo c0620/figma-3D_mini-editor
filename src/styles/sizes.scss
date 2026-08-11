@@ -21,12 +21,13 @@
   --window-size-window-width: 1600px;
   --outputs-size-card-height: 340px;
   --outputs-size-card-width: 480px;
-  --outputs-size-scene-graph-height: 290px;
+  --outputs-size-scene-graph-height: 400px;
   --outputs-size-scene-mats-height: 170px;
   --outputs-size-scene-textures-height: 164px;
   --border-radius-m: 20px;
   --border-radius-s: 10px;
   --border-weight: 2px;
+  --asset-card-height: 460px;
 }
 
 [data-window-size="Small"] {
@@ -52,10 +53,11 @@
   --window-size-window-width: 900px;
   --outputs-size-card-height: 170px;
   --outputs-size-card-width: 240px;
-  --outputs-size-scene-graph-height: 145px;
+  --outputs-size-scene-graph-height: 200px;
   --outputs-size-scene-mats-height: 85px;
   --outputs-size-scene-textures-height: 120px;
   --border-radius-m: 20px;
   --border-radius-s: 10px;
   --border-weight: 2px;
+  --asset-card-height: 230px;
 }

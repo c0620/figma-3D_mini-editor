@@ -10,17 +10,20 @@ export function ScrollPanel({
   text,
   img: Icon,
   children,
+  isFixed = false,
 }: {
   isLong: Boolean;
   text?: string;
   img?: IconComponent;
   children: any;
+  isFixed?: boolean;
 }) {
   const mode = useContext(PanelSceneModeContext);
   return (
     <div
       className={clsx(styles.scrollPanelContainer, {
         [styles.closed]: mode == "close",
+        [styles.panelFixed]: isFixed,
       })}
     >
       {text && (
@@ -38,6 +41,7 @@ export function ScrollPanel({
         className={clsx(styles.scrollPanel, {
           [styles.panelLong]: isLong,
           [styles.closed]: mode == "close",
+          [styles.panelFixed]: isFixed,
         })}
       >
         {children}

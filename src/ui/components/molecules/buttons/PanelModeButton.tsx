@@ -1,19 +1,21 @@
 import { useContext } from "react";
 import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
-import { ActionButton } from "../../atoms/buttons/Button";
+import { ActionButton, type ButtonProps } from "../../atoms/buttons/Button";
 import type { IconComponent } from "../../types/icon";
 
 export function PanelModeButton({
   text,
   img,
   onClick,
-}: {
-  text?: string;
-  img?: IconComponent;
-  onClick: () => void;
-}) {
+  deactivated = false,
+}: ButtonProps) {
   const mode = useContext(PanelSceneModeContext);
 
-  if (mode == "close") return <ActionButton onClick={onClick} img={img} />;
-  return <ActionButton onClick={onClick} text={text} />;
+  if (mode == "close")
+    return (
+      <ActionButton onClick={onClick} img={img} deactivated={deactivated} />
+    );
+  return (
+    <ActionButton onClick={onClick} text={text} deactivated={deactivated} />
+  );
 }
