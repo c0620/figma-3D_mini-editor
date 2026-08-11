@@ -1,6 +1,7 @@
 import type { SceneStorage } from "../store/sceneStorage";
 import { CommandType, type HistoryEntry } from "@/types/commands";
 import { SceneToolHandler } from "./sceneToolHandler";
+import type { ObjectToolMode } from "@/store/sessionStore";
 
 function resolveMeshObjectId(
   scene: SceneStorage,
@@ -63,9 +64,13 @@ export class ToggleVisibilityHandler extends SceneToolHandler<
   }
 }
 
-export type ToggleLockPayload = { id?: string };
+export type ToggleLockPayload = { id?: string; _tool?: ObjectToolMode | null };
 
-export type ToggleLockSnapshot = { id: string; locked: boolean };
+export type ToggleLockSnapshot = {
+  id: string;
+  locked: boolean;
+  _tool?: ObjectToolMode | null;
+};
 
 /** Инвертирует `locked` для меша (история: ToggleLock). */
 export class ToggleLockHandler extends SceneToolHandler<
@@ -83,6 +88,8 @@ export class ToggleLockHandler extends SceneToolHandler<
     if (!obj) return;
 
     this.scene.patchObject(id, { locked: !obj.locked });
+    if (!obj.locked) this.scene.setActiveObjectTool(null);
+    else if (payload._tool) this.scene.setActiveObjectTool(payload._tool);
   }
 
   getStateBeforeExecute(
@@ -101,9 +108,11 @@ export class ToggleLockHandler extends SceneToolHandler<
         "getStateBeforeExecute(toggleLockHandler): object not found"
       );
 
+    const activeTool = this.scene.getActiveObjectTool();
+
     return {
       type: CommandType.ToggleLock,
-      snapshot: { id, locked: obj.locked },
+      snapshot: { id, locked: obj.locked, _tool: activeTool },
     };
   }
 }

@@ -28,7 +28,9 @@ import {
   Vector3,
 } from "three";
 import React, {
+  type Dispatch,
   type RefObject,
+  type SetStateAction,
   useCallback,
   useEffect,
   useRef,
@@ -77,9 +79,11 @@ function SceneObjectLight() {
 function SceneObjectControls({
   activeRef,
   ref,
+  setUsing,
 }: {
   activeRef: ObjectRef;
   ref: RefObject<Object3D>;
+  setUsing: Dispatch<SetStateAction<boolean>>;
 }) {
   const { transform } = useHandlers();
   const activeTool = useSessionStore((s) => s.activeObjectTool);
@@ -125,9 +129,13 @@ function SceneObjectControls({
       <TransformControls
         key={`${activeRef.id}-controls`}
         mode={activeTool ? activeTool : undefined}
-        onMouseUp={handleTransformControls}
+        onMouseUp={() => {
+          handleTransformControls();
+          setUsing(false);
+        }}
         object={ref as RefObject<Object3D>}
         space="local"
+        onMouseDown={() => setUsing(true)}
       />
     );
   }
@@ -184,7 +192,6 @@ export function SceneRenderer() {
   const activeRef = useSessionStore((s) => s.activeObjectRef);
   const isCameraPreview = useSessionStore((s) => s.isCameraPreview);
   const activeCameraID = useSessionStore((s) => s.activeCameraID);
-
   const activeCamera =
     activeRef?.kind == "Camera"
       ? (scene.cameras[activeRef.id] as SceneCamera)
@@ -208,7 +215,9 @@ export function SceneRenderer() {
     ThreePerspectiveCamera | ThreeOrthographicCamera | null
   >(null);
 
-  const [controls, setControls] = useState<CameraControls | null>(null);
+  const [CC, setCC] = useState<CameraControls | null>(null);
+
+  const [isUsingTransforms, setIsUsingTranforms] = useState(false);
 
   const attachCamera = useCallback(
     (instance: ThreePerspectiveCamera | ThreeOrthographicCamera | null) => {
@@ -220,7 +229,7 @@ export function SceneRenderer() {
 
   const attachControls = useCallback((instance: CameraControls | null) => {
     ccRef.current = instance;
-    setControls(instance);
+    setCC(instance);
   }, []);
 
   const cameraID = activeCamera.id;
@@ -260,12 +269,12 @@ export function SceneRenderer() {
   }, [camera, cameraID, cameraType]);
 
   useEffect(() => {
-    if (!controls) return;
+    if (!CC) return;
 
     _desiredPosition.set(positionX, positionY, positionZ);
     _desiredTarget.set(targetX, targetY, targetZ);
-    controls.getPosition(_position);
-    controls.getTarget(_target);
+    CC.getPosition(_position);
+    CC.getTarget(_target);
 
     if (
       _position.distanceTo(_desiredPosition) < CAMERA_EPSILON &&
@@ -273,7 +282,7 @@ export function SceneRenderer() {
     )
       return;
 
-    void controls.setLookAt(
+    void CC.setLookAt(
       positionX,
       positionY,
       positionZ,
@@ -282,11 +291,11 @@ export function SceneRenderer() {
       targetZ,
       false
     );
-  }, [controls, positionX, positionY, positionZ, targetX, targetY, targetZ]);
+  }, [CC, positionX, positionY, positionZ, targetX, targetY, targetZ]);
 
   useEffect(() => {
     if (
-      !controls ||
+      !CC ||
       (cameraType == CameraType.Orthographic && zoom) ||
       (cameraType == CameraType.Perspective && dolly)
     ) {
@@ -302,27 +311,25 @@ export function SceneRenderer() {
     content.updateMatrixWorld(true);
     if (_contentBox.setFromObject(content).isEmpty()) return;
 
-    void controls
-      .fitToBox(content, false, {
-        paddingTop: 0.5,
-        paddingBottom: 0.5,
-        paddingLeft: 0.5,
-        paddingRight: 0.5,
-      })
-      .then(() => {
-        controls.update(0);
-        controls.getSpherical(_spherical);
-        const patch = {
-          id: activeCamera.id,
-          [cameraType == CameraType.Perspective ? "dolly" : "zoom"]:
-            cameraType == CameraType.Perspective
-              ? _spherical.radius
-              : cameraInstance.zoom,
-        };
+    void CC.fitToBox(content, false, {
+      paddingTop: 0.5,
+      paddingBottom: 0.5,
+      paddingLeft: 0.5,
+      paddingRight: 0.5,
+    }).then(() => {
+      CC.update(0);
+      CC.getSpherical(_spherical);
+      const patch = {
+        id: activeCamera.id,
+        [cameraType == CameraType.Perspective ? "dolly" : "zoom"]:
+          cameraType == CameraType.Perspective
+            ? _spherical.radius
+            : cameraInstance.zoom,
+      };
 
-        camera.execute(patch);
-      });
-  }, [controls]);
+      camera.execute(patch);
+    });
+  }, [CC]);
 
   const { innerWidth: windowW, innerHeight: windowH } = window;
   const ratioMx =
@@ -369,7 +376,7 @@ export function SceneRenderer() {
             <CameraControls
               ref={attachControls}
               camera={currentCamera}
-              enabled={!activeCamera.locked}
+              enabled={!activeCamera.locked && !isUsingTransforms}
               onRest={persistCameraState}
             />
           )}
@@ -410,6 +417,7 @@ export function SceneRenderer() {
               activeRef={activeRef}
               ref={nodeRef as RefObject<Object3D>}
               key={`controls-${activeRef.id}`}
+              setUsing={setIsUsingTranforms}
             />
           )}
         </Canvas>

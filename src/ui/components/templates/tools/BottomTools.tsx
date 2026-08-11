@@ -12,8 +12,8 @@ import { useSessionStore, type ObjectToolMode } from "@/store/sessionStore";
 import type { ActiveEntity } from "@/types/scene";
 
 export function BottomTools({ activeObj }: { activeObj: ActiveEntity | null }) {
-  const activeTool = useSessionStore().activeObjectTool;
-  const setActiveTool = useSessionStore().setActiveObjectTool;
+  const activeTool = useSessionStore((s) => s.activeObjectTool);
+  const setActiveTool = useSessionStore((s) => s.setActiveObjectTool);
   const toggleActiveTool = (tool: ObjectToolMode) => {
     if (!activeTool || activeTool != tool) setActiveTool(tool);
     if (activeTool == tool) setActiveTool(null);
@@ -21,24 +21,33 @@ export function BottomTools({ activeObj }: { activeObj: ActiveEntity | null }) {
 
   const { undo, redo } = useHistory();
 
+  function toolAction(toolType: ObjectToolMode) {
+    if (!activeObj) return;
+    if (activeObj.locked) return;
+    return toggleActiveTool(toolType);
+  }
+
   return (
     <div className={styles.toolsRow}>
       {activeObj && activeObj.kind != "Camera" && (
         <div className={styles.tool}>
           <SquareStateButton
-            onClick={() => toggleActiveTool("translate")}
+            onClick={() => toolAction("translate")}
             imgs={{ active: translateIcon, inactive: translateIcon }}
             active={activeTool === "translate"}
+            deactivated={activeObj.locked}
           />
           <SquareStateButton
-            onClick={() => toggleActiveTool("rotate")}
+            onClick={() => toolAction("rotate")}
             imgs={{ active: rotateIcon, inactive: rotateIcon }}
             active={activeTool === "rotate"}
+            deactivated={activeObj.locked}
           />
           <SquareStateButton
-            onClick={() => toggleActiveTool("scale")}
+            onClick={() => toolAction("scale")}
             imgs={{ active: scaleIcon, inactive: scaleIcon }}
             active={activeTool === "scale"}
+            deactivated={activeObj.locked}
           />
         </div>
       )}
