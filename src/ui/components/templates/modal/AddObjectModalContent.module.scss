@@ -1,0 +1,23 @@
+.library {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--margin-l);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tab-row {
+  display: flex;
+  position: sticky;
+  gap: var(--margin-m);
+}
+
+.load-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--margin-l);
+}

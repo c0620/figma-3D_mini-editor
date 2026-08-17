@@ -1,0 +1,23 @@
+.form {
+  border: var(--border-weight-bold) dashed var(--common-color-common-accent);
+  background-color: var(--interactive-color-interactive-background-primary);
+  flex-grow: 1;
+  border-radius: var(--border-radius-m);
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+  justify-content: center;
+  align-items: center;
+  color: var(--common-color-common-text);
+  & label {
+    text-align: center;
+    max-width: 80%;
+  }
+  &.load {
+    border-color: var(--interactive-color-interactive-background-secondary);
+  }
+}
+
+.input {
+  display: none;
+}

@@ -7,6 +7,7 @@ import { IDs } from "@/io/sceneEncoder";
 type colorTheme = "Light" | "Dark";
 type windowSize = "Small" | "Large";
 export type ObjectToolMode = "translate" | "rotate" | "scale";
+export type ModalType = "addObject" | "export" | "help" | null;
 
 export interface UiState {
   colorTheme: colorTheme;
@@ -20,6 +21,7 @@ export interface UiState {
   activeObjectTool: ObjectToolMode | null;
   isCameraPreview: boolean;
   cameraCustomAngle: Pick<SceneCamera, "azimuth" | "polar" | "target"> | null;
+  modalType: ModalType;
 }
 
 interface UiActions {
@@ -36,6 +38,7 @@ interface UiActions {
   setCameraCustomAngle(
     value: Pick<SceneCamera, "azimuth" | "polar" | "target">
   ): void;
+  setModalType(type: ModalType): void;
 }
 
 export const useSessionStore = create<UiState & UiActions>((set) => ({
@@ -50,6 +53,7 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
   activeObjectTool: null,
   isCameraPreview: false,
   cameraCustomAngle: null,
+  modalType: null,
 
   setColorTheme: (theme) => set({ colorTheme: theme }),
   setWindowSize: (size) => set({ windowSize: size }),
@@ -74,4 +78,5 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
         target: value.target,
       },
     }),
+  setModalType: (type) => set({ modalType: type }),
 }));

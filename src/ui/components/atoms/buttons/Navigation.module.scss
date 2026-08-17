@@ -28,3 +28,13 @@
 .hide {
   display: none;
 }
+
+.nav-title {
+  display: flex;
+  color: var(--common-color-common-text);
+  text-align: center;
+  align-items: center;
+  & > :nth-child(2) {
+    width: 100%;
+  }
+}

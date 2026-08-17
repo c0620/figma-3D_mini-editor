@@ -28,6 +28,18 @@
   --utils-color-edge: #ffffff4d;
   --utils-color-error: #a20000;
   --utils-color-modal-fade: #000000cc;
+  --accent-gradient:
+    linear-gradient(
+      0deg,
+      var(--common-color-common-accent) 0%,
+      rgba(0, 0, 0, 0) 68%
+    ),
+    linear-gradient(
+      45deg,
+      var(--common-color-common-accent) 16%,
+      #ffebc0 58%,
+      var(--common-color-common-accent) 80%
+    );
 }
 
 [data-theme="Light"] {
@@ -60,4 +72,16 @@
   --utils-color-edge: #ffffff;
   --utils-color-error: #e00000;
   --utils-color-modal-fade: #ffffffe5;
+  --accent-gradient:
+    linear-gradient(
+      0deg,
+      var(--common-color-common-accent) 0%,
+      rgba(0, 0, 0, 0) 68%
+    ),
+    linear-gradient(
+      45deg,
+      var(--common-color-common-accent) 16%,
+      #ffebc0 58%,
+      var(--common-color-common-accent) 80%
+    );
 }

@@ -15,19 +15,31 @@ export interface ButtonProps {
 
 export function MainButton({
   text,
-  action,
   to,
+  onClick,
+  frozen,
 }: {
   text: string;
-  action: "nav" | "event";
-  to?: string;
+  to?: string | null;
+  onClick?: () => void;
+  frozen: boolean;
 }) {
-  switch (action) {
-    case "event":
-      return <div>{text}</div>;
-    case "nav":
-      return <Link to={to!}>{text}</Link>;
-  }
+  return (
+    <>
+      {to ? (
+        <div className={clsx("h2", styles.mainButton)}>
+          <Link to={to!}>{text}</Link>
+        </div>
+      ) : (
+        <div
+          className={clsx("h2", styles.mainButton, { [styles.frozen]: frozen })}
+          onClick={onClick ?? undefined}
+        >
+          {text}
+        </div>
+      )}
+    </>
+  );
 }
 
 export function ActionButton({
@@ -129,10 +141,12 @@ export function SquareStateButton({
   onClick,
   imgs,
   active,
+  deactivated,
 }: {
   onClick: () => void;
   imgs: { active: IconComponent; inactive: IconComponent };
   active?: boolean;
+  deactivated: boolean;
 }) {
   const [isActive, setActive] = useState(active ? active : false);
   const Icon = isActive ? imgs.active : imgs.inactive;
@@ -146,6 +160,7 @@ export function SquareStateButton({
     <div
       className={clsx(styles.squareButton, {
         [styles.active]: active !== undefined ? active : isActive,
+        [styles.frozen]: deactivated,
       })}
       onClick={handleClick}
     >
@@ -154,10 +169,16 @@ export function SquareStateButton({
   );
 }
 
-export function NavLinkButton({ to }: { to: string }) {
+export function NavLinkButton({
+  to,
+  Img,
+}: {
+  to: string;
+  Img?: IconComponent;
+}) {
   return (
     <div>
-      <Link to={to}>arrow</Link>
+      <Link to={to}>{Img ? <Img /> : to}</Link>
     </div>
   );
 }

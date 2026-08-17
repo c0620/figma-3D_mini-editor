@@ -1,4 +1,4 @@
-import { CardStart } from "../molecules/Cards";
+import { CardStart } from "../molecules/cards/Cards";
 import phone from "../../../assets/images/start-phone.png";
 import sphere from "../../../assets/images/start-sphere.png";
 import suzanne from "../../../assets/images/start-suzanne.png";

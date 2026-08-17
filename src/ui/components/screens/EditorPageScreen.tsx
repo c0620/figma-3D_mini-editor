@@ -7,6 +7,9 @@ import { TopTools } from "../templates/tools/TopTools";
 import { BottomTools } from "../templates/tools/BottomTools";
 import { useEffect } from "react";
 import styles from "./EditorPageScreen.module.scss";
+import { Modal } from "../templates/modal/Modal";
+import { useSessionStore, type ModalType } from "@/store/sessionStore";
+import { AddObjectModalContent } from "../templates/modal/AddObjectModalContent";
 
 export default function EditorPage() {
   const activeObj = useActiveObject();
@@ -15,8 +18,17 @@ export default function EditorPage() {
     () => () => renderService.disposeMaterialPreview(),
     [renderService]
   );
+
+  const modalType = useSessionStore((s) => s.modalType);
+
+  const modals: Record<NonNullable<ModalType>, React.ReactNode> = {
+    addObject: <AddObjectModalContent />,
+    export: undefined,
+    help: undefined,
+  };
+
   return (
-    <div style={{ width: "100%", height: "100%" }}>
+    <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <div className={styles.pannels}>
         <PanelScene activeObj={activeObj} />
         {activeObj && <PanelParams activeObj={activeObj} />}
@@ -28,6 +40,7 @@ export default function EditorPage() {
       <div className={styles.renderer}>
         <SceneRenderer />
       </div>
+      {modalType && modals[modalType]}
     </div>
   );
 }

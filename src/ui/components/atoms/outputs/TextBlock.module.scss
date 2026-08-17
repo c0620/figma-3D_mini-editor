@@ -1,0 +1,16 @@
+.text-block {
+  display: flex;
+  gap: var(--margin-l);
+  background-color: var(--interactive-color-interactive-background-primary);
+  border-radius: var(--border-radius-m);
+  padding: var(--margin-l);
+  & > svg {
+    padding-top: var(--margin-xs);
+  }
+}
+
+.text-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-xs);
+}

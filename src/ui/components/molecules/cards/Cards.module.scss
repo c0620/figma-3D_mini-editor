@@ -1,0 +1,11 @@
+.card-asset {
+  background-color: var(--interactive-color-interactive-background-primary);
+  padding: var(--margin-l) var(--margin-l) var(--margin-l) var(--margin-l);
+  border-radius: var(--border-radius-m);
+  height: var(--asset-card-height);
+  position: relative;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-m);
+}

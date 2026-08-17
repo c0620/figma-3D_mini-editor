@@ -70,9 +70,9 @@ export function PanelModeToggle({
 
 export function NavTitle({ title, to }: { title: string; to: string }) {
   return (
-    <div>
-      <NavLinkButton to={to} />
-      {title}
+    <div className={styles.navTitle}>
+      <NavLinkButton to={to} Img={ArrowL} />
+      <h1>{title}</h1>
     </div>
   );
 }

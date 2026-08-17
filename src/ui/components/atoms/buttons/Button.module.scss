@@ -1,3 +1,12 @@
+.mainButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--common-color-common-accent);
+  border-radius: var(--border-radius-m);
+  height: var(--button-size-button-main-max-height);
+}
+
 .small-button {
   background-color: var(--common-color-common-black);
   height: var(--button-size-button-mode-height);

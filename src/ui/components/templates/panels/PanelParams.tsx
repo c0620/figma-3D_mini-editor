@@ -70,6 +70,7 @@ function GroupParams({ activeGroup }: { activeGroup: SceneGroup }) {
     while (childrenStack.length != 0) {
       const currentChild = childrenStack.pop()!;
       const children = graph[currentChild];
+      if (!children) continue;
       childrenCount += children.length;
       for (const child of children) {
         childrenStack.push(child);
