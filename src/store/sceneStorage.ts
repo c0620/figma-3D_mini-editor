@@ -110,6 +110,8 @@ export class SceneStorage {
 
   addObject(object: SceneObject): void {
     const store = useSceneStore.getState();
+    const session = useSessionStore.getState();
+
     switch (object.kind) {
       case "Mesh":
         store.addMesh(object);
@@ -123,6 +125,14 @@ export class SceneStorage {
       case "Camera":
         store.addCamera(object);
     }
+
+    session.setActiveObjectTool(null);
+    session.setActiveObjectRef({ id: object.id, kind: object.kind });
+  }
+
+  addMaterial(material: Material): void {
+    const store = useSceneStore.getState();
+    store.addMaterial(material);
   }
 
   patchObject(objectId: string, patch: CommonObjectPatch): void {
@@ -206,7 +216,7 @@ export class SceneStorage {
     useSessionStore.getState().setHistoryFlags(canUndo, canRedo);
   }
 
-  setActiveObjectTool(tool: ObjectToolMode): void {
+  setActiveObjectTool(tool: ObjectToolMode | null): void {
     useSessionStore.getState().setActiveObjectTool(tool);
   }
 }

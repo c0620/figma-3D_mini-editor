@@ -1,7 +1,8 @@
 import { SceneStorage } from "../store/sceneStorage";
-import { NotificationService } from "../store/notificationService";
-import { SceneAnalyzer } from "../render/sceneAnalyzer";
+import { NotificationService } from "../services/notificationService";
+import { SceneAnalyzer } from "../services/sceneAnalyzerService";
 import { SceneEncoder } from "./sceneEncoder";
+import type { ObjectID } from "@/types/scene";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
 
@@ -31,8 +32,38 @@ export class SceneImportExportService {
   async importFromDevice(
     type: SceneFileType,
     input: ArrayBuffer | string
-  ): Promise<void> {
-    const scene = await this.encoder.import(type, input);
+  ): Promise<ObjectID> {
+    const scene = await this.encoder.import(type, input, "LoadScene");
     this.scene.load(scene);
+    return scene.id;
+  }
+
+  async addFromDevice(
+    type: SceneFileType,
+    input: ArrayBuffer | string
+  ): Promise<ObjectID> {
+    const scene = await this.encoder.import(type, input, "AddScene");
+
+    Object.values(scene.cameras).forEach((object) =>
+      this.scene.addObject(object)
+    );
+
+    Object.values(scene.groups).forEach((object) =>
+      this.scene.addObject(object)
+    );
+
+    Object.values(scene.lights).forEach((object) =>
+      this.scene.addObject(object)
+    );
+
+    Object.values(scene.meshes).forEach((object) =>
+      this.scene.addObject(object)
+    );
+
+    Object.values(scene.materials).forEach((material) =>
+      this.scene.addMaterial(material)
+    );
+
+    return scene.id;
   }
 }

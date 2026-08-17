@@ -29,6 +29,7 @@ import type {
 } from "../types/scene";
 import { CameraType } from "../types/scene";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
+import type { UploadAction } from "./sceneTransferFacade";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
 type ImportFileType = SceneFileType | "Figma";
@@ -171,10 +172,14 @@ function parseObjectThree(
   );
 }
 
-function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
-  threeAssetRegistry.clear();
+function threeObjectToDomainScene(
+  root: Object3D | GLTF,
+  action: UploadAction
+): Scene {
+  if (action == "LoadScene") threeAssetRegistry.clear();
 
   const threeRoot = "scene" in root ? root.scene : root;
+  const roots: SceneGraph["roots"] = [threeRoot.uuid];
   const graphThree: SceneGraph["graphThree"] = {};
   const meshes: Scene["meshes"] = {};
   const lights: Scene["lights"] = {};
@@ -221,45 +226,49 @@ function threeObjectToDomainScene(root: Object3D | GLTF): Scene {
     };
   });
 
-  let pluginCamera: SceneCamera = {
-    name: "Plugin Camera",
-    kind: "Camera",
-    id: IDs.PluginCamera,
-    type: CameraType.Perspective,
-    zoom: null,
-    locked: false,
-    pendingDelete: false,
-    parentId: null,
-    transform: {
-      position: [0, 0, 5],
-      rotation: [0, 0, 0],
-      scale: [1, 1, 1],
-    },
-    near: 0.1,
-    far: 2000,
-    fov: 50,
-    aspect: [1, 1],
-    dolly: null,
-    azimuth: 0,
-    polar: Math.PI / 2,
-    target: [0, 0, 0],
-  };
+  if (action == "LoadScene") {
+    let pluginCamera: SceneCamera = {
+      name: "Plugin Camera",
+      kind: "Camera",
+      id: IDs.PluginCamera,
+      type: CameraType.Perspective,
+      zoom: null,
+      locked: false,
+      pendingDelete: false,
+      parentId: null,
+      transform: {
+        position: [0, 0, 5],
+        rotation: [0, 0, 0],
+        scale: [1, 1, 1],
+      },
+      near: 0.1,
+      far: 2000,
+      fov: 50,
+      aspect: [1, 1],
+      dolly: null,
+      azimuth: 0,
+      polar: Math.PI / 2,
+      target: [0, 0, 0],
+    };
+    cameras[pluginCamera.id] = pluginCamera;
+    roots.push(pluginCamera.id);
+  }
 
   if (!hasLight) {
     // var pluginAmbientLight: SceneLight = {};
     // var pluginSpotLight: SceneLight = {};
   }
   return {
-    id: randomUUID(),
+    id: threeRoot.uuid,
     meshes,
     lights,
     groups,
     sceneGraph: {
       graphThree,
-      roots: [threeRoot.uuid, pluginCamera.id],
+      roots: roots,
     },
     materials,
-    cameras: { ...cameras, [pluginCamera.id]: pluginCamera },
+    cameras: { ...cameras },
     environment: { backgroundColor: null, shadowsEnabled: false },
   };
 }
@@ -274,7 +283,8 @@ export class SceneEncoder {
 
   async import(
     type: ImportFileType,
-    raw: ArrayBuffer | string
+    raw: ArrayBuffer | string,
+    action: UploadAction
   ): Promise<Scene> {
     switch (type) {
       case "OBJ": {
@@ -282,7 +292,7 @@ export class SceneEncoder {
           typeof raw === "string" ? raw : new TextDecoder().decode(raw);
         const loader = new OBJLoader();
         const group = loader.parse(text);
-        return threeObjectToDomainScene(group);
+        return threeObjectToDomainScene(group, action);
       }
       case "FBX": {
         const buffer =
@@ -291,7 +301,7 @@ export class SceneEncoder {
             : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
         const loader = new FBXLoader();
         const group = loader.parse(buffer, "");
-        return threeObjectToDomainScene(group);
+        return threeObjectToDomainScene(group, action);
       }
       case "GLB": {
         const buffer =
@@ -300,7 +310,7 @@ export class SceneEncoder {
             : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
         const loader = new GLTFLoader();
         const gltf = await loader.parseAsync(buffer, "");
-        return threeObjectToDomainScene(gltf);
+        return threeObjectToDomainScene(gltf, action);
       }
       case "Figma":
         throw new Error("SceneEncoder.import: Figma is not implemented");

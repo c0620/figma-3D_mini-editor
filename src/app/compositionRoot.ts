@@ -6,13 +6,19 @@ import {
   TransformObjectHandler,
   type TransformObjectHandlerPayload,
 } from "../handlers/transformObjectHandler";
-import { CameraEditingHandler } from "../handlers/cameraEditingHandler";
+import {
+  CameraEditingHandler,
+  type CameraEditingHandlerPayload,
+} from "../handlers/cameraEditingHandler";
 import {
   DeletionHandler,
   type DeletionHandlerPayload,
 } from "../handlers/deletionHandler";
 import { EnvironmentHandler } from "../handlers/environmentHandler";
-import { LightAdditionHandler } from "../handlers/lightAdditionHandler";
+import {
+  ObjectAdditionHandler,
+  type ObjectAdditionHandlerPayload,
+} from "../handlers/objectAdditionHandler";
 import {
   LightEditingHandler,
   type LightEditingPayload,
@@ -42,7 +48,7 @@ import { TextureLocalService } from "../io/textureLocalService";
 import { AssetCatalogService } from "../library/assetCatalogService";
 import { Renderer } from "../render/renderer";
 import { RenderService } from "../render/renderService";
-import { SceneAnalyzer } from "../render/sceneAnalyzer";
+import { SceneAnalyzer } from "../services/sceneAnalyzerService";
 import { LocalizationService } from "../services/localizationService";
 import { HelpService } from "../services/helpService";
 import { TooltipService } from "../services/tooltipService";
@@ -50,7 +56,7 @@ import { ActionExecutor } from "../commands/actionExecutor";
 import { CommandBus } from "../commands/commandBus";
 import { DeletionGarbageCollector } from "../commands/deletionGarbageCollector";
 import { History } from "../store/history";
-import { NotificationService } from "../store/notificationService";
+import { NotificationService } from "../services/notificationService";
 import { SceneStorage } from "../store/sceneStorage";
 
 import type { SceneEntitySummary } from "../store/sceneEntityList";
@@ -71,16 +77,14 @@ type HandlerProxy<P extends object = object> = {
 export interface AppHandlers {
   /** Выделение объекта — без истории, вызывается напрямую */
   selection: SelectionHandler;
-  /** Управление камерой — без истории, вызывается напрямую */
-  camera: CameraEditingHandler;
-
   /** Ниже — прокси через CommandBus, действия записываются в историю */
+  camera: HandlerProxy<CameraEditingHandlerPayload>;
   transform: HandlerProxy<TransformObjectHandlerPayload>;
   materialEditing: HandlerProxy<MaterialEditingPayload>;
   deletion: HandlerProxy<DeletionHandlerPayload>;
   visibility: HandlerProxy<ToggleVisibilityPayload>;
   lock: HandlerProxy<ToggleLockPayload>;
-  lightAddition: HandlerProxy<SceneLight>;
+  objectAddition: HandlerProxy<ObjectAdditionHandlerPayload>;
   lightEditing: HandlerProxy<LightEditingPayload>;
   background: HandlerProxy<EnvironmentState>; //too Narrow
   shadows: HandlerProxy<EnvironmentState>; //too Narrow
@@ -158,7 +162,7 @@ export function buildKernel(): AppKernel {
   const selectionHandler = new SelectionHandler(sceneStorage);
   const deletionHandler = new DeletionHandler(sceneStorage);
   const cameraHandler = new CameraEditingHandler(sceneStorage);
-  const lightAdditionHandler = new LightAdditionHandler(sceneStorage);
+  const objectAdditionHandler = new ObjectAdditionHandler(sceneStorage);
   const lightEditingHandler = new LightEditingHandler(sceneStorage);
   const environmentHandler = new EnvironmentHandler(sceneStorage);
   const textureImportHandler = new TextureImportHandler(
@@ -182,7 +186,7 @@ export function buildKernel(): AppKernel {
   executor.handlers.set(CommandType.TransformObject, transformHandler);
   executor.handlers.set(CommandType.EditMaterial, materialEditingHandler);
   executor.handlers.set(CommandType.DeleteObject, deletionHandler);
-  executor.handlers.set(CommandType.AddLight, lightAdditionHandler);
+  executor.handlers.set(CommandType.AddObject, objectAdditionHandler);
   executor.handlers.set(CommandType.EditLight, lightEditingHandler);
   executor.handlers.set(CommandType.EditCamera, cameraHandler);
   executor.handlers.set(CommandType.SetBackground, environmentHandler);
@@ -196,12 +200,14 @@ export function buildKernel(): AppKernel {
 
   // --- Сборка handlers-объекта для UI ---
   const makeProxy = <P extends object>(type: CommandType): HandlerProxy<P> => ({
-    execute: (payload: P) => bus.execute(type, payload),
+    execute: (payload: P) => {
+      bus.execute(type, payload);
+    },
   });
 
   const handlers: AppHandlers = {
     selection: selectionHandler,
-    camera: cameraHandler,
+    camera: makeProxy(CommandType.EditCamera),
 
     environment: environmentHandler,
 
@@ -210,7 +216,7 @@ export function buildKernel(): AppKernel {
     deletion: makeProxy(CommandType.DeleteObject),
     visibility: makeProxy(CommandType.ToggleVisibility),
     lock: makeProxy(CommandType.ToggleLock),
-    lightAddition: makeProxy(CommandType.AddLight),
+    objectAddition: makeProxy(CommandType.AddObject),
     lightEditing: makeProxy(CommandType.EditLight),
     background: makeProxy(CommandType.SetBackground),
     shadows: makeProxy(CommandType.ToggleShadows),

@@ -1,6 +1,6 @@
 import { randomUUID } from "../lib/randomId";
 
-import { useSessionStore } from "./sessionStore";
+import { useSessionStore } from "../store/sessionStore";
 
 export class NotificationService {
   pushSuccess(message: string): string {

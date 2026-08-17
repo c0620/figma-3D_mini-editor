@@ -5,7 +5,6 @@ export enum CommandType {
   ToggleVisibility = "ToggleVisibility",
   ToggleLock = "ToggleLock",
   SelectObject = "SelectObject",
-  AddLight = "AddLight",
   EditLight = "EditLight",
   EditCamera = "EditCamera",
   SetBackground = "SetBackground",

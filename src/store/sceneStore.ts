@@ -63,6 +63,7 @@ interface SceneActions {
   addLight(object: SceneLight): void;
   addGroup(object: SceneGroup): void;
   addCamera(camera: SceneCamera): void;
+  addMaterial(material: Material): void;
   patchMesh(id: ObjectID, patch: MeshPatch): void;
   patchLight(id: ObjectID, patch: LightPatch): void;
   patchGroup(id: ObjectID, patch: GroupPatch): void;
@@ -79,7 +80,8 @@ function linkIntoGraph(
 ): void {
   const { roots, graphThree } = scene.sceneGraph;
   if (object.parentId) {
-    if (object.parentId in graphThree) graphThree[object.parentId].push(object.id);
+    if (object.parentId in graphThree)
+      graphThree[object.parentId].push(object.id);
     else graphThree[object.parentId] = [object.id];
   } else {
     roots.push(object.id);
@@ -152,6 +154,16 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
         scene: produce(state.scene, (scene) => {
           linkIntoGraph(scene, newCamera);
           scene.cameras[newCamera.id] = newCamera;
+        }),
+      };
+    }),
+
+  addMaterial: (newMaterial) =>
+    set((state) => {
+      if (!state.scene) return state;
+      return {
+        scene: produce(state.scene, (scene) => {
+          scene.materials[newMaterial.id] = newMaterial;
         }),
       };
     }),

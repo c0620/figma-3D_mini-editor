@@ -7,6 +7,7 @@ import { buildSceneEntityList } from "../store/sceneEntityList";
 import { findSceneObject } from "../store/sceneStorage";
 import { useSceneStore } from "../store/sceneStore";
 import { useSessionStore } from "../store/sessionStore";
+import type { ImportSceneRequest } from "@/io/sceneTransferFacade";
 
 export type { SceneEntitySummary } from "../store/sceneEntityList";
 
@@ -89,4 +90,13 @@ export function useActiveObject(): ActiveEntity | null {
 
 export function useActiveObjectRef() {
   return useSessionStore((s) => s.activeObjectRef);
+}
+
+export function useSceneAddition() {
+  const { transfer, handlers } = useKernel();
+
+  return async (data: ImportSceneRequest) => {
+    const groupID = await transfer.importScene(data);
+    handlers.objectAddition.execute({ kind: "Group", id: groupID });
+  };
 }
