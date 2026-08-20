@@ -1,9 +1,7 @@
 import { useSceneEntities, useHandlers } from "@/app/ApplicationKernelContext";
 
-import { ScrollPanel } from "../../atoms/outputs/ScrollPanel";
 import { Panel } from "./BasePanel";
 
-import sceneIcon from "@/assets/images/icons/descriptive/scene.svg?react";
 import cameraSecIcon from "@/assets/images/icons/state/selectOff.svg?react";
 import cameraPrimcon from "@/assets/images/icons/state/selectOn.svg?react";
 
@@ -23,14 +21,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
   return (
     <Panel panel="Left" text="Сцена">
       <div className={styles.panelScene}>
-        <ScrollPanel
-          text="Содержимое сцены"
-          isLong={activeObj === null}
-          img={sceneIcon}
-          isFixed={activeObj !== null}
-        >
-          <SceneGraph activeObj={activeObj} />
-        </ScrollPanel>
+        <SceneGraph activeObj={activeObj} />
         <ObjectAddButton />
       </div>
 

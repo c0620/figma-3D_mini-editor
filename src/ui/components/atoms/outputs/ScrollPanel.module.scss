@@ -16,13 +16,15 @@
   padding: var(--margin-m);
   // height: var(--outputs-size-scene-graph-height);
   overflow-y: scroll;
-  scrollbar-color: var(--interactive-color-interactive-background-secondary)
-    var(--interactive-color-interactive-background-primary);
   scrollbar-gutter: stable;
   clip-path: inset(0 round var(--border-radius-s));
   display: flex;
   flex-direction: column;
   gap: var(--margin-s);
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-color: var(--interactive-color-interactive-background-secondary)
+      var(--interactive-color-interactive-background-primary);
+  }
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -33,6 +35,14 @@
     background: var(--interactive-color-interactive-background-secondary);
     border-radius: 4px;
   }
+  &::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+.disable-scroll {
   &::-webkit-scrollbar-button {
     display: none;
     width: 0;

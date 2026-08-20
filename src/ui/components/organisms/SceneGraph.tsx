@@ -1,11 +1,13 @@
 import { useHandlers, useSceneEntities } from "@/app/ApplicationKernelContext";
 import { useSceneStore } from "@/store/sceneStore";
 import type { ActiveEntity, ObjectID } from "@/types/scene";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GraphItem } from "../molecules/scene/GraphItem";
 import { produce } from "immer";
 import { useSessionStore } from "@/store/sessionStore";
 import { enableMapSet } from "immer";
+import { ScrollPanel } from "../atoms/outputs/ScrollPanel";
+import sceneIcon from "@/assets/images/icons/descriptive/scene.svg?react";
 
 enableMapSet();
 
@@ -15,8 +17,16 @@ export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
   const sceneEntities = useSceneEntities();
   const sceneThree = useSceneStore((s) => s.scene!.sceneGraph.graphThree);
   const activeID = activeObj?.id;
+
   const [hiddenNodes, setHiddenNodes] = useState<Set<ObjectID>>(new Set());
   const graphItems = [];
+
+  const activeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!activeRef.current) return;
+    activeRef.current.scrollIntoView();
+  }, [activeID]);
 
   const hideCameraDelete =
     Object.values(useSceneStore((s) => s.scene?.cameras)!).filter(
@@ -64,10 +74,20 @@ export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
             }}
             hidden={hiddenNodes.has(entity.id)}
             hideDelete={entity.kind == "Camera" ? hideCameraDelete : false}
+            ref={activeID == entity.id ? activeRef : null}
           />
         );
       }
     }
   }
-  return graphItems;
+  return (
+    <ScrollPanel
+      isLong={activeObj === null}
+      img={sceneIcon}
+      isFixed={activeObj !== null}
+      disableScroll={false}
+    >
+      {graphItems}
+    </ScrollPanel>
+  );
 }

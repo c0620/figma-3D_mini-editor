@@ -30,6 +30,7 @@ export function GraphItem({
   hidden,
   hideLock = false,
   hideDelete = false,
+  ref,
 }: {
   item: SceneEntitySummary;
   isActive: boolean;
@@ -40,6 +41,7 @@ export function GraphItem({
   hidden: boolean;
   hideLock?: boolean;
   hideDelete?: boolean;
+  ref: React.RefObject<HTMLDivElement | null> | null;
 }) {
   const mode = useContext(PanelSceneModeContext);
 
@@ -81,6 +83,7 @@ export function GraphItem({
         [styles.textDisabled]: isDisabled,
         [styles.textActive]: isActive,
       })}
+      ref={ref}
     >
       {mode == "open" && (
         <div

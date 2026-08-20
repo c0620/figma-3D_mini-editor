@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 
 import styles from "./ScrollPanel.module.scss";
@@ -11,12 +11,14 @@ export function ScrollPanel({
   img: Icon,
   children,
   isFixed = false,
+  disableScroll = true,
 }: {
   isLong: Boolean;
   text?: string;
   img?: IconComponent;
   children: any;
   isFixed?: boolean;
+  disableScroll?: boolean;
 }) {
   const mode = useContext(PanelSceneModeContext);
   return (
@@ -42,6 +44,7 @@ export function ScrollPanel({
           [styles.panelLong]: isLong,
           [styles.closed]: mode == "close",
           [styles.panelFixed]: isFixed,
+          [styles.disableScroll]: disableScroll,
         })}
       >
         {children}
