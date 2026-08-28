@@ -18,7 +18,45 @@ export default defineConfig({
     },
     target: "esnext",
   },
-  plugins: [svgr(), react(), viteSingleFile()],
+  plugins: [
+    svgr({
+      svgrOptions: {
+        plugins: ["@svgr/plugin-svgo", "@svgr/plugin-jsx"],
+        svgoConfig: {
+          plugins: [
+            {
+              name: "decode-href-ids",
+              fn: () => ({
+                element: {
+                  enter: (node) => {
+                    for (const attr of ["href", "xlink:href"] as const) {
+                      const value = node.attributes[attr];
+                      if (value?.startsWith("#")) {
+                        node.attributes[attr] =
+                          `#${decodeURIComponent(value.slice(1))}`;
+                      }
+                    }
+                  },
+                },
+              }),
+            },
+            {
+              name: "preset-default",
+              params: {
+                overrides: {
+                  removeViewBox: false,
+                  cleanupIds: false,
+                },
+              },
+            },
+            { name: "prefixIds", params: { prefixClassNames: false } },
+          ],
+        },
+      },
+    }),
+    react(),
+    viteSingleFile(),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
