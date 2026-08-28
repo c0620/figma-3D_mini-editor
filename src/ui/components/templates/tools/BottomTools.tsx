@@ -21,9 +21,13 @@ export function BottomTools({ activeObj }: { activeObj: ActiveEntity | null }) {
 
   const { undo, redo } = useHistory();
 
+  const rotateLocked =
+    !!activeObj && activeObj.kind === "Light" && activeObj.target != null;
+
   function toolAction(toolType: ObjectToolMode) {
     if (!activeObj) return;
     if (activeObj.locked) return;
+    if (toolType === "rotate" && rotateLocked) return;
     return toggleActiveTool(toolType);
   }
 
@@ -41,7 +45,7 @@ export function BottomTools({ activeObj }: { activeObj: ActiveEntity | null }) {
             onClick={() => toolAction("rotate")}
             imgs={{ active: rotateIcon, inactive: rotateIcon }}
             active={activeTool === "rotate"}
-            deactivated={activeObj.locked}
+            deactivated={activeObj.locked || rotateLocked}
           />
           <SquareStateButton
             onClick={() => toolAction("scale")}

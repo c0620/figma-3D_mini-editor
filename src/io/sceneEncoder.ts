@@ -12,6 +12,7 @@ import {
   SpotLight,
   PerspectiveCamera,
   OrthographicCamera,
+  PointLight,
 } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
@@ -27,15 +28,21 @@ import type {
   SceneLight,
   SceneMesh,
 } from "../types/scene";
-import { CameraType } from "../types/scene";
+import { CameraType, LightType } from "../types/scene";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
 import type { UploadAction } from "./sceneTransferFacade";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
 type ImportFileType = SceneFileType | "Figma";
+type SceneProperties = {
+  hasLight: boolean;
+  hasCamera: boolean;
+};
 
 export enum IDs {
   PluginCamera = "plugin-camera-id",
+  PluginSpotLight = "plugin-spotlight-id",
+  PluginAmbientLight = "plugin-ambientlight-id",
 }
 
 function cameraTargetFromThree(
@@ -59,7 +66,7 @@ function parseObjectThree(
   lights: Scene["lights"],
   groups: Scene["groups"],
   cameras: Scene["cameras"],
-  hasLight: boolean
+  sceneProperties: SceneProperties
 ) {
   const transform = {
     position: node.position.toArray() as [number, number, number],
@@ -73,6 +80,7 @@ function parseObjectThree(
 
   const id = node.uuid;
   if (node instanceof PerspectiveCamera || node instanceof OrthographicCamera) {
+    sceneProperties.hasCamera = true;
     const isPerspective = node instanceof PerspectiveCamera;
     const distance = 5;
     const target = cameraTargetFromThree(node, distance);
@@ -124,20 +132,36 @@ function parseObjectThree(
         : [node.material.uuid],
     } as SceneMesh;
   } else if (node instanceof Light) {
-    hasLight = true;
-    const type = node instanceof SpotLight ? "Spot" : "Ambient";
+    sceneProperties.hasLight = true;
+    const type =
+      node instanceof SpotLight
+        ? LightType.Spot
+        : node instanceof PointLight
+          ? LightType.Point
+          : LightType.Ambient;
     lights[id] = {
       id: id,
       parentId: parentID,
       kind: "Light",
       type: type,
-      color: node.color.getHexString(),
+      color: { type: "custom", value: node.color },
       intensity: node.intensity,
       transform: transform,
       visible: node.visible,
       locked: false,
       name: node.name,
       pendingDelete: false,
+      distance:
+        node instanceof SpotLight || node instanceof PointLight
+          ? node.distance
+          : 0,
+      angle: node instanceof SpotLight ? node.angle : Math.PI / 3,
+      penumbra: node instanceof SpotLight ? node.penumbra : 0,
+      decay:
+        node instanceof SpotLight || node instanceof PointLight
+          ? node.decay
+          : 2,
+      target: null,
     } as SceneLight;
   } else if (node instanceof Group || node instanceof Object3D) {
     groups[id] = {
@@ -167,7 +191,7 @@ function parseObjectThree(
       lights,
       groups,
       cameras,
-      hasLight
+      sceneProperties
     )
   );
 }
@@ -188,7 +212,7 @@ function threeObjectToDomainScene(
 
   threeRoot.updateMatrixWorld(true);
 
-  let hasLight = false; //is not working without wrapping in obj
+  let sceneProperties: SceneProperties = { hasLight: false, hasCamera: false };
 
   parseObjectThree(
     threeRoot,
@@ -198,7 +222,7 @@ function threeObjectToDomainScene(
     lights,
     groups,
     cameras,
-    hasLight
+    sceneProperties
   );
 
   const materials: Record<MaterialID, Material> = {};
@@ -254,9 +278,49 @@ function threeObjectToDomainScene(
     roots.push(pluginCamera.id);
   }
 
-  if (!hasLight) {
-    // var pluginAmbientLight: SceneLight = {};
-    // var pluginSpotLight: SceneLight = {};
+  if (!sceneProperties.hasLight && action == "LoadScene") {
+    let pluginAmbientLight: SceneLight = {
+      type: LightType.Ambient,
+      color: { type: "custom", value: new Color().setColorName("white") },
+      intensity: 1,
+      kind: "Light",
+      distance: 0,
+      angle: Math.PI / 3,
+      penumbra: 1,
+      decay: 1,
+      target: null,
+      id: IDs.PluginAmbientLight,
+      name: "Plugin Light",
+      visible: true,
+      locked: false,
+      transform: { position: [0, 5, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+      pendingDelete: false,
+      parentId: null,
+    };
+    let pluginSpotLight: SceneLight = {
+      type: LightType.Spot,
+      color: { type: "custom", value: new Color().setColorName("white") },
+      intensity: 100,
+      kind: "Light",
+      distance: 0,
+      angle: Math.PI / 3,
+      penumbra: 1,
+      decay: 1,
+      target: null,
+      id: IDs.PluginSpotLight,
+      name: "Plugin Light",
+      visible: true,
+      locked: false,
+      transform: { position: [5, 5, 5], rotation: [0, 0, 0], scale: [1, 1, 1] },
+      pendingDelete: false,
+      parentId: null,
+    };
+
+    lights[IDs.PluginAmbientLight] = pluginAmbientLight;
+    lights[IDs.PluginSpotLight] = pluginSpotLight;
+
+    roots.push(IDs.PluginAmbientLight);
+    roots.push(IDs.PluginSpotLight);
   }
   return {
     id: threeRoot.uuid,

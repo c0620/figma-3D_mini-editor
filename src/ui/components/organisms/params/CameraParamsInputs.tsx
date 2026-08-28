@@ -1,12 +1,12 @@
 import { CameraType, type SceneCamera } from "@/types/scene";
-import { NumberFieldInput } from "../molecules/inputs/NumberFieldInput";
-import styles from "./CameraParamsInputs.module.scss";
-import { ToggleState } from "../molecules/inputs/ToggleState";
+import { NumberFieldInput } from "../../molecules/inputs/NumberFieldInput";
+import styles from "./ParamsCommon.module.scss";
+import { ToggleState } from "../../molecules/inputs/ToggleState";
 
 import { useContext } from "react";
-import { RatioInput } from "../molecules/inputs/RatioInput";
-import { SelectLens } from "../molecules/inputs/SelectLens";
-import { PanelSceneModeContext } from "../templates/panels/BasePanel";
+import { RatioInput } from "../../molecules/inputs/RatioInput";
+import { SelectLens } from "../../molecules/inputs/SelectLens";
+import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import { useSessionStore } from "@/store/sessionStore";
 import clsx from "clsx";
@@ -23,7 +23,7 @@ export function CameraParamsInputs({
   const toggleCameraPreview = useSessionStore((s) => s.toggleCameraPreview);
 
   return (
-    <div className={styles.cameraParams}>
+    <div className={styles.paramsContainer}>
       {mode == "open" && (
         <h3 className="h3">
           Параметры <span></span>

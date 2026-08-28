@@ -25,7 +25,7 @@ export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
 
   useEffect(() => {
     if (!activeRef.current) return;
-    activeRef.current.scrollIntoView();
+    activeRef.current.scrollIntoView({ block: "center" });
   }, [activeID]);
 
   const hideCameraDelete =

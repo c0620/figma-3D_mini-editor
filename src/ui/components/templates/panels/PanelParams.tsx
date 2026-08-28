@@ -1,16 +1,17 @@
 import { Panel } from "./BasePanel.tsx";
 import styles from "./Panel.module.scss";
 import { ScrollPanel } from "../../atoms/outputs/ScrollPanel.tsx";
-import { MaterialParamsInputs } from "../../organisms/MaterialParamsInputs.tsx";
+import { MaterialParamsInputs } from "../../organisms/params/MaterialParamsInputs.tsx";
 import { useSceneStore } from "@/store/sceneStore";
 import type {
   ActiveEntity,
   MaterialID,
   SceneCamera,
   SceneGroup,
+  SceneLight,
   SceneMesh,
 } from "@/types/scene.ts";
-import { CameraType, TextureSlot } from "@/types/scene.ts";
+import { CameraType, LightType, TextureSlot } from "@/types/scene.ts";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry.ts";
 import { MaterialPreview } from "../../atoms/scene/MaterialPreview.tsx";
 import { useState } from "react";
@@ -25,10 +26,16 @@ import texturesIcon from "@/assets/images/icons/descriptive/texturesP.svg?react"
 import perspectiveCameraIcon from "@/assets/images/icons/descriptive/cameraP.svg?react";
 import orthographicCameraIcon from "@/assets/images/icons/descriptive/cameraO.svg?react";
 import lensIcon from "@/assets/images/icons/descriptive/lens.svg?react";
-import { CameraParamsInputs } from "../../organisms/CameraParamsInputs.tsx";
+import ambientLightIcon from "@/assets/images/icons/descriptive/lighting.svg?react";
+import pointLightIcon from "@/assets/images/icons/descriptive/pointLight.svg?react";
+import spotLightIcon from "@/assets/images/icons/descriptive/spotLight.svg?react";
+
+import { CameraParamsInputs } from "../../organisms/params/CameraParamsInputs.tsx";
 import { SwitchItem } from "../../molecules/inputs/SwitchItem.tsx";
-import { SelectAngleOption } from "../../molecules/inputs/SelectAngleOption.tsx";
+import { RadioCameraAnglePresets } from "../../molecules/inputs/radio/RadioCameraAnglePresets.tsx";
 import { useHandlers } from "@/app/ApplicationKernelContext.tsx";
+import { LightParamsInputs } from "../../organisms/params/LightParamsInputs.tsx";
+import { RadioLightPresets } from "../../molecules/inputs/radio/RadioLightPresets.tsx";
 
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
   switch (activeObj.kind) {
@@ -51,12 +58,73 @@ export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
     case "Camera":
       return <CameraParams activeCamera={activeObj} />;
     case "Light":
-      return (
-        <Panel panel="Right" text="Параметры">
-          <div>{activeObj.id}</div>
-        </Panel>
-      );
+      return <LightParams activeLight={activeObj} />;
   }
+}
+
+function LightParams({ activeLight }: { activeLight: SceneLight }) {
+  const { lightEditing } = useHandlers();
+  return (
+    <Panel panel="Right" text="Параметры">
+      <div className={styles.panelScene}>
+        <ScrollPanel
+          isLong={false}
+          text="Вид источника света"
+          img={
+            activeLight.type == LightType.Ambient
+              ? ambientLightIcon
+              : activeLight.type == LightType.Point
+                ? pointLightIcon
+                : spotLightIcon
+          }
+        >
+          <SwitchItem
+            text="Окружающий свет"
+            icon={ambientLightIcon}
+            onClick={() =>
+              lightEditing.execute({
+                id: activeLight.id,
+                changes: { type: LightType.Ambient },
+              })
+            }
+            isActive={activeLight.type == LightType.Ambient}
+          />
+          <SwitchItem
+            text="Точечный свет"
+            icon={pointLightIcon}
+            onClick={() =>
+              lightEditing.execute({
+                id: activeLight.id,
+                changes: { type: LightType.Point },
+              })
+            }
+            isActive={activeLight.type == LightType.Point}
+          />
+          <SwitchItem
+            text="Направленный свет"
+            icon={spotLightIcon}
+            onClick={() =>
+              lightEditing.execute({
+                id: activeLight.id,
+                changes: { type: LightType.Spot },
+              })
+            }
+            isActive={activeLight.type == LightType.Spot}
+          />
+        </ScrollPanel>
+        <LightParamsInputs activeLight={activeLight} />
+        {activeLight.type == LightType.Spot && (
+          <RadioLightPresets
+            title="Пресеты освещения"
+            value={activeLight}
+            onClick={(params) =>
+              lightEditing.execute({ id: activeLight.id, changes: params })
+            }
+          />
+        )}
+      </div>
+    </Panel>
+  );
 }
 
 function GroupParams({ activeGroup }: { activeGroup: SceneGroup }) {
@@ -186,7 +254,7 @@ function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
           <CameraParamsInputs activeCamera={activeCamera} />
         </div>
 
-        <SelectAngleOption
+        <RadioCameraAnglePresets
           title="Пресеты вида камеры"
           value={{
             azimuth: activeCamera.azimuth,

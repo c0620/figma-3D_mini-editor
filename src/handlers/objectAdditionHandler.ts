@@ -1,5 +1,6 @@
 import {
   CameraType,
+  LightType,
   type ObjectID,
   type SceneCamera,
   type SceneGroup,
@@ -13,6 +14,7 @@ import type {
   DeletionHandler,
   DeletionHandlerPayload,
 } from "./deletionHandler";
+import { Color } from "three";
 
 export type ObjectAdditionHandlerPayload =
   | (Partial<Omit<SceneLight, "id" | "kind">> & Pick<SceneLight, "id" | "kind">)
@@ -63,8 +65,11 @@ export class ObjectAdditionHandler extends SceneToolHandler<
       case "Light":
         const light: SceneLight = {
           id: incoming.id,
-          type: incoming.type ?? "Ambient",
-          color: incoming.color ?? "#ffffff",
+          type: incoming.type ?? LightType.Spot,
+          color: incoming.color ?? {
+            type: "custom",
+            value: new Color().setHex(0xffffff),
+          },
           intensity: incoming.intensity ?? 1,
           visible: incoming.visible ?? true,
           locked: incoming.locked ?? false,
@@ -77,6 +82,11 @@ export class ObjectAdditionHandler extends SceneToolHandler<
             rotation: [0, 0, 0],
             scale: [1, 1, 1],
           },
+          distance: 0,
+          angle: Math.PI / 3,
+          penumbra: 0,
+          decay: 2,
+          target: incoming.target ?? null,
         };
         this.scene.addObject(light);
         return;

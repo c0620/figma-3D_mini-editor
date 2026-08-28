@@ -1,7 +1,7 @@
 import styles from "./Common.module.scss";
 import {
-  SelectIcon,
-  type SelectIconVariables,
+  SelectVariable,
+  type SelectVariables,
 } from "../../atoms/inputs/Selects";
 
 import fov15Icon from "@/assets/images/icons/descriptive/fov15.svg?react";
@@ -21,7 +21,7 @@ export function SelectLens({
   mode: "open" | "close";
   onClick: (value: number) => void;
 }) {
-  const fovPresets: SelectIconVariables = {
+  const fovPresets: SelectVariables<number> = {
     120: {
       id: "15mm",
       icon: fov15Icon,
@@ -62,7 +62,7 @@ export function SelectLens({
   return (
     <div className={styles.commonContainer}>
       {mode == "open" && <p className="t3">{title}</p>}
-      <SelectIcon
+      <SelectVariable
         variables={fovPresets}
         value={value}
         onChange={(v) => onClick(v)}

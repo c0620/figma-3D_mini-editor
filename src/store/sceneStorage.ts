@@ -205,7 +205,15 @@ export class SceneStorage {
   // --- Session: запись ---
 
   setActiveObjectRef(objectRef: ObjectRef | null): void {
-    useSessionStore.getState().setActiveObjectRef(objectRef);
+    const session = useSessionStore.getState();
+    session.setActiveObjectRef(objectRef);
+    if (
+      objectRef?.kind === "Light" &&
+      session.activeObjectTool === "rotate" &&
+      useSceneStore.getState().scene?.lights[objectRef.id]?.target
+    ) {
+      session.setActiveObjectTool(null);
+    }
   }
 
   setProjectName(name: string): void {

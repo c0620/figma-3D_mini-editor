@@ -7,18 +7,21 @@ import { SmallButton } from "../../atoms/buttons/Button";
 import styles from "./GraphItem.module.scss";
 
 import meshIcon from "@/assets/images/icons/descriptive/mesh.svg?react";
-import lightIcon from "@/assets/images/icons/descriptive/lighting.svg?react";
-import cameraIcon from "@/assets/images/icons/descriptive/cameraP.svg?react";
+import cameraPIcon from "@/assets/images/icons/descriptive/cameraP.svg?react";
+import cameraOIcon from "@/assets/images/icons/descriptive/cameraO.svg?react";
 import groupIcon from "@/assets/images/icons/descriptive/scene.svg?react";
 import showIcon from "@/assets/images/icons/state/visibilityOn.svg?react";
 import hideIcon from "@/assets/images/icons/state/visibilityOff.svg?react";
 import lockIcon from "@/assets/images/icons/state/lockOn.svg?react";
 import freeIcon from "@/assets/images/icons/state/lockOff.svg?react";
 import garbIcon from "@/assets/images/icons/descriptive/garbage.svg?react";
-import inactiveIcon from "@/assets/images/icons/state/selectOff.svg?react";
-import activeIcon from "@/assets/images/icons/state/selectOn.svg?react";
+import ambientLightIcon from "@/assets/images/icons/descriptive/lighting.svg?react";
+import pointLightIcon from "@/assets/images/icons/descriptive/pointLight.svg?react";
+import spotLightIcon from "@/assets/images/icons/descriptive/spotLight.svg?react";
+
 import clsx from "clsx";
 import { useSessionStore } from "@/store/sessionStore";
+import { CameraType, LightType, type SceneLight } from "@/types/scene";
 
 export function GraphItem({
   item,
@@ -54,11 +57,25 @@ export function GraphItem({
       case "Mesh":
         return meshIcon;
       case "Light":
-        return lightIcon;
+        switch (item.type) {
+          case LightType.Spot:
+            return spotLightIcon;
+          case LightType.Ambient:
+            return ambientLightIcon;
+          case LightType.Point:
+            return pointLightIcon;
+          case LightType.HDRI:
+            return;
+        }
       case "Group":
         return groupIcon;
       case "Camera":
-        return cameraIcon;
+        switch (item.type) {
+          case CameraType.Perspective:
+            return cameraPIcon;
+          case CameraType.Orthographic:
+            return cameraOIcon;
+        }
     }
   })();
 

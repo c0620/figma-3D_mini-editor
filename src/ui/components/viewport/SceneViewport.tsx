@@ -1,5 +1,6 @@
 import {
   CameraControls,
+  Helper,
   OrthographicCamera,
   Outlines,
   PerspectiveCamera,
@@ -9,11 +10,14 @@ import { Canvas } from "@react-three/fiber";
 
 import { useSceneStore } from "../../../store/sceneStore";
 import { threeAssetRegistry } from "../../../store/threeAssetRegistry";
+import { useViewportObjectStore } from "@/store/viewportObjectStore";
 import {
   CameraType,
+  LightType,
   type ObjectID,
   type ObjectRef,
   type SceneCamera,
+  type SceneLight,
   type SceneObject,
 } from "../../../types/scene";
 import { useSessionStore } from "@/store/sessionStore";
@@ -26,13 +30,17 @@ import {
   Group,
   Spherical,
   Vector3,
+  SpotLightHelper,
+  SpotLight,
+  PointLightHelper,
 } from "three";
-import React, {
+import {
   type Dispatch,
   type RefObject,
   type SetStateAction,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -72,8 +80,88 @@ function SceneObjectMesh({
   );
 }
 
-function SceneObjectLight() {
-  return <ambientLight />;
+function SceneObjectLight({
+  light,
+  isActive,
+}: {
+  light: SceneLight;
+  isActive: boolean;
+}) {
+  const dummyRef = useRef<Object3D>(null);
+  const lightRef = useRef<SpotLight>(null);
+  const targetObject = useViewportObjectStore((s) =>
+    light.target ? s.byId[light.target] : undefined
+  );
+
+  useLayoutEffect(() => {
+    const spot = lightRef.current;
+    if (!spot) return;
+    const nextTarget = targetObject ?? dummyRef.current;
+    if (nextTarget) spot.target = nextTarget;
+  }, [targetObject, light.type]);
+
+  switch (light.type) {
+    case LightType.Spot:
+      return (
+        <spotLight
+          ref={(instance) => {
+            lightRef.current = instance;
+            if (instance) {
+              useViewportObjectStore
+                .getState()
+                .registerLight(light.id, instance);
+              if (targetObject) instance.target = targetObject;
+            } else useViewportObjectStore.getState().unregisterLight(light.id);
+          }}
+          color={light.color.value}
+          distance={light.distance}
+          decay={light.decay}
+          penumbra={light.penumbra}
+          angle={light.angle}
+          intensity={light.intensity}
+          position={[0, 0, 0]}
+          rotation={[0, 0, 0]}
+          scale={[1, 1, 1]}
+        >
+          <object3D ref={dummyRef} position={[0, 0, -1]} />
+          {isActive && <Helper type={SpotLightHelper} />}
+        </spotLight>
+      );
+    case LightType.Point:
+      return (
+        <pointLight
+          ref={(instance) => {
+            if (instance)
+              useViewportObjectStore
+                .getState()
+                .registerLight(light.id, instance);
+            else useViewportObjectStore.getState().unregisterLight(light.id);
+          }}
+          color={light.color.value}
+          intensity={light.intensity}
+          distance={light.distance}
+          decay={light.decay}
+        >
+          {isActive && <Helper type={PointLightHelper} />}
+        </pointLight>
+      );
+    case LightType.Ambient:
+      return (
+        <ambientLight
+          ref={(instance) => {
+            if (instance)
+              useViewportObjectStore
+                .getState()
+                .registerLight(light.id, instance);
+            else useViewportObjectStore.getState().unregisterLight(light.id);
+          }}
+          color={light.color.value}
+          intensity={light.intensity}
+        />
+      );
+    case LightType.HDRI:
+      throw new Error("SceneObjectLight: HDRI node is not implemented");
+  }
 }
 
 function SceneObjectControls({
@@ -87,10 +175,15 @@ function SceneObjectControls({
 }) {
   const { transform } = useHandlers();
   const activeTool = useSessionStore((s) => s.activeObjectTool);
+  const targetedLight = useSceneStore((s) =>
+    activeRef.kind === "Light" ? s.scene?.lights[activeRef.id] : undefined
+  );
+  const tool =
+    activeTool === "rotate" && targetedLight?.target ? null : activeTool;
 
   const handleTransformControls = () => {
     const transformObj = ref.current!;
-    switch (activeTool) {
+    switch (tool) {
       case "translate":
         transform.execute({
           objectRef: activeRef,
@@ -124,11 +217,11 @@ function SceneObjectControls({
     }
   };
 
-  if (activeTool) {
+  if (tool) {
     return (
       <TransformControls
         key={`${activeRef.id}-controls`}
-        mode={activeTool ? activeTool : undefined}
+        mode={tool}
         onMouseUp={() => {
           handleTransformControls();
           setUsing(false);
@@ -153,12 +246,27 @@ function SceneNode({
   ref: RefObject<Object3D | null>;
 }) {
   const node = useSceneObject(id);
+  const groupRef = useRef<Group>(null);
 
   const childrenIDs = useSceneStore((s) => s.scene!.sceneGraph.graphThree[id]);
 
-  if (!node || node.pendingDelete) return null;
+  const attachGroup = useCallback(
+    (instance: Group | null) => {
+      groupRef.current = instance;
+      if (instance) useViewportObjectStore.getState().register(id, instance);
+      else useViewportObjectStore.getState().unregister(id);
+    },
+    [id]
+  );
 
-  const isActive = node.id === activeId;
+  const isActive = node?.id === activeId;
+
+  useLayoutEffect(() => {
+    if (!isActive) return;
+    ref.current = groupRef.current;
+  }, [isActive, ref]);
+
+  if (!node || node.pendingDelete) return null;
 
   return (
     <>
@@ -168,7 +276,7 @@ function SceneNode({
         scale={node.transform.scale}
         visible={"visible" in node ? node.visible : true}
         name={node.name}
-        ref={node.id === activeId ? ref : null}
+        ref={attachGroup}
       >
         {node.kind === "Mesh" && (
           <SceneObjectMesh
@@ -177,7 +285,9 @@ function SceneNode({
             key={`sceneMesh-${node.id}`}
           />
         )}
-        {node.kind === "Light" && <SceneObjectLight />}
+        {node.kind === "Light" && (
+          <SceneObjectLight light={node} isActive={isActive} />
+        )}
         {(childrenIDs ?? []).map((cid) => (
           <SceneNode key={cid} id={cid} activeId={activeId} ref={ref} />
         ))}
@@ -405,11 +515,14 @@ export function SceneRenderer() {
               key={activeCamera.id}
             />
           )}
-          <ambientLight intensity={1} />
-          <directionalLight position={[5, 5, 5]} intensity={1} />
           <group ref={contentRef}>
             {scene.sceneGraph.roots.map((oid) => (
-              <SceneNode id={oid} activeId={activeRef?.id} ref={nodeRef} />
+              <SceneNode
+                key={oid}
+                id={oid}
+                activeId={activeRef?.id}
+                ref={nodeRef}
+              />
             ))}
           </group>
           {activeRef && activeRef.kind != "Camera" && (

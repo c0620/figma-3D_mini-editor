@@ -26,18 +26,9 @@ export type MeshPatch = Partial<
   Pick<SceneMesh, "visible" | "locked" | "name" | "pendingDelete" | "materials">
 > & { transform?: Partial<Transform> };
 
-export type LightPatch = Partial<
-  Pick<
-    SceneLight,
-    | "visible"
-    | "locked"
-    | "name"
-    | "pendingDelete"
-    | "color"
-    | "intensity"
-    | "type"
-  >
-> & { transform?: Partial<Transform> };
+export type LightPatch = Partial<Omit<SceneLight, "id" | "transform">> & {
+  transform?: Partial<Transform>;
+};
 
 export type GroupPatch = Partial<
   Pick<SceneGroup, "visible" | "locked" | "name" | "pendingDelete">
@@ -282,7 +273,13 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
       const addToDelete = (obj: SceneObject) => IDsToDelete.push(obj);
       applyToSceneThreeNode(objectRef.id, state.scene, addToDelete);
 
+      const deletedIds = new Set(IDsToDelete.map((node) => node.id));
+
       const newSceneState = produce(state.scene, (scene) => {
+        Object.values(scene.lights).forEach((light) => {
+          if (light.target && deletedIds.has(light.target)) light.target = null;
+        });
+
         IDsToDelete.forEach((node) => {
           unlinkFromGraph(scene, node.id, node.parentId);
           switch (node.kind) {

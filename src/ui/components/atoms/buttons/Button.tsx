@@ -27,9 +27,9 @@ export function MainButton({
   return (
     <>
       {to ? (
-        <div className={clsx("h2", styles.mainButton)}>
-          <Link to={to!}>{text}</Link>
-        </div>
+        <Link to={to!} className={clsx("h2", styles.mainButton)}>
+          {text}
+        </Link>
       ) : (
         <div
           className={clsx("h2", styles.mainButton, { [styles.frozen]: frozen })}
@@ -141,12 +141,12 @@ export function SquareStateButton({
   onClick,
   imgs,
   active,
-  deactivated,
+  deactivated = false,
 }: {
   onClick: () => void;
   imgs: { active: IconComponent; inactive: IconComponent };
   active?: boolean;
-  deactivated: boolean;
+  deactivated?: boolean;
 }) {
   const [isActive, setActive] = useState(active ? active : false);
   const Icon = isActive ? imgs.active : imgs.inactive;

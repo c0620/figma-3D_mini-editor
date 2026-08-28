@@ -1,5 +1,5 @@
-import { Option, type OptionType } from "../../atoms/inputs/Selects";
-import styles from "./SelectAngleOption.module.scss";
+import { Radio, type RadioProps } from "../../../atoms/inputs/Radio";
+import styles from "./RadioCommon.module.scss";
 
 import backIcon from "@/assets/images/icons/descriptive/cameraPBack.svg?react";
 import bottomIcon from "@/assets/images/icons/descriptive/cameraPBot.svg?react";
@@ -9,13 +9,13 @@ import rightIcon from "@/assets/images/icons/descriptive/cameraPRight.svg?react"
 import topIcon from "@/assets/images/icons/descriptive/cameraPTop.svg?react";
 import customIcon from "@/assets/images/icons/descriptive/cameraPUser.svg?react";
 import saveIcon from "@/assets/images/icons/descriptive/cameraPSave.svg?react";
-import { ActionButton } from "../../atoms/buttons/Button";
+import { ActionButton } from "../../../atoms/buttons/Button";
 import { useContext } from "react";
-import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
+import { PanelSceneModeContext } from "../../../templates/panels/BasePanel";
 import { useSessionStore } from "@/store/sessionStore";
 import type { SceneCamera } from "@/types/scene";
 
-export function SelectAngleOption({
+export function RadioCameraAnglePresets({
   title,
   value,
   onClick,
@@ -27,7 +27,7 @@ export function SelectAngleOption({
   const mode = useContext(PanelSceneModeContext);
   const customAngle = useSessionStore((s) => s.cameraCustomAngle);
   const setCustomAngle = useSessionStore((s) => s.setCameraCustomAngle);
-  const options: (Omit<OptionType, "onClick" | "isActive"> &
+  const options: (Omit<RadioProps, "onClick" | "isActive"> &
     Pick<SceneCamera, "azimuth" | "polar" | "target">)[] = [
     { azimuth: 0, polar: 0, text: "Сверху", icon: topIcon, target: [0, 0, 0] },
     {
@@ -71,7 +71,7 @@ export function SelectAngleOption({
       {mode == "open" && <h3 className="h3">{title}</h3>}
       <div className={styles.optionContainer}>
         {options.map((option) => (
-          <Option
+          <Radio
             key={option.text}
             icon={mode == "close" ? option.icon : undefined}
             text={option.text}
@@ -89,7 +89,7 @@ export function SelectAngleOption({
           />
         ))}
         {customAngle && (
-          <Option
+          <Radio
             key={`customAngle-${customAngle.azimuth}-${customAngle.polar}`}
             icon={mode == "close" ? customIcon : undefined}
             text="Кастомный"

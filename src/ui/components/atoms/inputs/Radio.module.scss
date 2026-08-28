@@ -1,0 +1,21 @@
+.option {
+  display: inline-flex;
+  padding: 4px 8px;
+  align-items: center;
+  gap: var(--margin-s);
+  border-radius: var(--border-radius-s);
+  color: var(--interactive-color-interactive-text-secondary);
+  background-color: var(--interactive-color-interactive-background-primary);
+  & > svg {
+    height: var(--button-size-button-icon-height);
+    color: var(--interactive-color-interactive-text-secondary);
+  }
+}
+
+.option-active {
+  color: var(--interactive-color-interactive-background-primary);
+  background-color: var(--interactive-color-interactive-text-secondary);
+  & > svg {
+    color: var(--interactive-color-interactive-background-primary);
+  }
+}

@@ -23,6 +23,13 @@ export enum CameraType {
   Orthographic = "OrthographicCamera",
 }
 
+export enum LightType {
+  Spot = "Spot",
+  Ambient = "Ambient",
+  HDRI = "HDRI",
+  Point = "Point",
+}
+
 export interface FigmaColor {
   type: "figma";
   id: Variable["id"];
@@ -35,12 +42,12 @@ export interface CustomColor {
   value: Color;
 }
 
-export type MaterialColor = FigmaColor | CustomColor;
+export type PluginColor = FigmaColor | CustomColor;
 
 export interface Material {
   id: MaterialID;
   name: string;
-  color: MaterialColor;
+  color: PluginColor;
   roughness: number;
   metalness: number;
   emissiveIntensity: number;
@@ -80,10 +87,15 @@ export interface SceneMesh extends BasicSceneObject {
 }
 
 export interface SceneLight extends BasicSceneObject {
-  type: "Spot" | "Ambient" | "HDRI";
-  color: string;
+  type: LightType;
+  color: PluginColor;
   intensity: number;
   kind: "Light";
+  distance: number;
+  angle: number;
+  penumbra: number;
+  decay: number;
+  target: ObjectID | null;
 }
 
 export interface SceneGroup extends BasicSceneObject {

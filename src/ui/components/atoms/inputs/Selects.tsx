@@ -6,15 +6,15 @@ import { Color } from "three";
 import type { IconComponent } from "../../types/icon";
 import clsx from "clsx";
 
-export type SelectIconVariable = {
-  icon: IconComponent;
-  id: string;
+export type SelectVariableType<T> = {
+  icon?: IconComponent;
+  id: PropertyKey;
   title: string;
-  value: number;
+  value: T;
 };
-export type SelectIconVariables = Record<
-  SelectIconVariable["id"],
-  SelectIconVariable
+export type SelectVariables<T> = Record<
+  SelectVariableType<T>["id"],
+  SelectVariableType<T>
 >;
 
 export type FigmaVariableListItem = {
@@ -35,15 +35,15 @@ function variableColorToCss(value: unknown): string | undefined {
   return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
 }
 
-export function SelectIcon({
+export function SelectVariable<T extends PropertyKey>({
   variables,
   value,
   onChange,
   isOpen = true,
 }: {
-  variables: SelectIconVariables;
-  value: number;
-  onChange: (value: SelectIconVariable["value"]) => void;
+  variables: SelectVariables<T>;
+  value: T;
+  onChange: (value: T) => void;
   isOpen?: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -57,7 +57,7 @@ export function SelectIcon({
     <div className={styles.selectContainer + " t3"}>
       {!open ? (
         <button className={styles.selectTrigger} onClick={() => setOpen(true)}>
-          <currentVariable.icon />
+          {currentVariable.icon && <currentVariable.icon />}
           {isOpen && currentVariable.title}
         </button>
       ) : (
@@ -74,7 +74,7 @@ export function SelectIcon({
                 setOpen(false);
               }}
             >
-              <variable.icon />
+              {variable.icon && <variable.icon />}
               {isOpen && variable.title}
             </li>
           ))}
@@ -154,34 +154,6 @@ export function SelectColor({
           })}
         </ul>
       )}
-    </div>
-  );
-}
-
-export type OptionType = {
-  icon?: IconComponent;
-  text: string;
-  isActive: boolean;
-  onClick: () => void;
-};
-
-export function Option({
-  icon: Icon,
-  text,
-  onClick,
-  isActive,
-  isLong = true,
-}: OptionType & { isLong?: boolean }) {
-  return (
-    <div
-      className={clsx("t3", styles.option, {
-        [styles.optionActive]: isActive,
-        accent: isActive,
-      })}
-      onClick={onClick}
-    >
-      {Icon && <Icon />}
-      {isLong && text}
     </div>
   );
 }

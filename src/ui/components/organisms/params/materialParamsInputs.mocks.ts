@@ -1,4 +1,4 @@
-import type { FigmaVariableListItem } from "../atoms/inputs/Selects";
+import type { FigmaVariableListItem } from "../../atoms/inputs/Selects";
 
 const MOCK_MODE_ID = "1:0";
 
