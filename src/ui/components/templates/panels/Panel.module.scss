@@ -13,40 +13,31 @@
   gap: var(--margin-l);
 }
 
-.free-long {
-  flex-grow: 1;
-  justify-content: space-between;
-}
-
-.panel.close {
+.close {
   width: var(--editor-size-editor-panel-width-closed);
   align-items: center;
 }
 
-.panel-scene {
+.panel-content {
   display: flex;
   flex-direction: column;
-  gap: var(--margin-m);
-  flex: 1 1 0;
+  flex-grow: 1;
   min-height: 0;
+  justify-content: space-between;
+  gap: var(--margin-l);
+}
+
+.panel-set {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-l);
+  flex: 0 0 auto;
 }
 
 .panel-group {
   display: flex;
   flex-direction: column;
-  gap: var(--margin-l);
-  height: max-content;
-  align-items: center;
-}
-
-.panel-items {
-  display: flex;
-  flex-direction: column;
-  gap: var(--margin-m);
-  height: max-content;
-  width: 100%;
-}
-
-.mesh-materials {
-  flex: 0 0 var(--outputs-size-scene-mats-height);
+  gap: var(--margin-s);
+  flex: 1 1 0;
+  min-height: 0;
 }

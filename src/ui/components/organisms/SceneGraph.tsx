@@ -81,12 +81,7 @@ export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
     }
   }
   return (
-    <ScrollPanel
-      isLong={activeObj === null}
-      img={sceneIcon}
-      isFixed={activeObj !== null}
-      disableScroll={false}
-    >
+    <ScrollPanel fill img={sceneIcon} disableScroll={false}>
       {graphItems}
     </ScrollPanel>
   );

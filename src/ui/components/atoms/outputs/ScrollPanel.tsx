@@ -6,18 +6,16 @@ import clsx from "clsx";
 import type { IconComponent } from "../../types/icon";
 
 export function ScrollPanel({
-  isLong,
+  fill = false,
   text,
   img: Icon,
   children,
-  isFixed = false,
   disableScroll = true,
 }: {
-  isLong: Boolean;
+  fill?: boolean;
   text?: string;
   img?: IconComponent;
-  children: any;
-  isFixed?: boolean;
+  children: React.ReactNode;
   disableScroll?: boolean;
 }) {
   const mode = useContext(PanelSceneModeContext);
@@ -25,7 +23,7 @@ export function ScrollPanel({
     <div
       className={clsx(styles.scrollPanelContainer, {
         [styles.closed]: mode == "close",
-        [styles.panelFixed]: isFixed,
+        [styles.fill]: fill,
       })}
     >
       {text && (
@@ -41,9 +39,7 @@ export function ScrollPanel({
 
       <div
         className={clsx(styles.scrollPanel, {
-          [styles.panelLong]: isLong,
           [styles.closed]: mode == "close",
-          [styles.panelFixed]: isFixed,
           [styles.disableScroll]: disableScroll,
         })}
       >

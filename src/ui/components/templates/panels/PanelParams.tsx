@@ -66,52 +66,51 @@ function LightParams({ activeLight }: { activeLight: SceneLight }) {
   const { lightEditing } = useHandlers();
   return (
     <Panel panel="Right" text="Параметры">
-      <div className={styles.panelScene}>
-        <ScrollPanel
-          isLong={false}
-          text="Вид источника света"
-          img={
-            activeLight.type == LightType.Ambient
-              ? ambientLightIcon
-              : activeLight.type == LightType.Point
-                ? pointLightIcon
-                : spotLightIcon
+      <ScrollPanel
+        text="Вид источника света"
+        img={
+          activeLight.type == LightType.Ambient
+            ? ambientLightIcon
+            : activeLight.type == LightType.Point
+              ? pointLightIcon
+              : spotLightIcon
+        }
+      >
+        <SwitchItem
+          text="Окружающий свет"
+          icon={ambientLightIcon}
+          onClick={() =>
+            lightEditing.execute({
+              id: activeLight.id,
+              changes: { type: LightType.Ambient },
+            })
           }
-        >
-          <SwitchItem
-            text="Окружающий свет"
-            icon={ambientLightIcon}
-            onClick={() =>
-              lightEditing.execute({
-                id: activeLight.id,
-                changes: { type: LightType.Ambient },
-              })
-            }
-            isActive={activeLight.type == LightType.Ambient}
-          />
-          <SwitchItem
-            text="Точечный свет"
-            icon={pointLightIcon}
-            onClick={() =>
-              lightEditing.execute({
-                id: activeLight.id,
-                changes: { type: LightType.Point },
-              })
-            }
-            isActive={activeLight.type == LightType.Point}
-          />
-          <SwitchItem
-            text="Направленный свет"
-            icon={spotLightIcon}
-            onClick={() =>
-              lightEditing.execute({
-                id: activeLight.id,
-                changes: { type: LightType.Spot },
-              })
-            }
-            isActive={activeLight.type == LightType.Spot}
-          />
-        </ScrollPanel>
+          isActive={activeLight.type == LightType.Ambient}
+        />
+        <SwitchItem
+          text="Точечный свет"
+          icon={pointLightIcon}
+          onClick={() =>
+            lightEditing.execute({
+              id: activeLight.id,
+              changes: { type: LightType.Point },
+            })
+          }
+          isActive={activeLight.type == LightType.Point}
+        />
+        <SwitchItem
+          text="Направленный свет"
+          icon={spotLightIcon}
+          onClick={() =>
+            lightEditing.execute({
+              id: activeLight.id,
+              changes: { type: LightType.Spot },
+            })
+          }
+          isActive={activeLight.type == LightType.Spot}
+        />
+      </ScrollPanel>
+      <div className={styles.panelSet}>
         <LightParamsInputs activeLight={activeLight} />
         {activeLight.type == LightType.Spot && (
           <RadioLightPresets
@@ -178,22 +177,22 @@ function MeshParams({
   return (
     <>
       <Panel panel="Right" text="Параметры">
-        <div className={clsx(styles.panelScene, styles.meshMaterials)}>
-          <ScrollPanel isLong={true} text="Материалы меша" img={materialsIcon}>
-            {materialIDs.map((id) => (
-              <MaterialPreview
-                key={id}
-                materialID={id}
-                name={materials[id].name}
-                onClick={() => setActiveMaterialID(id)}
-                isActive={id === activeMaterialID}
-              />
-            ))}
-          </ScrollPanel>
-        </div>
-        <MaterialParamsInputs material={activeMaterial} />
-        <div className={styles.panelScene}>
-          <ScrollPanel isLong={true} text="Текстуры" img={texturesIcon}>
+        <ScrollPanel fill text="Материалы меша" img={materialsIcon}>
+          {materialIDs.map((id) => (
+            <MaterialPreview
+              key={id}
+              materialID={id}
+              name={materials[id].name}
+              onClick={() => setActiveMaterialID(id)}
+              isActive={id === activeMaterialID}
+            />
+          ))}
+        </ScrollPanel>
+
+        <div className={styles.panelSet}>
+          <MaterialParamsInputs material={activeMaterial} />
+
+          <ScrollPanel text="Текстуры" img={texturesIcon}>
             {Object.values(TextureSlot).map((slot) => (
               <TextureItem
                 key={slot}
@@ -225,35 +224,32 @@ function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
   const { camera } = useHandlers();
   return (
     <Panel panel="Right" text="Параметры">
-      <div className={clsx(styles.panelItems, styles.freeLong)}>
-        <div className={styles.panelGroup}>
-          <ScrollPanel isLong={false} text="Тип камеры" img={lensIcon}>
-            <SwitchItem
-              text="Перспективная камера"
-              icon={perspectiveCameraIcon}
-              onClick={() =>
-                camera.execute({
-                  id: activeCamera.id,
-                  type: CameraType.Perspective,
-                })
-              }
-              isActive={activeCamera.type == CameraType.Perspective}
-            />
-            <SwitchItem
-              text="Ортогональная камера"
-              icon={orthographicCameraIcon}
-              onClick={() =>
-                camera.execute({
-                  id: activeCamera.id,
-                  type: CameraType.Orthographic,
-                })
-              }
-              isActive={activeCamera.type == CameraType.Orthographic}
-            />
-          </ScrollPanel>
-          <CameraParamsInputs activeCamera={activeCamera} />
-        </div>
-
+      <ScrollPanel text="Тип камеры" img={lensIcon}>
+        <SwitchItem
+          text="Перспективная камера"
+          icon={perspectiveCameraIcon}
+          onClick={() =>
+            camera.execute({
+              id: activeCamera.id,
+              type: CameraType.Perspective,
+            })
+          }
+          isActive={activeCamera.type == CameraType.Perspective}
+        />
+        <SwitchItem
+          text="Ортогональная камера"
+          icon={orthographicCameraIcon}
+          onClick={() =>
+            camera.execute({
+              id: activeCamera.id,
+              type: CameraType.Orthographic,
+            })
+          }
+          isActive={activeCamera.type == CameraType.Orthographic}
+        />
+      </ScrollPanel>
+      <div className={styles.panelSet}>
+        <CameraParamsInputs activeCamera={activeCamera} />
         <RadioCameraAnglePresets
           title="Пресеты вида камеры"
           value={{

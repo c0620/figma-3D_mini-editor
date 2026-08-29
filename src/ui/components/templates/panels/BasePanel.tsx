@@ -22,7 +22,7 @@ export function Panel({
     <div
       className={clsx(styles.panel, {
         [styles.close]: mode == "close",
-        [styles.spaceBetween]: spaceBetween,
+        // [styles.spaceBetween]: spaceBetween,
       })}
     >
       <PanelSceneModeContext value={mode}>
@@ -32,7 +32,7 @@ export function Panel({
           panel={panel}
           text={text}
         />
-        {children}
+        <div className={styles.panelContent}>{children}</div>
       </PanelSceneModeContext>
     </div>
   );

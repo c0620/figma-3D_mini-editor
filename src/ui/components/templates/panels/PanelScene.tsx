@@ -20,7 +20,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
 
   return (
     <Panel panel="Left" text="Сцена">
-      <div className={styles.panelScene}>
+      <div className={styles.panelGroup}>
         <SceneGraph activeObj={activeObj} />
         <ObjectAddButton />
       </div>
