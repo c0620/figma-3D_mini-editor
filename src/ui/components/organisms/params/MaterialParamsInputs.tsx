@@ -1,7 +1,4 @@
-import { useContext } from "react";
-import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
-
-import styles from "./MaterialParamsInputs.module.scss";
+import styles from "./ParamsCommon.module.scss";
 import type { Material } from "@/types/scene";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import { NumberFieldInput } from "../../molecules/inputs/NumberFieldInput";
@@ -10,20 +7,22 @@ import { SelectColor } from "../../atoms/inputs/Selects";
 import { getMockFigmaVariables } from "./materialParamsInputs.mocks";
 import clsx from "clsx";
 import { PickerColor } from "../../molecules/inputs/PickerColor";
+import { useSessionStore } from "@/store/sessionStore";
 
 export function MaterialParamsInputs({ material }: { material: Material }) {
-  const mode = useContext(PanelSceneModeContext);
+  const isParamsClosed = useSessionStore((s) => s.isParamsClosed);
+  const isOpen = !isParamsClosed;
 
   const { materialEditing } = useHandlers();
   const figmaVariables = getMockFigmaVariables();
 
   return (
     <div
-      className={clsx(styles.materialParams, {
-        [styles.materialParamsClosed]: mode == "close",
+      className={clsx(styles.paramsContainer, {
+        [styles.paramsClosed]: isParamsClosed,
       })}
     >
-      {mode == "open" && (
+      {isOpen && (
         <h3 className="h3">
           Параметры <span></span>materialname
         </h3>
@@ -31,12 +30,12 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
       {(material.roughness != undefined || material.metalness != undefined) && (
         <div
           className={clsx(styles.paramsRow, {
-            [styles.paramsRowClosed]: mode == "close",
+            [styles.paramsRowClosed]: isParamsClosed,
           })}
         >
           {material.roughness != undefined && (
             <NumberFieldInput
-              title={mode == "open" ? "Шероховатость" : undefined}
+              title={isOpen ? "Шероховатость" : undefined}
               field={{
                 onChange: (value) =>
                   materialEditing.execute({
@@ -46,7 +45,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
                 value: material.roughness,
                 isActive: false,
                 range:
-                  mode == "open"
+                  isOpen
                     ? {
                         min: 0,
                         max: 10,
@@ -64,7 +63,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
 
           {material.metalness != undefined && (
             <NumberFieldInput
-              title={mode == "open" ? "Металлик" : undefined}
+              title={isOpen ? "Металлик" : undefined}
               field={{
                 onChange: (value) =>
                   materialEditing.execute({
@@ -74,7 +73,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
                 value: material.metalness,
                 isActive: false,
                 range:
-                  mode == "open"
+                  isOpen
                     ? {
                         min: 0,
                         max: 10,
@@ -93,7 +92,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
       )}
 
       <NumberFieldInput
-        title={mode == "open" ? "Свечение" : undefined}
+        title={isOpen ? "Свечение" : undefined}
         field={{
           onChange: (value) =>
             materialEditing.execute({
@@ -103,7 +102,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
           value: material.emissiveIntensity,
           isActive: false,
           range:
-            mode == "open"
+            isOpen
               ? {
                   min: 0,
                   max: 10,
@@ -126,9 +125,9 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
         onPalette={(value: Material["color"]) => {
           threeAssetRegistry.setParam(material.id, { color: value.value });
         }}
-        mode={mode}
+        isOpen={isOpen}
       />
-      {mode == "open" && (
+      {isOpen && (
         <SelectColor
           variables={figmaVariables}
           value={material.color}

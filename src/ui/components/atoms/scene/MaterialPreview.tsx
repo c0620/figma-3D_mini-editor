@@ -2,22 +2,21 @@ import { useRender } from "@/app/ApplicationKernelContext";
 import { useSceneStore } from "@/store/sceneStore";
 import type { MaterialID } from "@/types/scene";
 import clsx from "clsx";
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import styles from "./MaterialPreview.module.scss";
-import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
-
 export function MaterialPreview({
   materialID,
   name,
   onClick,
   isActive,
+  isOpen,
 }: {
   materialID: MaterialID;
   onClick: () => void;
   name: string;
   isActive: boolean;
+  isOpen: boolean;
 }) {
-  const mode = useContext(PanelSceneModeContext);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderService = useRender();
@@ -38,7 +37,7 @@ export function MaterialPreview({
       onClick={onClick}
     >
       <canvas ref={canvasRef}></canvas>
-      {mode == "open" && <p className="t3">{name}</p>}
+      {isOpen && <p className="t3">{name}</p>}
     </div>
   );
 }

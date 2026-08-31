@@ -1,6 +1,4 @@
-import { useContext } from "react";
 import { Radio, type RadioProps } from "../../../atoms/inputs/Radio";
-import { PanelSceneModeContext } from "../../../templates/panels/BasePanel";
 import styles from "./RadioCommon.module.scss";
 import type { SceneLight } from "@/types/scene";
 import type { LightPatch } from "@/store/sceneStore";
@@ -12,12 +10,13 @@ export function RadioLightPresets({
   value,
   title,
   onClick,
+  isOpen,
 }: {
   value: Pick<SceneLight, "angle" | "decay" | "distance" | "penumbra">;
   title: string;
   onClick: (value: LightPatch) => void;
+  isOpen: boolean;
 }) {
-  const mode = useContext(PanelSceneModeContext);
   const options: (Omit<RadioProps, "onClick" | "isActive"> &
     Pick<SceneLight, "angle" | "decay" | "distance" | "penumbra">)[] = [
     {
@@ -47,12 +46,12 @@ export function RadioLightPresets({
   ];
   return (
     <div className={styles.container}>
-      {mode == "open" && <h3 className="h3">{title}</h3>}
+      {isOpen && <h3 className="h3">{title}</h3>}
       <div className={styles.optionContainer}>
         {options.map((option) => (
           <Radio
             key={option.text}
-            icon={mode == "close" ? option.icon : undefined}
+            icon={!isOpen ? option.icon : undefined}
             text={option.text}
             onClick={() =>
               onClick({
@@ -68,7 +67,7 @@ export function RadioLightPresets({
               value.decay == option.decay &&
               value.distance == option.distance
             }
-            isLong={mode == "open"}
+            isLong={isOpen}
           />
         ))}
       </div>

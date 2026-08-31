@@ -1,21 +1,20 @@
 import clsx from "clsx";
 import type { IconComponent } from "../../types/icon";
 import styles from "./SwitchItem.module.scss";
-import { useContext } from "react";
-import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 
 export function SwitchItem({
   icon: Icon,
   text,
   onClick,
   isActive,
+  isOpen,
 }: {
   icon: IconComponent;
   text: string;
   onClick: () => void;
   isActive: boolean;
+  isOpen: boolean;
 }) {
-  const mode = useContext(PanelSceneModeContext);
   return (
     <div
       className={clsx("t3", styles.selectItem, {
@@ -26,7 +25,7 @@ export function SwitchItem({
       <div className={styles.itemIcon}>
         <Icon />
       </div>
-      {mode == "open" && <div>{text}</div>}
+      {isOpen && <div>{text}</div>}
     </div>
   );
 }

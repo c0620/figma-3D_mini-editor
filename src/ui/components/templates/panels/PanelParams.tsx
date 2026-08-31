@@ -36,6 +36,7 @@ import { RadioCameraAnglePresets } from "../../molecules/inputs/radio/RadioCamer
 import { useHandlers } from "@/app/ApplicationKernelContext.tsx";
 import { LightParamsInputs } from "../../organisms/params/LightParamsInputs.tsx";
 import { RadioLightPresets } from "../../molecules/inputs/radio/RadioLightPresets.tsx";
+import { useSessionStore } from "@/store/sessionStore.ts";
 
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
   switch (activeObj.kind) {
@@ -46,13 +47,7 @@ export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
         activeObj.id
       )?.materials;
       if (materials)
-        return (
-          <MeshParams
-            key={activeObj.id}
-            activeMesh={activeObj}
-            materialIDs={materials}
-          />
-        );
+        return <MeshParams activeMesh={activeObj} materialIDs={materials} />;
       return null;
     }
     case "Camera":
@@ -64,8 +59,10 @@ export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
 
 function LightParams({ activeLight }: { activeLight: SceneLight }) {
   const { lightEditing } = useHandlers();
+  const isOpen = !useSessionStore((s) => s.isParamsClosed);
+  const onToggle = useSessionStore((s) => s.toggleParamsClosed);
   return (
-    <Panel panel="Right" text="Параметры">
+    <Panel panel="Right" text="Параметры" isOpen={isOpen} onToggle={onToggle}>
       <ScrollPanel
         text="Вид источника света"
         img={
@@ -75,6 +72,7 @@ function LightParams({ activeLight }: { activeLight: SceneLight }) {
               ? pointLightIcon
               : spotLightIcon
         }
+        isOpen={isOpen}
       >
         <SwitchItem
           text="Окружающий свет"
@@ -86,6 +84,7 @@ function LightParams({ activeLight }: { activeLight: SceneLight }) {
             })
           }
           isActive={activeLight.type == LightType.Ambient}
+          isOpen={isOpen}
         />
         <SwitchItem
           text="Точечный свет"
@@ -97,6 +96,7 @@ function LightParams({ activeLight }: { activeLight: SceneLight }) {
             })
           }
           isActive={activeLight.type == LightType.Point}
+          isOpen={isOpen}
         />
         <SwitchItem
           text="Направленный свет"
@@ -108,6 +108,7 @@ function LightParams({ activeLight }: { activeLight: SceneLight }) {
             })
           }
           isActive={activeLight.type == LightType.Spot}
+          isOpen={isOpen}
         />
       </ScrollPanel>
       <div className={styles.panelSet}>
@@ -119,6 +120,7 @@ function LightParams({ activeLight }: { activeLight: SceneLight }) {
             onClick={(params) =>
               lightEditing.execute({ id: activeLight.id, changes: params })
             }
+            isOpen={isOpen}
           />
         )}
       </div>
@@ -144,8 +146,10 @@ function GroupParams({ activeGroup }: { activeGroup: SceneGroup }) {
       }
     }
   }
+  const isOpen = !useSessionStore((s) => s.isParamsClosed);
+  const onToggle = useSessionStore((s) => s.toggleParamsClosed);
   return (
-    <Panel panel="Right" text="Параметры">
+    <Panel panel="Right" text="Параметры" isOpen={isOpen} onToggle={onToggle}>
       <div>{childrenCount}</div>
     </Panel>
   );
@@ -160,7 +164,8 @@ function MeshParams({
   const [activeMaterialID, setActiveMaterialID] = useState<MaterialID>(
     materialIDs[0]
   );
-
+  const isOpen = !useSessionStore((s) => s.isParamsClosed);
+  const onToggle = useSessionStore((s) => s.toggleParamsClosed);
   const materials = useSceneStore((s) => s.scene?.materials);
   if (!materials) return <></>;
 
@@ -176,8 +181,14 @@ function MeshParams({
 
   return (
     <>
-      <Panel panel="Right" text="Параметры">
-        <ScrollPanel fill text="Материалы меша" img={materialsIcon}>
+      <Panel panel="Right" text="Параметры" isOpen={isOpen} onToggle={onToggle}>
+        <ScrollPanel
+          fill
+          className={styles.meshMaterials}
+          text="Материалы меша"
+          img={materialsIcon}
+          isOpen={isOpen}
+        >
           {materialIDs.map((id) => (
             <MaterialPreview
               key={id}
@@ -185,6 +196,7 @@ function MeshParams({
               name={materials[id].name}
               onClick={() => setActiveMaterialID(id)}
               isActive={id === activeMaterialID}
+              isOpen={isOpen}
             />
           ))}
         </ScrollPanel>
@@ -192,7 +204,12 @@ function MeshParams({
         <div className={styles.panelSet}>
           <MaterialParamsInputs material={activeMaterial} />
 
-          <ScrollPanel text="Текстуры" img={texturesIcon}>
+          <ScrollPanel
+            className={styles.meshTextures}
+            text="Текстуры"
+            img={texturesIcon}
+            isOpen={isOpen}
+          >
             {Object.values(TextureSlot).map((slot) => (
               <TextureItem
                 key={slot}
@@ -205,6 +222,7 @@ function MeshParams({
                 openImportModal={() =>
                   setOpenImportTextureModal(!openImportTextureModal)
                 }
+                isOpen={isOpen}
               />
             ))}
           </ScrollPanel>
@@ -222,9 +240,11 @@ function MeshParams({
 
 function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
   const { camera } = useHandlers();
+  const isOpen = !useSessionStore((s) => s.isParamsClosed);
+  const onToggle = useSessionStore((s) => s.toggleParamsClosed);
   return (
-    <Panel panel="Right" text="Параметры">
-      <ScrollPanel text="Тип камеры" img={lensIcon}>
+    <Panel panel="Right" text="Параметры" isOpen={isOpen} onToggle={onToggle}>
+      <ScrollPanel text="Тип камеры" img={lensIcon} isOpen={isOpen}>
         <SwitchItem
           text="Перспективная камера"
           icon={perspectiveCameraIcon}
@@ -235,6 +255,7 @@ function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
             })
           }
           isActive={activeCamera.type == CameraType.Perspective}
+          isOpen={isOpen}
         />
         <SwitchItem
           text="Ортогональная камера"
@@ -246,6 +267,7 @@ function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
             })
           }
           isActive={activeCamera.type == CameraType.Orthographic}
+          isOpen={isOpen}
         />
       </ScrollPanel>
       <div className={styles.panelSet}>
@@ -265,6 +287,7 @@ function CameraParams({ activeCamera }: { activeCamera: SceneCamera }) {
               target: value.target,
             })
           }
+          isOpen={isOpen}
         />
       </div>
     </Panel>

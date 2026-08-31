@@ -13,12 +13,12 @@ import fov400Icon from "@/assets/images/icons/descriptive/fov400.svg?react";
 export function SelectLens({
   title,
   value,
-  mode,
+  isOpen,
   onClick,
 }: {
   title: string;
   value: number;
-  mode: "open" | "close";
+  isOpen: boolean;
   onClick: (value: number) => void;
 }) {
   const fovPresets: SelectVariables<number> = {
@@ -61,12 +61,12 @@ export function SelectLens({
 
   return (
     <div className={styles.commonContainer}>
-      {mode == "open" && <p className="t3">{title}</p>}
+      {isOpen && <p className="t3">{title}</p>}
       <SelectVariable
         variables={fovPresets}
         value={value}
         onChange={(v) => onClick(v)}
-        isOpen={mode == "open"}
+        isOpen={isOpen}
       />
     </div>
   );

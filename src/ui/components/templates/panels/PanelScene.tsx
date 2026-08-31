@@ -1,4 +1,4 @@
-import { useSceneEntities, useHandlers } from "@/app/ApplicationKernelContext";
+import { useState } from "react";
 
 import { Panel } from "./BasePanel";
 
@@ -9,23 +9,28 @@ import { TransformInputs } from "../../organisms/TransformInputs";
 import styles from "./Panel.module.scss";
 import type { ActiveEntity } from "@/types/scene";
 import { SceneGraph } from "../../organisms/SceneGraph";
-import { ActionButton } from "../../atoms/buttons/Button";
 import { useSessionStore } from "@/store/sessionStore";
 import { ObjectAddButton } from "../../molecules/buttons/ObjectAddButton";
 import { PanelModeButton } from "../../molecules/buttons/PanelModeButton";
 
 export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
+  const [isOpen, setIsOpen] = useState(true);
   const activeCameraID = useSessionStore((s) => s.activeCameraID);
   const setActiveCamera = useSessionStore((s) => s.setActiveCameraID);
 
   return (
-    <Panel panel="Left" text="Сцена">
+    <Panel
+      panel="Left"
+      text="Сцена"
+      isOpen={isOpen}
+      onToggle={() => setIsOpen((open) => !open)}
+    >
       <div className={styles.panelGroup}>
-        <SceneGraph activeObj={activeObj} />
-        <ObjectAddButton />
+        <SceneGraph activeObj={activeObj} isOpen={isOpen} />
+        <ObjectAddButton isOpen={isOpen} />
       </div>
 
-      {activeObj && <TransformInputs activeObj={activeObj} />}
+      {activeObj && <TransformInputs activeObj={activeObj} isOpen={isOpen} />}
       {activeObj?.kind == "Camera" && (
         <PanelModeButton
           text={
@@ -36,6 +41,7 @@ export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
           onClick={() => setActiveCamera(activeObj.id)}
           img={activeCameraID == activeObj.id ? cameraPrimcon : cameraSecIcon}
           deactivated={activeCameraID == activeObj.id ? true : false}
+          isOpen={isOpen}
         />
       )}
     </Panel>

@@ -42,25 +42,25 @@ function addTargetOptions(
 }
 
 export function SelectLightTarget({
-  mode,
+  isOpen,
   title,
   target,
   onClick,
 }: {
   title: string;
   target: string | null;
-  mode: "open" | "close";
+  isOpen: boolean;
   onClick: (value: string | null) => void;
 }) {
   const targetVariables = useLightTargetOptions(target);
   return (
     <div className={styles.commonContainer}>
-      {mode == "open" && <p className="t3">{title}</p>}
+      {isOpen && <p className="t3">{title}</p>}
       <SelectVariable
         variables={targetVariables}
         value={target ?? ""}
         onChange={(value) => onClick(value != "" ? value : null)}
-        isOpen={mode == "open"}
+        isOpen={isOpen}
       />
     </div>
   );

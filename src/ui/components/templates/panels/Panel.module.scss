@@ -25,13 +25,23 @@
   min-height: 0;
   justify-content: space-between;
   gap: var(--margin-l);
+  width: 100%;
 }
 
 .panel-set {
   display: flex;
   flex-direction: column;
   gap: var(--margin-l);
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.mesh-materials {
+  --scroll-panel-min-height: var(--outputs-size-scene-mats-height);
+}
+
+.mesh-textures {
+  --scroll-panel-min-height: var(--outputs-size-scene-textures-height);
 }
 
 .panel-group {

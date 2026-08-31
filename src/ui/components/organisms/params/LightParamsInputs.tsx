@@ -3,9 +3,8 @@ import { NumberFieldInput } from "../../molecules/inputs/NumberFieldInput";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import { PickerColor } from "../../molecules/inputs/PickerColor";
 import { SelectColor } from "../../atoms/inputs/Selects";
-import { useContext } from "react";
-import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 import { type LightPatch } from "@/store/sceneStore";
+import { useSessionStore } from "@/store/sessionStore";
 import { useViewportObjectStore } from "@/store/viewportObjectStore";
 import type { InputNumbersField } from "../../atoms/inputs/TextInputs";
 import type { SpotLight } from "three";
@@ -36,8 +35,8 @@ export function LightParamsInputs({
   activeLight: SceneLight;
 }) {
   const { lightEditing } = useHandlers();
-  const mode = useContext(PanelSceneModeContext);
-  const isOpen = mode == "open";
+  const isParamsClosed = useSessionStore((s) => s.isParamsClosed);
+  const isOpen = !isParamsClosed;
 
   const patch = (changes: LightPatch) =>
     lightEditing.execute({ id: activeLight.id, changes });
@@ -53,7 +52,11 @@ export function LightParamsInputs({
   const isSpot = activeLight.type === LightType.Spot;
 
   return (
-    <div className={styles.paramsContainer}>
+    <div
+      className={clsx(styles.paramsContainer, {
+        [styles.paramsClosed]: isParamsClosed,
+      })}
+    >
       {isOpen && <h3 className="h3">Параметры освещения</h3>}
       <NumberFieldInput
         title="Сила свечения"
@@ -103,7 +106,9 @@ export function LightParamsInputs({
             isOpen={isOpen}
           />
           <div
-            className={clsx(styles.paramsRow, { [styles.toColumn]: !isOpen })}
+            className={clsx(styles.paramsRow, {
+              [styles.paramsRowClosed]: !isOpen,
+            })}
           >
             <NumberFieldInput
               title="Сила рассеивания"
@@ -140,7 +145,7 @@ export function LightParamsInputs({
             <SelectLightTarget
               title={"Направление света"}
               target={activeLight.target}
-              mode={mode}
+              isOpen={isOpen}
               onClick={(value) => patch({ target: value })}
             />
           )}
@@ -156,7 +161,7 @@ export function LightParamsInputs({
           if (light) light.color.set(value.value);
         }}
         value={activeLight.color.value}
-        mode={mode}
+        isOpen={isOpen}
       />
       {isOpen && (
         <SelectColor

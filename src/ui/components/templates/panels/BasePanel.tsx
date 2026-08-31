@@ -1,39 +1,33 @@
-import { useState, createContext } from "react";
-import type { PanelMode } from "../../types/panel";
 import styles from "./Panel.module.scss";
 import { PanelModeToggle } from "../../atoms/buttons/Navigation";
 import clsx from "clsx";
-
-export const PanelSceneModeContext = createContext<PanelMode>("open");
 
 export function Panel({
   panel,
   text,
   children,
-  spaceBetween = false,
+  isOpen,
+  onToggle,
 }: {
   panel: "Left" | "Right";
   text: string;
   children: React.ReactNode;
-  spaceBetween?: boolean;
+  isOpen: boolean;
+  onToggle: () => void;
 }) {
-  const [mode, setMode] = useState<PanelMode>("open");
   return (
     <div
       className={clsx(styles.panel, {
-        [styles.close]: mode == "close",
-        // [styles.spaceBetween]: spaceBetween,
+        [styles.close]: !isOpen,
       })}
     >
-      <PanelSceneModeContext value={mode}>
-        <PanelModeToggle
-          mode={mode}
-          setMode={setMode}
-          panel={panel}
-          text={text}
-        />
-        <div className={styles.panelContent}>{children}</div>
-      </PanelSceneModeContext>
+      <PanelModeToggle
+        isOpen={isOpen}
+        onToggle={onToggle}
+        panel={panel}
+        text={text}
+      />
+      <div className={styles.panelContent}>{children}</div>
     </div>
   );
 }

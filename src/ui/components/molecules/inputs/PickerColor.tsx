@@ -8,22 +8,22 @@ export function PickerColor({
   onChange,
   onPalette,
   value,
-  mode,
+  isOpen,
 }: {
   title: string;
   onChange: (value: Material["color"]) => void;
   onPalette?: (value: Material["color"]) => void;
   value: Color;
-  mode: "open" | "close";
+  isOpen: boolean;
 }) {
   return (
     <div className={styles.commonContainer}>
-      {mode == "open" && <p className="t3">{title}</p>}
+      {isOpen && <p className="t3">{title}</p>}
       <InputColorPicker
         onChange={onChange}
         value={value}
         onPalette={onPalette}
-        isDetailed={mode == "open"}
+        isDetailed={isOpen}
       />
     </div>
   );

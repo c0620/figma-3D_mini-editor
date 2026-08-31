@@ -2,9 +2,17 @@
   display: flex;
   gap: var(--margin-m);
   align-items: center;
+  flex-grow: 0;
   & > canvas {
+    flex: 0 0 var(--inputs-size-preview-height);
     width: var(--inputs-size-preview-height);
     height: var(--inputs-size-preview-height);
+  }
+  & > p {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   &.active > canvas {
     outline: var(--border-weight) solid var(--common-color-common-accent);

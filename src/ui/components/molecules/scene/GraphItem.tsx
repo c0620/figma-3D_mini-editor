@@ -1,7 +1,5 @@
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import type { SceneEntitySummary } from "@/store/sceneEntityList";
-import { useContext, useState } from "react";
-import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 import { SmallButton } from "../../atoms/buttons/Button";
 
 import styles from "./GraphItem.module.scss";
@@ -34,6 +32,7 @@ export function GraphItem({
   hideLock = false,
   hideDelete = false,
   ref,
+  isOpen,
 }: {
   item: SceneEntitySummary;
   isActive: boolean;
@@ -45,8 +44,8 @@ export function GraphItem({
   hideLock?: boolean;
   hideDelete?: boolean;
   ref: React.RefObject<HTMLDivElement | null> | null;
+  isOpen: boolean;
 }) {
-  const mode = useContext(PanelSceneModeContext);
 
   const changeVisibilityHandler = useHandlers().visibility;
   const changeLockHandler = useHandlers().lock;
@@ -102,7 +101,7 @@ export function GraphItem({
       })}
       ref={ref}
     >
-      {mode == "open" && (
+      {isOpen && (
         <div
           className={styles.dots}
           onClick={isParent ? onToggleBranch : undefined}
@@ -120,10 +119,10 @@ export function GraphItem({
         >
           {ItemImg && <ItemImg />}
         </div>
-        {mode == "open" && <p>{item.label}</p>}
+        {isOpen && <p>{item.label}</p>}
       </div>
 
-      {mode == "open" &&
+      {isOpen &&
         (isActive ||
           item.locked ||
           (item.kind != "Camera" && !item.visible)) && (

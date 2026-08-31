@@ -20,6 +20,7 @@ export interface UiState {
   canRedo: boolean;
   activeObjectTool: ObjectToolMode | null;
   isCameraPreview: boolean;
+  isParamsClosed: boolean;
   cameraCustomAngle: Pick<SceneCamera, "azimuth" | "polar" | "target"> | null;
   modalType: ModalType;
 }
@@ -35,6 +36,7 @@ interface UiActions {
   setHistoryFlags(canUndo: boolean, canRedo: boolean): void;
   setActiveObjectTool(tool: ObjectToolMode | null): void;
   toggleCameraPreview(): void;
+  toggleParamsClosed(): void;
   setCameraCustomAngle(
     value: Pick<SceneCamera, "azimuth" | "polar" | "target">
   ): void;
@@ -52,6 +54,7 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
   canRedo: false,
   activeObjectTool: null,
   isCameraPreview: false,
+  isParamsClosed: false,
   cameraCustomAngle: null,
   modalType: null,
 
@@ -70,6 +73,8 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
     set((state) => ({
       isCameraPreview: !state.isCameraPreview,
     })),
+  toggleParamsClosed: () =>
+    set((state) => ({ isParamsClosed: !state.isParamsClosed })),
   setCameraCustomAngle: (value) =>
     set({
       cameraCustomAngle: {

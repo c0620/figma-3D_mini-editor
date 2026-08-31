@@ -3,10 +3,8 @@ import { NumberFieldInput } from "../../molecules/inputs/NumberFieldInput";
 import styles from "./ParamsCommon.module.scss";
 import { ToggleState } from "../../molecules/inputs/ToggleState";
 
-import { useContext } from "react";
 import { RatioInput } from "../../molecules/inputs/RatioInput";
 import { SelectLens } from "../../molecules/inputs/SelectLens";
-import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import { useSessionStore } from "@/store/sessionStore";
 import clsx from "clsx";
@@ -16,15 +14,20 @@ export function CameraParamsInputs({
 }: {
   activeCamera: SceneCamera;
 }) {
-  const mode = useContext(PanelSceneModeContext);
   const { camera } = useHandlers();
+  const isParamsClosed = useSessionStore((s) => s.isParamsClosed);
+  const isOpen = !isParamsClosed;
   const isCameraPreview = useSessionStore((s) => s.isCameraPreview);
 
   const toggleCameraPreview = useSessionStore((s) => s.toggleCameraPreview);
 
   return (
-    <div className={styles.paramsContainer}>
-      {mode == "open" && (
+    <div
+      className={clsx(styles.paramsContainer, {
+        [styles.paramsClosed]: isParamsClosed,
+      })}
+    >
+      {isOpen && (
         <h3 className="h3">
           Параметры <span></span>
           {activeCamera.name}
@@ -49,11 +52,11 @@ export function CameraParamsInputs({
             variant: "default",
           },
         }}
-        isOpen={mode == "open"}
+        isOpen={isOpen}
       />
       <div
         className={clsx(styles.paramsRow, {
-          [styles.toColumn]: mode == "close",
+          [styles.paramsRowClosed]: isParamsClosed,
         })}
       >
         <NumberFieldInput
@@ -75,7 +78,7 @@ export function CameraParamsInputs({
               variant: "default",
             },
           }}
-          isOpen={mode == "open"}
+          isOpen={isOpen}
         />
         <NumberFieldInput
           title="Дальняя граница видимости"
@@ -94,14 +97,14 @@ export function CameraParamsInputs({
               variant: "default",
             },
           }}
-          isOpen={mode == "open"}
+          isOpen={isOpen}
         />
       </div>
       {activeCamera.type == CameraType.Perspective && (
         <SelectLens
           title="Объектив"
           value={activeCamera.fov}
-          mode={mode}
+          isOpen={isOpen}
           onClick={(v) => camera.execute({ id: activeCamera.id, fov: v })}
         />
       )}
@@ -111,7 +114,7 @@ export function CameraParamsInputs({
         label="Режим предпросмотра"
         onChange={toggleCameraPreview}
         value={isCameraPreview}
-        isOpen={mode == "open"}
+        isOpen={isOpen}
       />
       <RatioInput
         title="Соотношение сторон рендера"
@@ -122,7 +125,7 @@ export function CameraParamsInputs({
           value1: activeCamera.aspect[0],
           value2: activeCamera.aspect[1],
         }}
-        isOpen={mode == "open"}
+        isOpen={isOpen}
       />
     </div>
   );

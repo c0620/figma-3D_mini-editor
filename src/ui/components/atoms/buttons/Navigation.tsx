@@ -1,6 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
 import { NavLinkButton } from "./Button";
-import type { PanelMode } from "../../types/panel";
 import clsx from "clsx";
 
 import styles from "./Navigation.module.scss";
@@ -8,64 +6,49 @@ import ArrowL from "@/assets/images/icons/descriptive/arrowL.svg?react";
 import ArrowR from "@/assets/images/icons/descriptive/arrowR.svg?react";
 
 export function PanelModeToggle({
-  mode,
+  isOpen,
   panel,
   text,
-  setMode,
+  onToggle,
 }: {
-  mode: PanelMode;
+  isOpen: boolean;
   panel: "Left" | "Right";
   text: string;
-  setMode: Dispatch<SetStateAction<PanelMode>>;
+  onToggle: () => void;
 }) {
-  let CloseArrow, OpenArrow;
-  if (panel == "Left") {
-    CloseArrow = ArrowL;
-    OpenArrow = ArrowR;
+  const isLeft = panel == "Left";
+  const CloseArrow = isLeft ? ArrowL : ArrowR;
+  const OpenArrow = isLeft ? ArrowR : ArrowL;
+  const button = (
+    <button className={styles.modeToggleButton} onClick={onToggle}>
+      {isOpen ? <CloseArrow /> : <OpenArrow />}
+    </button>
+  );
+  const title = (
+    <h2
+      className={clsx("h2", styles.modeToggleText, {
+        [styles.hide]: !isOpen,
+      })}
+    >
+      {text}
+    </h2>
+  );
 
-    return (
-      <div className={styles.modeToggle}>
-        <button
-          className={styles.modeToggleButton}
-          onClick={() => {
-            mode == "open" ? setMode("close") : setMode("open");
-          }}
-        >
-          {mode == "open" ? <CloseArrow /> : <OpenArrow />}
-        </button>
-        <h2
-          className={clsx("h2", styles.modeToggleText, {
-            [styles.hide]: mode == "close",
-          })}
-        >
-          {text}
-        </h2>
-      </div>
-    );
-  } else {
-    CloseArrow = ArrowR;
-    OpenArrow = ArrowL;
-
-    return (
-      <div className={styles.modeToggle}>
-        <h2
-          className={clsx("h2", styles.modeToggleText, {
-            [styles.hide]: mode == "close",
-          })}
-        >
-          {text}
-        </h2>
-        <button
-          className={styles.modeToggleButton}
-          onClick={() => {
-            mode == "open" ? setMode("close") : setMode("open");
-          }}
-        >
-          {mode == "open" ? <CloseArrow /> : <OpenArrow />}
-        </button>
-      </div>
-    );
-  }
+  return (
+    <div className={styles.modeToggle}>
+      {isLeft ? (
+        <>
+          {button}
+          {title}
+        </>
+      ) : (
+        <>
+          {title}
+          {button}
+        </>
+      )}
+    </div>
+  );
 }
 
 export function NavTitle({ title, to }: { title: string; to: string }) {

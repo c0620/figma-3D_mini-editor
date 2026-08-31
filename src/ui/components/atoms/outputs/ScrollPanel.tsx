@@ -1,5 +1,4 @@
-import React, { useContext } from "react";
-import { PanelSceneModeContext } from "../../templates/panels/BasePanel";
+import React from "react";
 
 import styles from "./ScrollPanel.module.scss";
 import clsx from "clsx";
@@ -10,36 +9,39 @@ export function ScrollPanel({
   text,
   img: Icon,
   children,
+  className,
   disableScroll = true,
+  isOpen,
 }: {
   fill?: boolean;
   text?: string;
   img?: IconComponent;
   children: React.ReactNode;
+  className?: string;
   disableScroll?: boolean;
+  isOpen: boolean;
 }) {
-  const mode = useContext(PanelSceneModeContext);
   return (
     <div
-      className={clsx(styles.scrollPanelContainer, {
-        [styles.closed]: mode == "close",
-        [styles.fill]: fill,
-      })}
+      className={clsx(
+        styles.scrollPanelContainer,
+        {
+          [styles.closed]: !isOpen,
+          [styles.fill]: fill,
+        },
+        className
+      )}
     >
       {text && (
-        <h3 className={clsx("h3", { [styles.hide]: mode == "close" })}>
-          {text}
-        </h3>
+        <h3 className={clsx("h3", { [styles.hide]: !isOpen })}>{text}</h3>
       )}
       {Icon && (
-        <Icon
-          className={clsx(styles.titleImg, { [styles.hide]: mode == "open" })}
-        />
+        <Icon className={clsx(styles.titleImg, { [styles.hide]: isOpen })} />
       )}
 
       <div
         className={clsx(styles.scrollPanel, {
-          [styles.closed]: mode == "close",
+          [styles.closed]: !isOpen,
           [styles.disableScroll]: disableScroll,
         })}
       >

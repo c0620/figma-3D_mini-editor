@@ -11,7 +11,13 @@ import sceneIcon from "@/assets/images/icons/descriptive/scene.svg?react";
 
 enableMapSet();
 
-export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
+export function SceneGraph({
+  activeObj,
+  isOpen,
+}: {
+  activeObj: ActiveEntity | null;
+  isOpen: boolean;
+}) {
   const { selection } = useHandlers();
   const activeCameraID = useSessionStore((s) => s.activeCameraID);
   const sceneEntities = useSceneEntities();
@@ -75,13 +81,14 @@ export function SceneGraph({ activeObj }: { activeObj: ActiveEntity | null }) {
             hidden={hiddenNodes.has(entity.id)}
             hideDelete={entity.kind == "Camera" ? hideCameraDelete : false}
             ref={activeID == entity.id ? activeRef : null}
+            isOpen={isOpen}
           />
         );
       }
     }
   }
   return (
-    <ScrollPanel fill img={sceneIcon} disableScroll={false}>
+    <ScrollPanel fill img={sceneIcon} disableScroll={false} isOpen={isOpen}>
       {graphItems}
     </ScrollPanel>
   );

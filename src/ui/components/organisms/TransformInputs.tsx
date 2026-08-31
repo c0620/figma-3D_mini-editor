@@ -6,8 +6,7 @@ import {
   type ActiveEntity,
   type Transform,
 } from "@/types/scene";
-import { useCallback, useContext, useMemo } from "react";
-import { PanelSceneModeContext } from "../templates/panels/BasePanel";
+import { useCallback, useMemo } from "react";
 
 import styles from "./TransformInputs.module.scss";
 import clsx from "clsx";
@@ -28,8 +27,13 @@ export function activeEntityEditorHeading(active: ActiveEntity): string {
   }
 }
 
-export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
-  const mode = useContext(PanelSceneModeContext);
+export function TransformInputs({
+  activeObj,
+  isOpen,
+}: {
+  activeObj: ActiveEntity;
+  isOpen: boolean;
+}) {
 
   const { transform } = useHandlers();
   const scene = useSceneStore((s) => s.scene);
@@ -88,11 +92,11 @@ export function TransformInputs({ activeObj }: { activeObj: ActiveEntity }) {
   return (
     <div
       className={clsx(styles.baseParams, {
-        [styles.hide]: mode == "close" && true, //toDo: show when active BottomTools
+        [styles.hide]: !isOpen && true, //toDo: show when active BottomTools
       })}
       style={locked ? { opacity: "0.5" } : { opacity: "1" }}
     >
-      {mode == "open" && (
+      {isOpen && (
         <h3 className="h3">
           Редактирование {activeEntityEditorHeading(activeObj)}
         </h3>

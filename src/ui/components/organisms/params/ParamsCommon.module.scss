@@ -10,8 +10,13 @@
   gap: var(--margin-m);
 }
 
-.to-column {
+.params-row-closed {
   flex-direction: column;
+}
+
+.params-closed {
+  width: 100%;
+  align-items: center;
 }
 
 .params-row > div > p {

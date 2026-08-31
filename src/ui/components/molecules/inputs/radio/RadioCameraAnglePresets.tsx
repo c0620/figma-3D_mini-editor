@@ -10,8 +10,6 @@ import topIcon from "@/assets/images/icons/descriptive/cameraPTop.svg?react";
 import customIcon from "@/assets/images/icons/descriptive/cameraPUser.svg?react";
 import saveIcon from "@/assets/images/icons/descriptive/cameraPSave.svg?react";
 import { ActionButton } from "../../../atoms/buttons/Button";
-import { useContext } from "react";
-import { PanelSceneModeContext } from "../../../templates/panels/BasePanel";
 import { useSessionStore } from "@/store/sessionStore";
 import type { SceneCamera } from "@/types/scene";
 
@@ -19,12 +17,13 @@ export function RadioCameraAnglePresets({
   title,
   value,
   onClick,
+  isOpen,
 }: {
   title: string;
   value: Pick<SceneCamera, "azimuth" | "polar" | "target">;
   onClick: (value: Pick<SceneCamera, "azimuth" | "polar" | "target">) => void;
+  isOpen: boolean;
 }) {
-  const mode = useContext(PanelSceneModeContext);
   const customAngle = useSessionStore((s) => s.cameraCustomAngle);
   const setCustomAngle = useSessionStore((s) => s.setCameraCustomAngle);
   const options: (Omit<RadioProps, "onClick" | "isActive"> &
@@ -68,12 +67,12 @@ export function RadioCameraAnglePresets({
   ];
   return (
     <div className={styles.container}>
-      {mode == "open" && <h3 className="h3">{title}</h3>}
+      {isOpen && <h3 className="h3">{title}</h3>}
       <div className={styles.optionContainer}>
         {options.map((option) => (
           <Radio
             key={option.text}
-            icon={mode == "close" ? option.icon : undefined}
+            icon={!isOpen ? option.icon : undefined}
             text={option.text}
             onClick={() =>
               onClick({
@@ -85,13 +84,13 @@ export function RadioCameraAnglePresets({
             isActive={
               value.azimuth == option.azimuth && value.polar == option.polar
             }
-            isLong={mode == "open"}
+            isLong={isOpen}
           />
         ))}
         {customAngle && (
           <Radio
             key={`customAngle-${customAngle.azimuth}-${customAngle.polar}`}
-            icon={mode == "close" ? customIcon : undefined}
+            icon={!isOpen ? customIcon : undefined}
             text="Кастомный"
             onClick={() =>
               onClick({
@@ -107,7 +106,7 @@ export function RadioCameraAnglePresets({
               value.target[1] == customAngle.target[1] &&
               value.target[2] == customAngle.target[2]
             }
-            isLong={mode == "open"}
+            isLong={isOpen}
           />
         )}
       </div>
@@ -120,13 +119,13 @@ export function RadioCameraAnglePresets({
           });
         }}
         text={
-          mode == "close"
+          !isOpen
             ? undefined
             : customAngle
               ? "Заменить текущий ракурс"
               : "Сохранить текущий ракурс"
         }
-        img={mode == "close" ? saveIcon : undefined}
+        img={!isOpen ? saveIcon : undefined}
         isIconFirst
       />
     </div>
