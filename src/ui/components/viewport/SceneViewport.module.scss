@@ -1,0 +1,17 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.viewport {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+.preview {
+  border: var(--border-weight-bold) solid var(--common-color-common-accent);
+}

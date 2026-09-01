@@ -6,7 +6,7 @@ import {
   PerspectiveCamera,
   TransformControls,
 } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, type RootState } from "@react-three/fiber";
 
 import { useSceneStore } from "../../../store/sceneStore";
 import { threeAssetRegistry } from "../../../store/threeAssetRegistry";
@@ -47,7 +47,33 @@ import {
 import type { CameraEditingHandlerPayload } from "@/handlers/cameraEditingHandler";
 import { eulerFromLookAt } from "@/lib/cameraOrbit";
 
+import styles from "./SceneViewport.module.scss";
+import clsx from "clsx";
+
 const CAMERA_EPSILON = 1e-3;
+
+function letterboxSize(
+  parentW: number,
+  parentH: number,
+  ratioW: number,
+  ratioH: number
+): { w: number; h: number } {
+  const frameAspect = ratioW / ratioH;
+  const parentAspect = parentW / Math.max(parentH, 1);
+  let w: number;
+  let h: number;
+  if (parentAspect > frameAspect) {
+    h = parentH;
+    w = h * frameAspect;
+  } else {
+    w = parentW;
+    h = w / frameAspect;
+  }
+  return {
+    w: Math.max(1, Math.round(w)),
+    h: Math.max(1, Math.round(h)),
+  };
+}
 
 const _position = new Vector3();
 const _target = new Vector3();
@@ -415,7 +441,6 @@ export function SceneRenderer() {
     ) {
       return;
     }
-
     const content = contentRef.current;
     if (!content) return;
 
@@ -445,47 +470,65 @@ export function SceneRenderer() {
     });
   }, [CC]);
 
-  const { innerWidth: windowW, innerHeight: windowH } = window;
-  const ratioMx =
-    Math.max(innerWidth, innerHeight) / Math.min(innerWidth, innerHeight);
-  const ratioMn =
-    Math.min(innerWidth, innerHeight) / Math.max(innerWidth, innerHeight);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<RootState>(null);
+  const [canvasReady, setCanvasReady] = useState(false);
 
   const ratioW = activeCamera.aspect[0];
   const ratioH = activeCamera.aspect[1];
 
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const viewport = viewportRef.current;
+    if (!container || !viewport) return;
+
+    const applySize = () => {
+      if (isCameraPreview) {
+        const { w, h } = letterboxSize(
+          container.clientWidth,
+          container.clientHeight,
+          ratioW,
+          ratioH
+        );
+        viewport.style.width = `${w}px`;
+        viewport.style.height = `${h}px`;
+      } else {
+        viewport.style.width = "100%";
+        viewport.style.height = "100%";
+      }
+
+      const w = viewport.clientWidth;
+      const h = viewport.clientHeight;
+      const canvas = canvasRef.current;
+      if (!canvas || w < 1 || h < 1) return;
+
+      canvas.setSize(w, h);
+      canvas.invalidate();
+    };
+
+    applySize();
+
+    // const observer = new ResizeObserver(applySize);
+    // observer.observe(container);
+    // return () => observer.disconnect();
+  }, [isCameraPreview, ratioW, ratioH, canvasReady]);
+
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100%",
-        width: "100%",
-      }}
-    >
+    <div className={styles.container} ref={containerRef}>
       <div
-        className="canvas"
-        style={
-          isCameraPreview
-            ? {
-                width:
-                  (ratioW /
-                    (Math.max(ratioW, ratioH) *
-                      (windowW > windowH ? ratioMx : 1))) *
-                    100 +
-                  "%",
-                height:
-                  (ratioH / Math.max(ratioW, ratioH)) *
-                    (windowH > windowW ? ratioMn : 1) *
-                    100 +
-                  "%",
-                border: "3px solid orange",
-              }
-            : { width: "100%", height: "100%" }
-        }
+        className={clsx(styles.viewport, {
+          [styles.preview]: isCameraPreview,
+        })}
+        ref={viewportRef}
       >
-        <Canvas>
+        <Canvas
+          resize={{ scroll: false, debounce: 0 }}
+          onCreated={(canvas) => {
+            canvasRef.current = canvas;
+            setCanvasReady(true);
+          }}
+        >
           {currentCamera && (
             <CameraControls
               ref={attachControls}
@@ -501,7 +544,6 @@ export function SceneRenderer() {
               near={activeCamera.near}
               far={activeCamera.far}
               fov={activeCamera.fov}
-              manual={isCameraPreview}
               key={activeCamera.id}
             />
           ) : (
