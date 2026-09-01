@@ -297,21 +297,19 @@ function SceneNode({
 }
 
 export function SceneRenderer() {
-  const scene = useSceneStore((s) => s.scene);
-  if (!scene) return null;
+  const scene = useSceneStore((s) => s.scene)!;
   const activeRef = useSessionStore((s) => s.activeObjectRef);
   const isCameraPreview = useSessionStore((s) => s.isCameraPreview);
   const activeCameraID = useSessionStore((s) => s.activeCameraID);
+
+  const { camera } = useHandlers();
+
   const activeCamera =
     activeRef?.kind == "Camera"
       ? (scene.cameras[activeRef.id] as SceneCamera)
       : (scene.cameras[activeCameraID] as SceneCamera);
 
-  const { camera } = useHandlers();
-
-  const nodeRef = useRef<
-    ThreePerspectiveCamera | ThreeOrthographicCamera | null
-  >(null);
+  const nodeRef = useRef<Object3D>(null);
 
   const camRef = useRef<
     ThreePerspectiveCamera | ThreeOrthographicCamera | null
@@ -404,6 +402,12 @@ export function SceneRenderer() {
   }, [CC, positionX, positionY, positionZ, targetX, targetY, targetZ]);
 
   useEffect(() => {
+    if (!CC || cameraType !== CameraType.Orthographic || zoom == null) return;
+    if (Math.abs(CC.camera.zoom - zoom) < CAMERA_EPSILON) return;
+    void CC.zoomTo(zoom, false);
+  }, [CC, cameraType, zoom]);
+
+  useEffect(() => {
     if (
       !CC ||
       (cameraType == CameraType.Orthographic && zoom) ||
@@ -494,12 +498,9 @@ export function SceneRenderer() {
             <PerspectiveCamera
               makeDefault
               ref={attachCamera}
-              position={activeCamera.transform.position}
-              rotation={activeCamera.transform.rotation}
               near={activeCamera.near}
               far={activeCamera.far}
               fov={activeCamera.fov}
-              aspect={isCameraPreview ? ratioW / ratioH : undefined}
               manual={isCameraPreview}
               key={activeCamera.id}
             />
@@ -507,9 +508,6 @@ export function SceneRenderer() {
             <OrthographicCamera
               makeDefault
               ref={attachCamera}
-              position={activeCamera.transform.position}
-              rotation={activeCamera.transform.rotation}
-              zoom={activeCamera.zoom ?? 1}
               near={activeCamera.near}
               far={activeCamera.far}
               key={activeCamera.id}
