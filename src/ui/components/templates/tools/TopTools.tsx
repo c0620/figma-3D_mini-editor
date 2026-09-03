@@ -13,7 +13,7 @@ import render from "@/assets/images/icons/descriptive/render.svg?react";
 import { useNavigate } from "react-router";
 
 export function TopTools() {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <div className={styles.toolsRow}>
       <div className={styles.tool}>

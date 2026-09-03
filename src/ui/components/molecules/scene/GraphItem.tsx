@@ -80,7 +80,7 @@ export function GraphItem({
 
   const dots = [];
 
-  for (var i = 0; i < item.level + 1; i++) {
+  for (let i = 0; i < item.level + 1; i++) {
     dots.push(
       <div
         key={i}

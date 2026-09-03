@@ -6,6 +6,7 @@ import { useSceneStore } from "@/store/sceneStore";
 import type {
   ActiveEntity,
   MaterialID,
+  Scene,
   SceneCamera,
   SceneGroup,
   SceneLight,
@@ -38,22 +39,64 @@ import { LightParamsInputs } from "../../organisms/params/LightParamsInputs.tsx"
 import { RadioLightPresets } from "../../molecules/inputs/radio/RadioLightPresets.tsx";
 import { useSessionStore } from "@/store/sessionStore.ts";
 
+function getChildrenData(
+  scene: Scene,
+  activeObj: ActiveEntity
+): { childrenCount: number; materials: MaterialID[] } {
+  const isInMats = new Set();
+  const graph = scene!.sceneGraph.graphThree;
+  const groupChildren = graph[activeObj.id];
+
+  let childrenCount = 0;
+  const materials: string[] = [];
+
+  if (groupChildren) {
+    childrenCount += groupChildren.length;
+    const childrenStack = [...groupChildren];
+    while (childrenStack.length != 0) {
+      const currentChildID = childrenStack.pop()!;
+      if (Object.hasOwn(scene.meshes, currentChildID)) {
+        const currentMesh = scene.meshes[currentChildID];
+        currentMesh.materials.forEach((matID) => {
+          if (!isInMats.has(matID)) {
+            isInMats.add(matID);
+            materials.push(matID);
+          }
+        });
+      }
+      const childrenIDs = graph[currentChildID];
+      if (!childrenIDs) continue;
+      childrenCount += childrenIDs.length;
+      for (const childID of childrenIDs) {
+        childrenStack.push(childID);
+      }
+    }
+  }
+  return { childrenCount, materials };
+}
+
 export function PanelParams({ activeObj }: { activeObj: ActiveEntity }) {
+  const { scene } = useSceneStore();
+
   switch (activeObj.kind) {
-    case "Group":
-      return <GroupParams activeGroup={activeObj} />;
+    case "Group": {
+      const { materials } = getChildrenData(scene!, activeObj);
+      if (materials)
+        return <MaterialParams key={activeObj.id} materialIDs={materials} />;
+      return null;
+    }
     case "Mesh": {
       const materials = threeAssetRegistry.getAssetData(
         activeObj.id
       )?.materials;
       if (materials)
-        return <MeshParams activeMesh={activeObj} materialIDs={materials} />;
+        return <MaterialParams key={activeObj.id} materialIDs={materials} />;
       return null;
     }
     case "Camera":
-      return <CameraParams activeCamera={activeObj} />;
+      return <CameraParams key={activeObj.id} activeCamera={activeObj} />;
     case "Light":
-      return <LightParams activeLight={activeObj} />;
+      return <LightParams key={activeObj.id} activeLight={activeObj} />;
   }
 }
 
@@ -128,56 +171,23 @@ function LightParams({ activeLight }: { activeLight: SceneLight }) {
   );
 }
 
-function GroupParams({ activeGroup }: { activeGroup: SceneGroup }) {
-  const { scene } = useSceneStore();
-  const graph = scene!.sceneGraph.graphThree;
-  const groupChildren = graph[activeGroup.id];
-  let childrenCount = 0;
-  if (groupChildren) {
-    childrenCount += groupChildren.length;
-    const childrenStack = [...groupChildren];
-    while (childrenStack.length != 0) {
-      const currentChild = childrenStack.pop()!;
-      const children = graph[currentChild];
-      if (!children) continue;
-      childrenCount += children.length;
-      for (const child of children) {
-        childrenStack.push(child);
-      }
-    }
-  }
-  const isOpen = !useSessionStore((s) => s.isParamsClosed);
-  const onToggle = useSessionStore((s) => s.toggleParamsClosed);
-  return (
-    <Panel panel="Right" text="Параметры" isOpen={isOpen} onToggle={onToggle}>
-      <div>{childrenCount}</div>
-    </Panel>
-  );
-}
-
-function MeshParams({
-  materialIDs,
-}: {
-  activeMesh: SceneMesh;
-  materialIDs: MaterialID[];
-}) {
+function MaterialParams({ materialIDs }: { materialIDs: MaterialID[] }) {
   const [activeMaterialID, setActiveMaterialID] = useState<MaterialID>(
     materialIDs[0]
   );
   const isOpen = !useSessionStore((s) => s.isParamsClosed);
   const onToggle = useSessionStore((s) => s.toggleParamsClosed);
   const materials = useSceneStore((s) => s.scene?.materials);
+  const [activeTextureSlot, setActiveTextureSlot] = useState<TextureSlot>(
+    TextureSlot.BaseColor
+  );
+  const [openImportTextureModal, setOpenImportTextureModal] = useState(false);
+
   if (!materials) return <></>;
 
   const activeMaterial = materials[activeMaterialID];
   const activeThreeMaterial =
     threeAssetRegistry.materials[activeMaterialID].material;
-
-  const [activeTextureSlot, setActiveTextureSlot] = useState<TextureSlot>(
-    TextureSlot.BaseColor
-  );
-
-  const [openImportTextureModal, setOpenImportTextureModal] = useState(false);
 
   return (
     <>
@@ -185,7 +195,7 @@ function MeshParams({
         <ScrollPanel
           fill
           className={styles.meshMaterials}
-          text="Материалы меша"
+          text="Материалы объекта"
           img={materialsIcon}
           isOpen={isOpen}
         >

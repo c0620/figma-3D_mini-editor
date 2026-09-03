@@ -212,7 +212,7 @@ function threeObjectToDomainScene(
 
   threeRoot.updateMatrixWorld(true);
 
-  let sceneProperties: SceneProperties = { hasLight: false, hasCamera: false };
+  const sceneProperties: SceneProperties = { hasLight: false, hasCamera: false };
 
   parseObjectThree(
     threeRoot,
@@ -251,7 +251,7 @@ function threeObjectToDomainScene(
   });
 
   if (action == "LoadScene") {
-    let pluginCamera: SceneCamera = {
+    const pluginCamera: SceneCamera = {
       name: "Plugin Camera",
       kind: "Camera",
       id: IDs.PluginCamera,
@@ -279,7 +279,7 @@ function threeObjectToDomainScene(
   }
 
   if (!sceneProperties.hasLight && action == "LoadScene") {
-    let pluginAmbientLight: SceneLight = {
+    const pluginAmbientLight: SceneLight = {
       type: LightType.Ambient,
       color: { type: "custom", value: new Color().setColorName("white") },
       intensity: 1,
@@ -297,7 +297,7 @@ function threeObjectToDomainScene(
       pendingDelete: false,
       parentId: null,
     };
-    let pluginSpotLight: SceneLight = {
+    const pluginSpotLight: SceneLight = {
       type: LightType.Spot,
       color: { type: "custom", value: new Color().setColorName("white") },
       intensity: 100,

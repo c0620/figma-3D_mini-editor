@@ -29,8 +29,8 @@ export function AddObjectModalContent() {
   const [hoverID, setHoverID] = useState<string | null>(null);
 
   const mockCards: CardAsset[] = [];
-  for (var i = 0; i < 50; i++) {
-    let toPush = {
+  for (let i = 0; i < 50; i++) {
+    const toPush = {
       id: i.toString(),
       title: "Test Asset",
       description: "Размер файла: 10МБ Количество полигонов: 102020",

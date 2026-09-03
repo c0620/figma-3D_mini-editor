@@ -22,11 +22,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
         [styles.paramsClosed]: isParamsClosed,
       })}
     >
-      {isOpen && (
-        <h3 className="h3">
-          Параметры <span></span>materialname
-        </h3>
-      )}
+      {isOpen && <h3 className="h3">Параметры {material.name}</h3>}
       {(material.roughness != undefined || material.metalness != undefined) && (
         <div
           className={clsx(styles.paramsRow, {
@@ -44,19 +40,18 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
                   }),
                 value: material.roughness,
                 isActive: false,
-                range:
-                  isOpen
-                    ? {
-                        min: 0,
-                        max: 10,
-                        variant: "default",
-                        step: 0.1,
-                        onDrag: (value) =>
-                          threeAssetRegistry.setParam(material.id, {
-                            roughness: value,
-                          }),
-                      }
-                    : undefined,
+                range: isOpen
+                  ? {
+                      min: 0,
+                      max: 10,
+                      variant: "default",
+                      step: 0.1,
+                      onDrag: (value) =>
+                        threeAssetRegistry.setParam(material.id, {
+                          roughness: value,
+                        }),
+                    }
+                  : undefined,
               }}
             />
           )}
@@ -72,19 +67,18 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
                   }),
                 value: material.metalness,
                 isActive: false,
-                range:
-                  isOpen
-                    ? {
-                        min: 0,
-                        max: 10,
-                        variant: "default",
-                        step: 0.1,
-                        onDrag: (value) =>
-                          threeAssetRegistry.setParam(material.id, {
-                            metalness: value,
-                          }),
-                      }
-                    : undefined,
+                range: isOpen
+                  ? {
+                      min: 0,
+                      max: 10,
+                      variant: "default",
+                      step: 0.1,
+                      onDrag: (value) =>
+                        threeAssetRegistry.setParam(material.id, {
+                          metalness: value,
+                        }),
+                    }
+                  : undefined,
               }}
             />
           )}
@@ -101,19 +95,18 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
             }),
           value: material.emissiveIntensity,
           isActive: false,
-          range:
-            isOpen
-              ? {
-                  min: 0,
-                  max: 10,
-                  variant: "default",
-                  step: 0.01,
-                  onDrag: (value) =>
-                    threeAssetRegistry.setParam(material.id, {
-                      emissiveIntensity: value,
-                    }),
-                }
-              : undefined,
+          range: isOpen
+            ? {
+                min: 0,
+                max: 10,
+                variant: "default",
+                step: 0.01,
+                onDrag: (value) =>
+                  threeAssetRegistry.setParam(material.id, {
+                    emissiveIntensity: value,
+                  }),
+              }
+            : undefined,
         }}
       />
       <PickerColor

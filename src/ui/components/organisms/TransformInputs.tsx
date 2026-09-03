@@ -41,14 +41,14 @@ export function TransformInputs({
 
   if (!sceneId) return;
 
-  var locked = activeObj.locked;
+  const locked = activeObj.locked;
 
   const transformHandler = (
     type: keyof Transform,
     i: number,
     value: number
   ) => {
-    var nextTuple = [...activeObj.transform[type]];
+    const nextTuple = [...activeObj.transform[type]];
     nextTuple[i] = value;
     transform.execute({ objectRef: activeObj, [type]: nextTuple });
   };
@@ -59,7 +59,7 @@ export function TransformInputs({
   const transforms = [];
 
   for (const transform in activeObjTrans) {
-    var valueTransforms = [];
+    const valueTransforms = [];
     if (activeObj.kind == "Camera" && transform == "scale") continue;
     for (const i in activeObjTrans[transform as keyof Transform]) {
       valueTransforms.push(

@@ -101,7 +101,7 @@ export function InputColorPicker({
   const onBlurHex = () => {
     const hex = Number.parseInt(cachedHEXValue, 16);
     if (cachedHEXValue.length == 6 && 0x000000 <= hex && hex <= 0xffffff) {
-      var newValue = new Color(hex);
+      const newValue = new Color(hex);
       setCachedValue(newValue.getHexString());
       setCachedHEXValue(newValue.getHexString());
       onChange({

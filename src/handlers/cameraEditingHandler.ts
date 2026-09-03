@@ -26,7 +26,7 @@ export class CameraEditingHandler extends SceneToolHandler<
     payload: CameraEditingHandlerPayload
   ): HistoryEntry<SceneCamera> {
     const { id } = payload;
-    var camera;
+    let camera;
     if (id) camera = this.scene.findCameraById(id);
     if (!id || !camera)
       throw new Error(

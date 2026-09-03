@@ -39,7 +39,7 @@ export function SceneGraph({
       (c) => c.pendingDelete != true
     ).length == 1;
 
-  var hiddenLevel = null;
+  let hiddenLevel = null;
 
   for (const entity of sceneEntities) {
     const isHidden = entity.parentId ? hiddenNodes.has(entity.parentId) : false;

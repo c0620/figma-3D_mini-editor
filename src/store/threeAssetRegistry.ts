@@ -39,7 +39,7 @@ class ThreeAssetRegistry {
     const existing = this.assets.get(id);
     if (existing) this.disposeAsset(existing);
 
-    var assetMaterials: ThreeAssetMaterial[] = [];
+    const assetMaterials: ThreeAssetMaterial[] = [];
 
     const mats = Array.isArray(asset.materials)
       ? asset.materials
