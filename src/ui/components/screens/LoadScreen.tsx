@@ -6,6 +6,7 @@ import styles from "./LoadScreen.module.scss";
 import { TextBlock } from "../atoms/outputs/TextBlock";
 import { useState } from "react";
 import InfoIcon from "@/assets/images/icons/descriptive/info.svg?react";
+import { ImportTypes } from "@/services/information/types";
 
 export function LoadScreen({ type }: { type: "Local" | "Figma" }) {
   const transferFacade = useTransfer();
@@ -25,7 +26,7 @@ export function LoadScreen({ type }: { type: "Local" | "Figma" }) {
           onUpload={(type, file) =>
             transferFacade
               .importScene({
-                source: "device",
+                source: ImportTypes.device,
                 type,
                 input: file,
                 intent: "LoadScene",

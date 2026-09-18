@@ -28,7 +28,7 @@ type RegistryMaterial = {
  *
  * Связь со сценой: SceneObject.id (в Zustand-сторе) ↔ ключ в этом регистре.
  */
-class ThreeAssetRegistry {
+export class ThreeAssetRegistry {
   assets = new Map<string, ThreeAsset>();
   materials: Record<MaterialID, RegistryMaterial> = {};
 
@@ -100,14 +100,36 @@ class ThreeAssetRegistry {
     this.assets.clear();
   }
 
+  replace(
+    assets: Map<string, ThreeAsset>,
+    materials: Record<MaterialID, RegistryMaterial>
+  ) {
+    this.clear();
+    this.assets = assets;
+    this.materials = materials;
+  }
+
+  merge(
+    assets: Map<string, ThreeAsset>,
+    materials: Record<MaterialID, RegistryMaterial>
+  ) {
+    assets.forEach((val, key) => this.assets.set(key, val));
+    for (const [key, incoming] of Object.entries(materials)) {
+      const existing = this.materials[key];
+      if (existing) existing.linkCount += incoming.linkCount;
+      else this.materials[key] = incoming;
+    }
+  }
+
   private disposeAsset(asset: ThreeAsset): void {
     asset.geometry.dispose();
     asset.materials.forEach((m) => {
-      if (this.materials[m].linkCount == 0) {
-        this.materials[m].material.dispose();
+      const entry = this.materials[m];
+      if (!entry) return;
+      entry.linkCount -= 1;
+      if (entry.linkCount <= 0) {
+        entry.material.dispose();
         delete this.materials[m];
-      } else {
-        this.materials[m].linkCount -= 1;
       }
     });
   }

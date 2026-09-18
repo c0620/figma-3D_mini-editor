@@ -9,11 +9,3 @@ export interface ShortcutItem {
   toolId: string;
   keys: string;
 }
-
-export interface Notification {
-  id: string;
-  type: "Success" | "Error";
-  message: string;
-  reason: string | null;
-  createdAt: number;
-}

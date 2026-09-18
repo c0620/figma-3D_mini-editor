@@ -5,6 +5,7 @@ import AssetLibraryScreen from "./ui/components/screens/AssetLibraryScreen";
 import { useEffect } from "react";
 import { useSessionStore } from "./store/sessionStore";
 import { LoadScreen } from "./ui/components/screens/LoadScreen";
+import { TestErrorNotifyModal } from "./ui/components/templates/modal/TestErrorNotifyModal";
 
 function App() {
   const colorTheme = useSessionStore((s) => s.colorTheme);
@@ -28,6 +29,7 @@ function App() {
           </Route>
         </Routes>
       </MemoryRouter>
+      <TestErrorNotifyModal />
     </>
   );
 }

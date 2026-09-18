@@ -9,9 +9,10 @@ import { CardAsset } from "../../molecules/cards/Cards";
 import styles from "./AddObjectModalContent.module.scss";
 import { FileInput } from "../../atoms/inputs/FileInputs";
 import { useSceneAddition } from "@/app/ApplicationKernelContext";
-import type { SceneFileType } from "@/io/sceneTransferFacade";
+import { type SceneFileType } from "@/io/sceneTransferFacade";
 import { useSessionStore } from "@/store/sessionStore";
 import { Torus } from "@react-three/drei";
+import { ImportTypes } from "@/services/information/types";
 
 export function AssetPreview({ assetId }: { assetId: string }) {
   return <Torus />;
@@ -101,7 +102,7 @@ export function AddObjectModalContent() {
             onClick={() => {
               if (file) {
                 addObject({
-                  source: "device",
+                  source: ImportTypes.device,
                   type: file.type,
                   input: file.input,
                   intent: "AddScene",

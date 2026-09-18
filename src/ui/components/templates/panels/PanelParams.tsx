@@ -186,6 +186,9 @@ function MaterialParams({ materialIDs }: { materialIDs: MaterialID[] }) {
   if (!materials) return <></>;
 
   const activeMaterial = materials[activeMaterialID];
+
+  if (!activeMaterial) return <></>;
+
   const activeThreeMaterial =
     threeAssetRegistry.materials[activeMaterialID].material;
 

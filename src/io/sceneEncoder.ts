@@ -13,10 +13,14 @@ import {
   PerspectiveCamera,
   OrthographicCamera,
   PointLight,
+  AmbientLight,
+  DirectionalLight,
+  HemisphereLight,
+  RectAreaLight,
+  Scene as ThreeScene,
 } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-import { randomUUID } from "../lib/randomId";
 import type {
   Material,
   MaterialID,
@@ -29,8 +33,22 @@ import type {
   SceneMesh,
 } from "../types/scene";
 import { CameraType, LightType } from "../types/scene";
-import { threeAssetRegistry } from "../store/threeAssetRegistry";
+import { ThreeAssetRegistry } from "../store/threeAssetRegistry";
 import type { UploadAction } from "./sceneTransferFacade";
+import {
+  AddCameraWarning,
+  AddLightsWarning,
+  UnknownNodeWarning,
+  type Warning,
+} from "@/services/information/warnings";
+import type { OperationContext } from "@/services/information/operationContext";
+import {
+  AppError,
+  DecisionRequiredError,
+  ErrorCode,
+  QuestionCode,
+} from "@/services/information/errors";
+import { randomUUID } from "@/lib/randomId";
 
 type SceneFileType = "OBJ" | "FBX" | "GLB";
 type ImportFileType = SceneFileType | "Figma";
@@ -38,12 +56,24 @@ type SceneProperties = {
   hasLight: boolean;
   hasCamera: boolean;
 };
+type Parsed = { scene: Scene; registry: ThreeAssetRegistry };
 
 export enum IDs {
   PluginCamera = "plugin-camera-id",
   PluginSpotLight = "plugin-spotlight-id",
   PluginAmbientLight = "plugin-ambientlight-id",
 }
+
+type ParseContext = {
+  objectThree: SceneGraph["graphThree"];
+  meshes: Scene["meshes"];
+  lights: Scene["lights"];
+  groups: Scene["groups"];
+  cameras: Scene["cameras"];
+  sceneProperties: SceneProperties;
+  ask: OperationContext["ask"];
+  warn: OperationContext["log"];
+};
 
 function cameraTargetFromThree(
   camera: PerspectiveCamera | OrthographicCamera,
@@ -58,15 +88,92 @@ function cameraTargetFromThree(
   return target.toArray() as [number, number, number];
 }
 
-function parseObjectThree(
+function isGroupLike(node: Object3D): boolean {
+  return (
+    node instanceof Group ||
+    node instanceof ThreeScene ||
+    node.constructor === Object3D
+  );
+}
+
+function replacementLightType(node: Light): LightType {
+  if (node instanceof DirectionalLight) return LightType.Spot;
+  if (node instanceof HemisphereLight) return LightType.Ambient;
+  if (node instanceof RectAreaLight) return LightType.Spot;
+  if ("target" in node) return LightType.Spot;
+  return LightType.Point;
+}
+
+function nodeTypeName(node: Object3D): string {
+  return node.type || node.constructor.name;
+}
+
+function sceneLightFromThree(
+  node: Light,
+  id: ObjectID,
+  parentID: ObjectID | null,
+  type: LightType,
+  transform: SceneLight["transform"]
+): SceneLight {
+  return {
+    id,
+    parentId: parentID,
+    kind: "Light",
+    type,
+    color: { type: "custom", value: node.color },
+    intensity: node.intensity,
+    transform,
+    visible: node.visible,
+    locked: false,
+    name: node.name,
+    pendingDelete: false,
+    distance:
+      node instanceof SpotLight || node instanceof PointLight
+        ? node.distance
+        : 0,
+    angle: node instanceof SpotLight ? node.angle : Math.PI / 3,
+    penumbra: node instanceof SpotLight ? node.penumbra : 0,
+    decay:
+      node instanceof SpotLight || node instanceof PointLight ? node.decay : 2,
+    target: null,
+  };
+}
+
+function linkChild(
+  objectThree: SceneGraph["graphThree"],
+  parentID: ObjectID,
+  childID: ObjectID
+) {
+  if (parentID in objectThree) {
+    objectThree[parentID]!.push(childID);
+  } else {
+    objectThree[parentID] = [childID];
+  }
+}
+
+async function decideUnknownLight(
+  node: Light,
+  ctx: ParseContext
+): Promise<boolean> {
+  const key = nodeTypeName(node);
+  const mapped = replacementLightType(node);
+  const answer = await ctx.ask({
+    id: randomUUID(),
+    error: new DecisionRequiredError(
+      QuestionCode.UnknownTypeOfLight,
+      `Unknown light: ${key} → ${mapped}`
+    ),
+    choice: false,
+  });
+  const replace = Boolean(answer.choice);
+  return replace;
+}
+
+async function parseObjectThree(
   node: Object3D,
   parentID: ObjectID | null,
-  objectThree: SceneGraph["graphThree"],
-  meshes: Scene["meshes"],
-  lights: Scene["lights"],
-  groups: Scene["groups"],
-  cameras: Scene["cameras"],
-  sceneProperties: SceneProperties
+  ctx: ParseContext,
+  draftRegistry: ThreeAssetRegistry
 ) {
   const transform = {
     position: node.position.toArray() as [number, number, number],
@@ -79,8 +186,10 @@ function parseObjectThree(
   };
 
   const id = node.uuid;
+  let keep = false;
+
   if (node instanceof PerspectiveCamera || node instanceof OrthographicCamera) {
-    sceneProperties.hasCamera = true;
+    ctx.sceneProperties.hasCamera = true;
     const isPerspective = node instanceof PerspectiveCamera;
     const distance = 5;
     const target = cameraTargetFromThree(node, distance);
@@ -90,7 +199,7 @@ function parseObjectThree(
         .sub(new Vector3().fromArray(target))
     );
 
-    const camera: SceneCamera = {
+    ctx.cameras[id] = {
       id,
       kind: "Camera",
       type: isPerspective ? CameraType.Perspective : CameraType.Orthographic,
@@ -109,16 +218,15 @@ function parseObjectThree(
       polar: orbit.phi,
       target,
     };
-
-    cameras[id] = camera;
+    keep = true;
   } else if (node instanceof Mesh) {
-    threeAssetRegistry.register(id, {
+    draftRegistry.register(id, {
       geometry: node.geometry,
       materials: node.material,
     });
-    objectThree[id] = [];
+    ctx.objectThree[id] = [];
 
-    meshes[id] = {
+    ctx.meshes[id] = {
       id: id,
       parentId: parentID,
       kind: "Mesh",
@@ -131,40 +239,36 @@ function parseObjectThree(
         ? node.material.map((m) => m.uuid)
         : [node.material.uuid],
     } as SceneMesh;
-  } else if (node instanceof Light) {
-    sceneProperties.hasLight = true;
+    keep = true;
+  } else if (
+    node instanceof SpotLight ||
+    node instanceof PointLight ||
+    node instanceof AmbientLight
+  ) {
+    ctx.sceneProperties.hasLight = true;
     const type =
       node instanceof SpotLight
         ? LightType.Spot
         : node instanceof PointLight
           ? LightType.Point
           : LightType.Ambient;
-    lights[id] = {
-      id: id,
-      parentId: parentID,
-      kind: "Light",
-      type: type,
-      color: { type: "custom", value: node.color },
-      intensity: node.intensity,
-      transform: transform,
-      visible: node.visible,
-      locked: false,
-      name: node.name,
-      pendingDelete: false,
-      distance:
-        node instanceof SpotLight || node instanceof PointLight
-          ? node.distance
-          : 0,
-      angle: node instanceof SpotLight ? node.angle : Math.PI / 3,
-      penumbra: node instanceof SpotLight ? node.penumbra : 0,
-      decay:
-        node instanceof SpotLight || node instanceof PointLight
-          ? node.decay
-          : 2,
-      target: null,
-    } as SceneLight;
-  } else if (node instanceof Group || node instanceof Object3D) {
-    groups[id] = {
+    ctx.lights[id] = sceneLightFromThree(node, id, parentID, type, transform);
+    keep = true;
+  } else if (node instanceof Light) {
+    const replace = await decideUnknownLight(node, ctx);
+    if (replace) {
+      ctx.sceneProperties.hasLight = true;
+      ctx.lights[id] = sceneLightFromThree(
+        node,
+        id,
+        parentID,
+        replacementLightType(node),
+        transform
+      );
+      keep = true;
+    }
+  } else {
+    ctx.groups[id] = {
       id: id,
       parentId: parentID,
       kind: "Group",
@@ -174,33 +278,29 @@ function parseObjectThree(
       name: node.name,
       pendingDelete: false,
     } as SceneGroup;
-  }
-  if (parentID) {
-    if (parentID in objectThree) {
-      objectThree[parentID]!.push(id);
-    } else {
-      objectThree[parentID] = [id];
+    keep = true;
+    if (!isGroupLike(node)) {
+      ctx.warn(new UnknownNodeWarning(node.name, nodeTypeName(node)));
     }
   }
-  node.children.forEach((c) =>
-    parseObjectThree(
-      c,
-      id,
-      objectThree,
-      meshes,
-      lights,
-      groups,
-      cameras,
-      sceneProperties
-    )
-  );
+
+  if (keep && parentID) {
+    linkChild(ctx.objectThree, parentID, id);
+  }
+
+  const childParent = keep ? id : parentID;
+  for (const child of node.children) {
+    await parseObjectThree(child, childParent, ctx, draftRegistry);
+  }
 }
 
-function threeObjectToDomainScene(
+async function threeObjectToDomainScene(
   root: Object3D | GLTF,
-  action: UploadAction
-): Scene {
-  if (action == "LoadScene") threeAssetRegistry.clear();
+  action: UploadAction,
+  ask: OperationContext["ask"],
+  warn: OperationContext["log"]
+): Promise<Parsed> {
+  const threeAssetRegistryDraft = new ThreeAssetRegistry();
 
   const threeRoot = "scene" in root ? root.scene : root;
   const roots: SceneGraph["roots"] = [threeRoot.uuid];
@@ -212,22 +312,30 @@ function threeObjectToDomainScene(
 
   threeRoot.updateMatrixWorld(true);
 
-  const sceneProperties: SceneProperties = { hasLight: false, hasCamera: false };
+  const sceneProperties: SceneProperties = {
+    hasLight: false,
+    hasCamera: false,
+  };
 
-  parseObjectThree(
+  await parseObjectThree(
     threeRoot,
     null,
-    graphThree,
-    meshes,
-    lights,
-    groups,
-    cameras,
-    sceneProperties
+    {
+      objectThree: graphThree,
+      meshes,
+      lights,
+      groups,
+      cameras,
+      sceneProperties,
+      ask,
+      warn,
+    },
+    threeAssetRegistryDraft
   );
 
   const materials: Record<MaterialID, Material> = {};
 
-  Object.entries(threeAssetRegistry.materials).map(([id, m]) => {
+  Object.entries(threeAssetRegistryDraft.materials).map(([id, m]) => {
     if (m.material.emissive?.equals(new Color(0x000000))) {
       m.material.emissiveIntensity = 0;
     }
@@ -276,6 +384,9 @@ function threeObjectToDomainScene(
     };
     cameras[pluginCamera.id] = pluginCamera;
     roots.push(pluginCamera.id);
+    if (!sceneProperties.hasCamera) {
+      warn(new AddCameraWarning(pluginCamera.id));
+    }
   }
 
   if (!sceneProperties.hasLight && action == "LoadScene") {
@@ -321,19 +432,24 @@ function threeObjectToDomainScene(
 
     roots.push(IDs.PluginAmbientLight);
     roots.push(IDs.PluginSpotLight);
+    warn(new AddLightsWarning(threeRoot.name));
   }
+
   return {
-    id: threeRoot.uuid,
-    meshes,
-    lights,
-    groups,
-    sceneGraph: {
-      graphThree,
-      roots: roots,
+    scene: {
+      id: threeRoot.uuid,
+      meshes,
+      lights,
+      groups,
+      sceneGraph: {
+        graphThree,
+        roots: roots,
+      },
+      materials,
+      cameras: { ...cameras },
+      environment: { backgroundColor: null, shadowsEnabled: false },
     },
-    materials,
-    cameras: { ...cameras },
-    environment: { backgroundColor: null, shadowsEnabled: false },
+    registry: threeAssetRegistryDraft,
   };
 }
 
@@ -348,15 +464,21 @@ export class SceneEncoder {
   async import(
     type: ImportFileType,
     raw: ArrayBuffer | string,
-    action: UploadAction
-  ): Promise<Scene> {
+    action: UploadAction,
+    context: OperationContext
+  ): Promise<Parsed> {
     switch (type) {
       case "OBJ": {
         const text =
           typeof raw === "string" ? raw : new TextDecoder().decode(raw);
         const loader = new OBJLoader();
         const group = loader.parse(text);
-        return threeObjectToDomainScene(group, action);
+        return threeObjectToDomainScene(
+          group,
+          action,
+          context.ask,
+          context.log
+        );
       }
       case "FBX": {
         const buffer =
@@ -365,7 +487,12 @@ export class SceneEncoder {
             : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
         const loader = new FBXLoader();
         const group = loader.parse(buffer, "");
-        return threeObjectToDomainScene(group, action);
+        return threeObjectToDomainScene(
+          group,
+          action,
+          context.ask,
+          context.log
+        );
       }
       case "GLB": {
         const buffer =
@@ -374,7 +501,7 @@ export class SceneEncoder {
             : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
         const loader = new GLTFLoader();
         const gltf = await loader.parseAsync(buffer, "");
-        return threeObjectToDomainScene(gltf, action);
+        return threeObjectToDomainScene(gltf, action, context.ask, context.log);
       }
       case "Figma":
         throw new Error("SceneEncoder.import: Figma is not implemented");

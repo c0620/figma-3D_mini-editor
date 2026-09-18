@@ -1,8 +1,11 @@
 import { create } from "zustand";
 
-import type { Notification } from "../types/ui";
 import type { ObjectRef, ObjectID, SceneCamera } from "@/types/scene";
 import { IDs } from "@/io/sceneEncoder";
+import type {
+  Notification,
+  PendingQuestion,
+} from "@/services/information/types";
 
 type colorTheme = "Light" | "Dark";
 type windowSize = "Small" | "Large";
@@ -16,6 +19,7 @@ export interface UiState {
   activeCameraID: ObjectID;
   projectName: string;
   notifications: Notification[];
+  decisions: PendingQuestion[];
   canUndo: boolean;
   canRedo: boolean;
   activeObjectTool: ObjectToolMode | null;
@@ -33,6 +37,8 @@ interface UiActions {
   setProjectName(name: string): void;
   pushNotification(notification: Notification): void;
   removeNotification(id: string): void;
+  pushDecision(question: PendingQuestion): void;
+  removeDecision(id: string): void;
   setHistoryFlags(canUndo: boolean, canRedo: boolean): void;
   setActiveObjectTool(tool: ObjectToolMode | null): void;
   toggleCameraPreview(): void;
@@ -50,6 +56,7 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
   activeCameraID: IDs.PluginCamera,
   projectName: "",
   notifications: [],
+  decisions: [],
   canUndo: false,
   canRedo: false,
   activeObjectTool: null,
@@ -67,6 +74,10 @@ export const useSessionStore = create<UiState & UiActions>((set) => ({
     set((s) => ({ notifications: [...s.notifications, notification] })),
   removeNotification: (id) =>
     set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) })),
+  pushDecision: (question) =>
+    set((s) => ({ decisions: [...s.decisions, question] })),
+  removeDecision: (id) =>
+    set((s) => ({ decisions: s.decisions.filter((q) => q.id != id) })),
   setHistoryFlags: (canUndo, canRedo) => set({ canUndo, canRedo }),
   setActiveObjectTool: (tool) => set({ activeObjectTool: tool }),
   toggleCameraPreview: () =>

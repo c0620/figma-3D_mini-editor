@@ -97,6 +97,7 @@ export function useSceneAddition() {
 
   return async (data: ImportSceneRequest) => {
     const groupID = await transfer.importScene(data);
+    if (!groupID) return;
     handlers.objectAddition.execute({ kind: "Group", id: groupID });
   };
 }

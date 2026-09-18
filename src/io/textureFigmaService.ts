@@ -1,21 +1,15 @@
 import { TextureSlot } from "../types/scene";
-import { NotificationService } from "../services/notificationService";
+import { NotificationService } from "../services/information/notificationService";
 import { FigmaHandler } from "../figma/figmaHandler";
 import { SceneNamingService } from "./sceneNamingService";
 
 export class TextureFigmaService {
   figmaHandler: FigmaHandler;
   naming: SceneNamingService;
-  notifications: NotificationService;
 
-  constructor(
-    figmaHandler: FigmaHandler,
-    naming: SceneNamingService,
-    notifications: NotificationService
-  ) {
+  constructor(figmaHandler: FigmaHandler, naming: SceneNamingService) {
     this.figmaHandler = figmaHandler;
     this.naming = naming;
-    this.notifications = notifications;
   }
 
   exportTextureFrame(textureId: string, materialName: string): string {

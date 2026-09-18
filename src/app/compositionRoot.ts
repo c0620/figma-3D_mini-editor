@@ -56,7 +56,7 @@ import { ActionExecutor } from "../commands/actionExecutor";
 import { CommandBus } from "../commands/commandBus";
 import { DeletionGarbageCollector } from "../commands/deletionGarbageCollector";
 import { History } from "../store/history";
-import { NotificationService } from "../services/notificationService";
+import { NotificationService } from "../services/information/notificationService";
 import { SceneStorage } from "../store/sceneStorage";
 
 import type { SceneEntitySummary } from "../store/sceneEntityList";
@@ -109,6 +109,11 @@ export interface AppKernel {
 }
 
 export function buildKernel(): AppKernel {
+  // --- State ---
+  const sceneStorage = new SceneStorage();
+  const notifications = new NotificationService();
+  const history = new History();
+
   // --- Infrastructure ---
   const figmaApi = new FigmaAPI();
   const figmaHandler = new FigmaHandler(figmaApi);
@@ -116,29 +121,15 @@ export function buildKernel(): AppKernel {
   const encoder = new SceneEncoder();
   const renderer = new Renderer();
 
-  // --- State ---
-  const sceneStorage = new SceneStorage();
-  const notifications = new NotificationService();
-  const history = new History();
-
   // --- Render / Analytics ---
   const renderService = new RenderService(renderer, sceneStorage);
   sceneStorage.setOnClear(() => renderService.disposeMaterialPreview());
   const analyzer = new SceneAnalyzer();
 
   // --- IO ---
-  const sceneIo = new SceneImportExportService(
-    encoder,
-    sceneStorage,
-    analyzer,
-    notifications
-  );
+  const sceneIo = new SceneImportExportService(encoder, sceneStorage, analyzer);
   const textureLocal = new TextureLocalService();
-  const textureFigma = new TextureFigmaService(
-    figmaHandler,
-    naming,
-    notifications
-  );
+  const textureFigma = new TextureFigmaService(figmaHandler, naming);
   const persistence = new ScenePersistenceService(figmaHandler, naming);
   const assetCatalog = new AssetCatalogService(sceneStorage);
   const transfer = new SceneTransferFacade(
