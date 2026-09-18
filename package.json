@@ -11,9 +11,12 @@
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --max-warnings=0",
     "lint:debug": "eslint --ext .jsx,.js,.ts,.tsx ./src --debug --max-warnings=0",
     "lint:fix": "npx eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix --max-warnings=0",
+    "lint:diff": "lint-staged --diff=\"main...HEAD\" --no-stash --allow-empty",
     "prepare": "husky",
     "preview": "vite preview",
     "start": "concurrently -n tsc,build,vite -c yellow,blue,green \"npm run tsc:watch\" \"npm run build:main:watch\" \"vite\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "tsc:watch": "tsc -b --watch --preserveWatchOutput"
   },
   "dependencies": {
@@ -57,7 +60,8 @@
     "typescript-eslint": "^8.63.0",
     "vite": "^7.1.2",
     "vite-plugin-singlefile": "^2.3.0",
-    "vite-plugin-svgr": "^5.2.0"
+    "vite-plugin-svgr": "^5.2.0",
+    "vitest": "^5.0.1"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [

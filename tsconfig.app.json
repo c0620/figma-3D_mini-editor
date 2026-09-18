@@ -28,5 +28,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "plugin-src", "config"]
+  "include": ["src", "plugin-src", "config", "tests"]
 }
