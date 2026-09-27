@@ -2,17 +2,21 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { ErrorCode } from "@/services/information/errors";
 import { useSessionStore } from "@/store/sessionStore";
-import type { Notification } from "@/services/information/types";
+import type {
+  Notification,
+  StackedNotification,
+} from "@/services/information/types";
 
 import { resetStores } from "../helpers/resetStores";
 import { TEST_IDS } from "../helpers/sceneFixtures";
 
-const notification: Notification = {
+const notification: StackedNotification = {
   id: "n-1",
   contextId: "ctx-1",
   createdAt: 1,
   type: "error",
   code: ErrorCode.ParsingError,
+  count: 1,
 };
 
 describe("useSessionStore (session contract)", () => {
@@ -39,7 +43,7 @@ describe("useSessionStore (session contract)", () => {
     expect(useSessionStore.getState().activeObjectTool).toBe("translate");
   });
 
-  it("appends and removes notifications", () => {
+  it("appends and removes stacked notifications", () => {
     useSessionStore.getState().pushNotification(notification);
     expect(useSessionStore.getState().notifications).toEqual([notification]);
 

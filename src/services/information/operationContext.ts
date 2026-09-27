@@ -1,16 +1,21 @@
-import type { Warning } from "./warnings";
+import { Warning } from "./warnings";
 import { randomUUID } from "@/lib/randomId";
 import type { NotificationService } from "./notificationService";
-import type { DecisionQuestion, Notification, OperationType } from "./types";
-import type { Success } from "./success";
-import { CancelError, type AppError } from "./errors";
+import type {
+  DecisionQuestion,
+  Notification,
+  OperationType,
+  StackedNotification,
+} from "./types";
+import { Success } from "./success";
+import { CancelError, AppError } from "./errors";
 import { useSessionStore } from "@/store/sessionStore";
 
 export class OperationContext {
   private readonly controller = new AbortController();
   private readonly logs: (Notification | Success | Warning | AppError)[] = [];
   private readonly cachedAnswers = new Map<
-    DecisionQuestion["error"]["name"],
+    DecisionQuestion["error"]["code"],
     DecisionQuestion
   >();
   private readonly notifications: NotificationService;
@@ -29,7 +34,35 @@ export class OperationContext {
   };
 
   pushLogs() {
-    this.logs.map((w) => this.notifications.push(w, this.id));
+    let stackedNotifications: Record<
+      Notification["code"],
+      StackedNotification
+    > = {} as Record<Notification["code"], StackedNotification>;
+
+    this.logs.forEach((input) => {
+      if (input.code in stackedNotifications) {
+        stackedNotifications[input.code].count += 1;
+        if ("source" in input) {
+          stackedNotifications[input.code].content
+            ? stackedNotifications[input.code].content!.push({
+                source: input.source,
+                nodeType: input.nodeType,
+              })
+            : (stackedNotifications[input.code].content = [
+                {
+                  source: input.source,
+                  nodeType: input.nodeType,
+                },
+              ]);
+        }
+        return;
+      }
+      stackedNotifications[input.code] =
+        this.notifications.toStackedNotification(input, this.id);
+    });
+    Object.values(stackedNotifications).forEach((n) => {
+      this.notifications.pushStacked(n);
+    });
   }
 
   private async queueQuestion(q: DecisionQuestion) {
@@ -44,7 +77,7 @@ export class OperationContext {
             reject(new CancelError("cancelled by user"));
           }
         },
-      })
+      }),
     );
   }
 

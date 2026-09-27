@@ -8,6 +8,7 @@ export enum WarningCode {
 export interface BaseWarning {
   descriptionTemp: string; //toDo: replace with code-descr mapping in UI
   code: WarningCode;
+  type: "warning";
 }
 
 export class Warning implements BaseWarning {
@@ -15,6 +16,7 @@ export class Warning implements BaseWarning {
   code = WarningCode.UnknownWarning;
   source: string;
   nodeType?: string;
+  readonly type = "warning";
 
   constructor(source: string, nodeType?: string) {
     this.source = source;

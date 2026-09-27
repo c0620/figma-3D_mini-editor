@@ -37,7 +37,6 @@ type NotificationBase = {
 export type ErrorNotification = NotificationBase & {
   type: "error";
   code: ErrorCode;
-  params?: Record<string, string>;
 };
 
 export type WarningNotification = NotificationBase & {
@@ -54,3 +53,8 @@ export type SuccessNotification = NotificationBase & {
 
 export type Notification =
   ErrorNotification | WarningNotification | SuccessNotification;
+
+export type StackedNotification = Omit<Notification, "source" | "nodeType"> & {
+  count: number;
+  content?: Pick<WarningNotification, "source" | "nodeType">[];
+};

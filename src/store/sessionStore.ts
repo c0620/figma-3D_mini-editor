@@ -5,6 +5,7 @@ import { IDs } from "@/io/sceneEncoder";
 import type {
   Notification,
   PendingQuestion,
+  StackedNotification,
 } from "@/services/information/types";
 
 type colorTheme = "Light" | "Dark";
@@ -18,7 +19,7 @@ export interface UiState {
   activeObjectRef: ObjectRef | null;
   activeCameraID: ObjectID;
   projectName: string;
-  notifications: Notification[];
+  notifications: StackedNotification[];
   decisions: PendingQuestion[];
   canUndo: boolean;
   canRedo: boolean;
@@ -35,7 +36,7 @@ interface UiActions {
   setActiveObjectRef(ref: ObjectRef | null): void;
   setActiveCameraID(id: ObjectID): void;
   setProjectName(name: string): void;
-  pushNotification(notification: Notification): void;
+  pushNotification(notification: StackedNotification): void;
   removeNotification(id: string): void;
   pushDecision(question: PendingQuestion): void;
   removeDecision(id: string): void;

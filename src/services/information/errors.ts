@@ -9,6 +9,7 @@ export enum QuestionCode {
 
 export class AppError extends Error {
   readonly code: ErrorCode;
+  readonly type = "error";
   constructor(code: ErrorCode, message: string) {
     super(message);
     this.name = new.target.name;
@@ -18,6 +19,7 @@ export class AppError extends Error {
 
 export class CancelError extends Error {
   readonly code: ErrorCode;
+  readonly type = "error";
   constructor(message: string) {
     super(message);
     this.code = ErrorCode.DecisionContextAborted;
@@ -26,7 +28,9 @@ export class CancelError extends Error {
 }
 
 export class DecisionRequiredError extends Error {
+  //AppError?
   readonly code: QuestionCode;
+  readonly type = "error";
 
   constructor(code: QuestionCode, message: string) {
     super(message);
