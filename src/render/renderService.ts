@@ -18,11 +18,7 @@ export class RenderService {
     const canvas = document.createElement("canvas");
     canvas.width = options.width;
     canvas.height = options.height;
-    const result = this.renderer.renderScene(
-      canvas,
-      this.scene.getScene(),
-      options
-    );
+    const result = this.renderer.renderScene(canvas, options);
     this.progressListeners.forEach((l) => l(100));
     return result;
   }
@@ -31,7 +27,10 @@ export class RenderService {
     this.progressListeners.push(listener);
   }
 
-  renderMaterialPreview(canvas: HTMLCanvasElement, materialID: MaterialID): void {
+  renderMaterialPreview(
+    canvas: HTMLCanvasElement,
+    materialID: MaterialID,
+  ): void {
     this.renderer.renderMaterialPreview(canvas, materialID);
   }
 

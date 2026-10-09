@@ -39,7 +39,7 @@ import {
   type ToggleVisibilityPayload,
 } from "../handlers/objectModeChangingHandler";
 import { SceneEncoder } from "../io/sceneEncoder";
-import { SceneImportExportService } from "../io/sceneImportExportService";
+import { DeviceImportExportService } from "../io/deviceImportExportService";
 import { SceneNamingService } from "../io/sceneNamingService";
 import { ScenePersistenceService } from "../io/scenePersistenceService";
 import { SceneTransferFacade } from "../io/sceneTransferFacade";
@@ -127,7 +127,11 @@ export function buildKernel(): AppKernel {
   const analyzer = new SceneAnalyzer();
 
   // --- IO ---
-  const sceneIo = new SceneImportExportService(encoder, sceneStorage, analyzer);
+  const sceneIo = new DeviceImportExportService(
+    encoder,
+    sceneStorage,
+    analyzer,
+  );
   const textureLocal = new TextureLocalService();
   const textureFigma = new TextureFigmaService(figmaHandler, naming);
   const persistence = new ScenePersistenceService(figmaHandler, naming);
@@ -139,7 +143,7 @@ export function buildKernel(): AppKernel {
     renderService,
     analyzer,
     notifications,
-    assetCatalog
+    assetCatalog,
   );
 
   // --- UX services ---
@@ -159,12 +163,12 @@ export function buildKernel(): AppKernel {
   const textureImportHandler = new TextureImportHandler(
     sceneStorage,
     textureLocal,
-    textureFigma
+    textureFigma,
   );
   const textureExportHandler = new TextureExportHandler(
     sceneStorage,
     textureLocal,
-    textureFigma
+    textureFigma,
   );
   const toggleVisibilityHandler = new ToggleVisibilityHandler(sceneStorage);
   const toggleLockHandler = new ToggleLockHandler(sceneStorage);

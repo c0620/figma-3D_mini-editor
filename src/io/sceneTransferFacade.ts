@@ -2,7 +2,7 @@ import { NotificationService } from "../services/information/notificationService
 import { SceneAnalyzer } from "../services/sceneAnalyzerService";
 import { RenderService } from "../render/renderService";
 import { AssetCatalogService } from "../library/assetCatalogService";
-import { SceneImportExportService } from "./sceneImportExportService";
+import { DeviceImportExportService } from "./deviceImportExportService";
 import { TextureFigmaService } from "./textureFigmaService";
 import { ScenePersistenceService } from "./scenePersistenceService";
 import type { ObjectID } from "@/types/scene";
@@ -11,8 +11,13 @@ import type {
   Warning,
 } from "@/services/information/warnings";
 import { OperationContext } from "@/services/information/operationContext";
-import { AppError, CancelError } from "@/services/information/errors";
+import {
+  AppError,
+  CancelError,
+  ErrorCode,
+} from "@/services/information/errors";
 import { ImportTypes } from "@/services/information/types";
+import type { DeviceExportFormat } from "@/types/io";
 
 export type SceneFileType = "OBJ" | "FBX" | "GLB";
 export type UploadAction = "LoadScene" | "AddScene";
@@ -35,7 +40,7 @@ export type ImportSceneRequest =
     };
 
 export class SceneTransferFacade {
-  sceneIo: SceneImportExportService;
+  deviceIO: DeviceImportExportService;
   textureFigma: TextureFigmaService;
   persistence: ScenePersistenceService;
   renderService: RenderService;
@@ -46,15 +51,15 @@ export class SceneTransferFacade {
   lastExportTasks: OperationContext[] = [];
 
   constructor(
-    sceneIo: SceneImportExportService,
+    deviceIO: DeviceImportExportService,
     textureFigma: TextureFigmaService,
     persistence: ScenePersistenceService,
     renderService: RenderService,
     analyzer: SceneAnalyzer,
     notifications: NotificationService,
-    assetCatalog: AssetCatalogService
+    assetCatalog: AssetCatalogService,
   ) {
-    this.sceneIo = sceneIo;
+    this.deviceIO = deviceIO;
     this.textureFigma = textureFigma;
     this.persistence = persistence;
     this.renderService = renderService;
@@ -65,8 +70,25 @@ export class SceneTransferFacade {
 
   readonly exportSceneToFigmaLinked = (): void => {};
 
-  readonly exportSceneToDevice = (type: SceneFileType): Blob => {
-    return this.sceneIo.exportToDevice(type);
+  readonly exportSceneToDevice = async (
+    type: DeviceExportFormat,
+  ): Promise<Blob> => {
+    switch (type) {
+      case "PNG":
+        return this.renderService.exportRender({
+          transparentBackground: true,
+          width: 1024,
+          height: 1024,
+        }).png;
+      case "OBJ":
+      case "GLTF":
+        return this.deviceIO.exportToDevice(type);
+      default:
+        throw new AppError(
+          ErrorCode.UnsupportedExportFormat,
+          `Unsupported export format: ${type}`,
+        );
+    }
   };
 
   private abortPreviousTask(context: OperationContext) {
@@ -77,7 +99,7 @@ export class SceneTransferFacade {
   }
 
   readonly importScene = async (
-    request: ImportSceneRequest
+    request: ImportSceneRequest,
   ): Promise<ObjectID | undefined> => {
     const context = new OperationContext(request.source, this.notifications);
     this.abortPreviousTask(context);
@@ -92,8 +114,12 @@ export class SceneTransferFacade {
 
           const result =
             request.intent === "LoadScene"
-              ? await this.sceneIo.importFromDevice(request.type, data, context)
-              : await this.sceneIo.addFromDevice(request.type, data, context);
+              ? await this.deviceIO.importFromDevice(
+                  request.type,
+                  data,
+                  context,
+                )
+              : await this.deviceIO.addFromDevice(request.type, data, context);
 
           if (!context.isAborted()) {
             context.pushLogs();
@@ -105,14 +131,14 @@ export class SceneTransferFacade {
           void request.frameId;
           void request.intent;
           throw new Error(
-            "SceneTransferFacade.importScene: Figma is not implemented"
+            "SceneTransferFacade.importScene: Figma is not implemented",
           );
           break;
         }
         case ImportTypes.library: {
           void request.assetId;
           throw new Error(
-            "SceneTransferFacade.importScene: library is not implemented"
+            "SceneTransferFacade.importScene: library is not implemented",
           );
         }
       }

@@ -4,10 +4,10 @@ import { SceneEncoder } from "./sceneEncoder";
 import type { Scene } from "@/types/scene";
 import { OperationContext } from "@/services/information/operationContext";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
+import type { DeviceExportFormat, DeviceImportFormat } from "@/types/io";
+import { AppError, ErrorCode } from "@/services/information/errors";
 
-type SceneFileType = "OBJ" | "FBX" | "GLB";
-
-export class SceneImportExportService {
+export class DeviceImportExportService {
   encoder: SceneEncoder;
   scene: SceneStorage;
   analyzer: SceneAnalyzer;
@@ -15,22 +15,43 @@ export class SceneImportExportService {
   constructor(
     encoder: SceneEncoder,
     scene: SceneStorage,
-    analyzer: SceneAnalyzer
+    analyzer: SceneAnalyzer,
   ) {
     this.encoder = encoder;
     this.scene = scene;
     this.analyzer = analyzer;
   }
 
-  exportToDevice(type: SceneFileType): Blob {
-    const raw = this.encoder.export(type, this.scene.getScene());
-    return new Blob([raw]);
+  async exportToDevice(type: Omit<DeviceExportFormat, "PNG">): Promise<Blob> {
+    let raw;
+    let result: string | ArrayBuffer | undefined = undefined;
+    switch (type) {
+      case "OBJ":
+        result = this.encoder.exportOBJ();
+        break;
+      case "GLTF":
+        raw = await this.encoder.exportGLTF();
+        break;
+      default:
+        throw new AppError(
+          ErrorCode.UnsupportedExportFormat,
+          `Unsupported export format: ${type}`,
+        );
+    }
+    if (typeof raw === "object" && !Array.isArray(raw) && raw !== null) {
+      result = JSON.stringify(raw);
+    }
+    if (!result)
+      throw new AppError(ErrorCode.UnknownError, "Failed to export scene");
+    return new Blob([result], {
+      type: type === "OBJ" ? "text/plain" : "application/octet-stream", // or application/json for GLTF?
+    });
   }
 
   async importFromDevice(
-    type: SceneFileType,
+    type: DeviceImportFormat,
     input: ArrayBuffer | string,
-    context: OperationContext
+    context: OperationContext,
   ): Promise<Scene | undefined> {
     const result = await this.encoder.import(type, input, "LoadScene", context);
     if (context.isAborted()) {
@@ -40,7 +61,7 @@ export class SceneImportExportService {
 
     threeAssetRegistry.replace(
       result.registry.assets,
-      result.registry.materials
+      result.registry.materials,
     );
     this.scene.load(result.scene);
 
@@ -48,9 +69,9 @@ export class SceneImportExportService {
   }
 
   async addFromDevice(
-    type: SceneFileType,
+    type: DeviceImportFormat,
     input: ArrayBuffer | string,
-    context: OperationContext
+    context: OperationContext,
   ): Promise<Scene | undefined> {
     const result = await this.encoder.import(type, input, "AddScene", context);
     if (context.isAborted()) {
@@ -61,23 +82,23 @@ export class SceneImportExportService {
     threeAssetRegistry.merge(result.registry.assets, result.registry.materials);
 
     Object.values(result.scene.cameras).forEach((object) =>
-      this.scene.addObject(object)
+      this.scene.addObject(object),
     );
 
     Object.values(result.scene.groups).forEach((object) =>
-      this.scene.addObject(object)
+      this.scene.addObject(object),
     );
 
     Object.values(result.scene.lights).forEach((object) =>
-      this.scene.addObject(object)
+      this.scene.addObject(object),
     );
 
     Object.values(result.scene.meshes).forEach((object) =>
-      this.scene.addObject(object)
+      this.scene.addObject(object),
     );
 
     Object.values(result.scene.materials).forEach((material) =>
-      this.scene.addMaterial(material)
+      this.scene.addMaterial(material),
     );
 
     return result.scene;

@@ -10,6 +10,7 @@ import {
   WebGLRenderer,
 } from "three";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
+import { useThree } from "@react-three/fiber";
 
 type PreviewState = {
   canvas: HTMLCanvasElement;
@@ -23,15 +24,25 @@ type PreviewState = {
 export class Renderer {
   private previewState: PreviewState | null = null;
 
-  renderScene(
-    canvas: HTMLCanvasElement,
-    scene: Scene,
-    options: RenderOptions
-  ): RenderResult {
-    void canvas;
-    void scene;
-    void options;
-    return { png: new Blob(), durationMs: 0 };
+  renderScene(canvas: HTMLCanvasElement, options: RenderOptions): RenderResult {
+    const renderer = new WebGLRenderer({
+      canvas,
+      alpha: options.transparentBackground,
+    });
+    const scene = useThree().scene;
+    const camera = useThree().camera;
+    renderer.setSize(options.width, options.height, false);
+    renderer.render(scene, camera);
+    let resultBlob: Blob | null = null;
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resultBlob = blob;
+      }
+    });
+    if (!resultBlob) {
+      throw new Error("Failed to generate PNG blob from canvas");
+    }
+    return { png: resultBlob, durationMs: 0 };
   }
 
   renderTexture(canvas: HTMLCanvasElement, textureId: string): Blob {
@@ -42,7 +53,7 @@ export class Renderer {
 
   renderMaterialPreview(
     targetCanvas: HTMLCanvasElement,
-    materialID: MaterialID
+    materialID: MaterialID,
   ): void {
     const preview = this.getPreviewState();
     const size = targetCanvas.clientWidth || 64;

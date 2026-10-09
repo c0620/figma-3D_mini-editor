@@ -49,9 +49,11 @@ import {
   QuestionCode,
 } from "@/services/information/errors";
 import { randomUUID } from "@/lib/randomId";
+import type { DeviceExportFormat, DeviceImportFormat } from "@/types/io";
+import { OBJExporter } from "three/examples/jsm/exporters/OBJExporter.js";
+import { useThree } from "@react-three/fiber";
+import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
 
-type SceneFileType = "OBJ" | "FBX" | "GLB";
-type ImportFileType = SceneFileType | "Figma";
 type SceneProperties = {
   hasLight: boolean;
   hasCamera: boolean;
@@ -77,7 +79,7 @@ type ParseContext = {
 
 function cameraTargetFromThree(
   camera: PerspectiveCamera | OrthographicCamera,
-  distance = 5
+  distance = 5,
 ): [number, number, number] {
   camera.updateWorldMatrix(true, false);
   const origin = new Vector3();
@@ -113,7 +115,7 @@ function sceneLightFromThree(
   id: ObjectID,
   parentID: ObjectID | null,
   type: LightType,
-  transform: SceneLight["transform"]
+  transform: SceneLight["transform"],
 ): SceneLight {
   return {
     id,
@@ -142,7 +144,7 @@ function sceneLightFromThree(
 function linkChild(
   objectThree: SceneGraph["graphThree"],
   parentID: ObjectID,
-  childID: ObjectID
+  childID: ObjectID,
 ) {
   if (parentID in objectThree) {
     objectThree[parentID]!.push(childID);
@@ -153,7 +155,7 @@ function linkChild(
 
 async function decideUnknownLight(
   node: Light,
-  ctx: ParseContext
+  ctx: ParseContext,
 ): Promise<boolean> {
   const key = nodeTypeName(node);
   const mapped = replacementLightType(node);
@@ -161,7 +163,7 @@ async function decideUnknownLight(
     id: randomUUID(),
     error: new DecisionRequiredError(
       QuestionCode.UnknownTypeOfLight,
-      `Unknown light: ${key} → ${mapped}`
+      `Unknown light: ${key} → ${mapped}`,
     ),
     choice: false,
   });
@@ -173,7 +175,7 @@ async function parseObjectThree(
   node: Object3D,
   parentID: ObjectID | null,
   ctx: ParseContext,
-  draftRegistry: ThreeAssetRegistry
+  draftRegistry: ThreeAssetRegistry,
 ) {
   const transform = {
     position: node.position.toArray() as [number, number, number],
@@ -196,7 +198,7 @@ async function parseObjectThree(
     const orbit = new Spherical().setFromVector3(
       new Vector3()
         .fromArray(transform.position)
-        .sub(new Vector3().fromArray(target))
+        .sub(new Vector3().fromArray(target)),
     );
 
     ctx.cameras[id] = {
@@ -263,7 +265,7 @@ async function parseObjectThree(
         id,
         parentID,
         replacementLightType(node),
-        transform
+        transform,
       );
       keep = true;
     }
@@ -298,7 +300,7 @@ async function threeObjectToDomainScene(
   root: Object3D | GLTF,
   action: UploadAction,
   ask: OperationContext["ask"],
-  warn: OperationContext["log"]
+  warn: OperationContext["log"],
 ): Promise<Parsed> {
   const threeAssetRegistryDraft = new ThreeAssetRegistry();
 
@@ -330,7 +332,7 @@ async function threeObjectToDomainScene(
       ask,
       warn,
     },
-    threeAssetRegistryDraft
+    threeAssetRegistryDraft,
   );
 
   const materials: Record<MaterialID, Material> = {};
@@ -454,18 +456,31 @@ async function threeObjectToDomainScene(
 }
 
 export class SceneEncoder {
-  export(type: SceneFileType, scene: Scene): string {
-    // TODO: сериализация доменной сцены в нужный формат
-    void type;
-    void scene;
-    return "";
+  exportOBJ(): string {
+    const exporter = new OBJExporter();
+    const scene = useThree().get().scene;
+    const result = exporter.parse(scene);
+    return result;
+  }
+
+  async exportGLTF(): Promise<ArrayBuffer | { [key: string]: unknown }> {
+    const exporter = new GLTFExporter();
+    const scene = useThree().get().scene;
+    try {
+      return await exporter.parseAsync(scene);
+    } catch {
+      throw new AppError(
+        ErrorCode.UnsupportedExportFormat,
+        "GLTF export failed",
+      );
+    }
   }
 
   async import(
-    type: ImportFileType,
+    type: DeviceImportFormat,
     raw: ArrayBuffer | string,
     action: UploadAction,
-    context: OperationContext
+    context: OperationContext,
   ): Promise<Parsed> {
     switch (type) {
       case "OBJ": {
@@ -477,7 +492,7 @@ export class SceneEncoder {
           group,
           action,
           context.ask,
-          context.log
+          context.log,
         );
       }
       case "FBX": {
@@ -491,7 +506,7 @@ export class SceneEncoder {
           group,
           action,
           context.ask,
-          context.log
+          context.log,
         );
       }
       case "GLB": {
@@ -503,8 +518,11 @@ export class SceneEncoder {
         const gltf = await loader.parseAsync(buffer, "");
         return threeObjectToDomainScene(gltf, action, context.ask, context.log);
       }
-      case "Figma":
-        throw new Error("SceneEncoder.import: Figma is not implemented");
+      default:
+        throw new AppError(
+          ErrorCode.ParsingError,
+          `Unsupported format: ${type}`,
+        );
     }
   }
 }

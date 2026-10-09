@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SceneEncoder } from "@/io/sceneEncoder";
-import { SceneImportExportService } from "@/io/sceneImportExportService";
+import { SceneImportExportService } from "@/io/deviceImportExportService";
 import type { OperationContext } from "@/services/information/operationContext";
 import { SceneAnalyzer } from "@/services/sceneAnalyzerService";
 import { SceneStorage } from "@/store/sceneStorage";
@@ -30,7 +30,7 @@ describe("SceneImportExportService", () => {
   const service = new SceneImportExportService(
     encoder as unknown as SceneEncoder,
     storage,
-    new SceneAnalyzer()
+    new SceneAnalyzer(),
   );
 
   beforeEach(() => {
@@ -46,14 +46,14 @@ describe("SceneImportExportService", () => {
     const result = await service.importFromDevice(
       "OBJ",
       "payload",
-      stubContext()
+      stubContext(),
     );
 
     expect(encoder.import).toHaveBeenCalledWith(
       "OBJ",
       "payload",
       "LoadScene",
-      expect.anything()
+      expect.anything(),
     );
     expect(result?.id).toBe("imported");
     expect(storage.getScene().id).toBe("imported");
@@ -77,7 +77,7 @@ describe("SceneImportExportService", () => {
         cameras: {},
         materials: {},
         sceneGraph: { roots: [extra.id], graphThree: {} },
-      })
+      }),
     );
 
     await service.addFromDevice("GLB", new ArrayBuffer(0), stubContext());
@@ -86,7 +86,7 @@ describe("SceneImportExportService", () => {
       "GLB",
       expect.any(ArrayBuffer),
       "AddScene",
-      expect.anything()
+      expect.anything(),
     );
     expect(storage.findObjectById("light-imported")?.kind).toBe("Light");
     expect(storage.findObjectById(TEST_IDS.mesh)?.kind).toBe("Mesh");
