@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Modal } from "./Modal";
+import { BaseModal } from "./BaseModal";
 import {
   ActionButton,
   MainButton,
@@ -45,7 +45,8 @@ export function AddObjectModalContent() {
   }
 
   return (
-    <Modal
+    <BaseModal
+      size="default"
       title="Добавить объект"
       buttonTitle={
         loadType == "library"
@@ -113,6 +114,6 @@ export function AddObjectModalContent() {
           />
         </div>
       )}
-    </Modal>
+    </BaseModal>
   );
 }

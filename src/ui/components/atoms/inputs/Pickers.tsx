@@ -4,6 +4,7 @@ import {
   useState,
   type ChangeEvent,
   type FocusEvent,
+  type InputEvent,
 } from "react";
 import styles from "./Pickers.module.scss";
 import { Color, SRGBColorSpace } from "three";
@@ -57,14 +58,14 @@ export function InputColorPicker({
     el.addEventListener("change", handler);
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    switch (e.target.type) {
+  const handleChange = (e: InputEvent<HTMLInputElement>) => {
+    switch (e.currentTarget.type) {
       case "number":
         var newValue = new Color("#" + cachedValue);
-        const userValue = +e.target.value / 255;
+        const userValue = +e.currentTarget.value / 255;
         const rgb = { r: 0, g: 0, b: 0 };
         new Color("#" + cachedValue).getRGB(rgb, SRGBColorSpace);
-        switch (e.target.id) {
+        switch (e.currentTarget.id) {
           case "color-r":
             rgb.r = userValue;
             break;
@@ -84,7 +85,7 @@ export function InputColorPicker({
         });
         break;
       case "color":
-        var newValue = new Color(e.target.value);
+        var newValue = new Color(e.currentTarget.value);
         setCachedValue(newValue.getHexString());
         setCachedHEXValue(newValue.getHexString());
         onPalette?.({
@@ -93,7 +94,7 @@ export function InputColorPicker({
         });
         break;
       case "text":
-        setCachedHEXValue(e.target.value);
+        setCachedHEXValue(e.currentTarget.value);
         break;
     }
   };

@@ -110,12 +110,19 @@ export function ChoiceButton({
 export function MidiButton({
   onClick,
   text,
+  isActive = false,
 }: {
   onClick: () => void;
   text: string;
+  isActive?: boolean;
 }) {
   return (
-    <div className={clsx("t3", styles.midiButton)} onClick={onClick}>
+    <div
+      className={clsx("t3", styles.midiButton, {
+        [styles.active]: isActive,
+      })}
+      onClick={onClick}
+    >
       {text}
     </div>
   );

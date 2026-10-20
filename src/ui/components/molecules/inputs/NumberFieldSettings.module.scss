@@ -1,0 +1,9 @@
+.container {
+  max-width: max-content;
+  & > * {
+    padding: var(--margin-s);
+    background: var(
+      --interactive-color-interactive-background-toggle
+    ) !important;
+  }
+}

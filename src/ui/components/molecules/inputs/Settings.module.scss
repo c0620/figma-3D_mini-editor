@@ -1,0 +1,32 @@
+.settings-container {
+  display: flex;
+  width: 100%;
+  gap: var(--margin-m);
+  align-items: center;
+}
+
+.description {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.toggle-reset {
+  width: 60px;
+}
+
+.toggle-reset > * {
+  background-color: var(--interactive-color-interactive-background-toggle);
+}
+
+.toggle-frozen > *,
+.toggle-frozen > *:checked {
+  background-color: var(
+    --interactive-color-interactive-background-toggle
+  ) !important;
+}
+
+.toggle-frozen > *::before {
+  background: var(--interactive-color-interactive-background-tertiary);
+}

@@ -327,6 +327,7 @@ export function SceneRenderer() {
   const activeRef = useSessionStore((s) => s.activeObjectRef);
   const isCameraPreview = useSessionStore((s) => s.isCameraPreview);
   const activeCameraID = useSessionStore((s) => s.activeCameraID);
+  const contextSetter = useSceneStore((s) => s.setCanvasContext);
 
   const { camera } = useHandlers();
 
@@ -526,6 +527,7 @@ export function SceneRenderer() {
           resize={{ scroll: false, debounce: 0 }}
           onCreated={(canvas) => {
             canvasRef.current = canvas;
+            contextSetter(canvas.get);
             setCanvasReady(true);
           }}
         >

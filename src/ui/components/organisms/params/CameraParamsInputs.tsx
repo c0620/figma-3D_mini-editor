@@ -119,8 +119,8 @@ export function CameraParamsInputs({
       <RatioInput
         title="Соотношение сторон рендера"
         field={{
-          onChange: (value: number[]) =>
-            camera.execute({ id: activeCamera.id, aspect: value }),
+          onChange: (val1, val2) =>
+            camera.execute({ id: activeCamera.id, aspect: [val1!, val2!] }),
           isActive: false,
           value1: activeCamera.aspect[0],
           value2: activeCamera.aspect[1],

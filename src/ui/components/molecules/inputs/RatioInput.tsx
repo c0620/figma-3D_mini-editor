@@ -65,7 +65,7 @@ export function RatioInput({
             max={1}
             step={0.01}
             onChange={(value) => {
-              field.onChange(findRatio(value));
+              field.onChange(...findRatio(value));
             }}
           />
         )}

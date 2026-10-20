@@ -18,10 +18,12 @@ export function LoadScreen({ type }: { type: "Local" | "Figma" }) {
         to={"/"}
       />
       <div className={styles.stack}>
-        <TextBlock
-          text="Загружайте для дальнейшего просмотра и редактирования модели с вашего устройства в форматах .obj, .fbx и .glb."
-          Icon={InfoIcon}
-        />
+        <TextBlock Icon={InfoIcon}>
+          <p>
+            Загружайте для дальнейшего просмотра и редактирования модели с
+            вашего устройства в форматах .obj, .fbx и .glb.
+          </p>
+        </TextBlock>
         <FileInput
           onUpload={(type, file) =>
             transferFacade

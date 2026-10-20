@@ -61,10 +61,6 @@
   flex-basis: content;
 }
 
-.active {
-  background-color: var(--common-color-common-accent);
-}
-
 .frozen {
   background-color: var(--interactive-color-interactive-background-tertiary);
 }
@@ -125,12 +121,13 @@
 }
 
 .midi-button {
-  background-color: var(--common-color-common-accent);
+  background-color: var(--common-color-common-black);
   color: var(--common-color-common-white);
   border-radius: var(--border-radius-m);
   height: var(--button-size-button-main-midi-height);
   padding: 0 var(--margin-l);
   line-height: var(--button-size-button-main-midi-height);
+  text-align: center;
 }
 
 .option-button {
@@ -149,4 +146,8 @@
 
 .active-option {
   background-image: var(--accent-gradient);
+}
+
+.active {
+  background-color: var(--common-color-common-accent);
 }

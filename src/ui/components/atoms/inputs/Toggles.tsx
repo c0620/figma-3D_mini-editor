@@ -1,16 +1,19 @@
+import clsx from "clsx";
 import styles from "./Toggles.module.scss";
 
 export function Toggle({
   label,
   onChange,
   value,
+  className,
 }: {
   label?: string;
   value: boolean;
   onChange: () => void;
+  className?: string;
 }) {
   return (
-    <div className={styles.toggleContainer}>
+    <div className={clsx(styles.toggleContainer, className && className)}>
       <input
         className={styles.toggle}
         type="checkbox"

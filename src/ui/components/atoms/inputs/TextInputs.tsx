@@ -1,7 +1,8 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, InputEvent, InputEventHandler } from "react";
 
 import styles from "./TextInputs.module.scss";
 import { useId } from "react";
+import clsx from "clsx";
 
 export type InputNumbersField = {
   onChange: (value: number) => void;
@@ -18,18 +19,25 @@ export type InputNumbersField = {
   };
 };
 
+export type InputPairValues =
+  | [val1: number, val2: undefined]
+  | [val1: undefined, val2: number]
+  | [val1: number, val2: number];
+
 export type InputPairNumbersField = {
-  onChange: (value: number[]) => void;
+  onChange: (...vals: InputPairValues) => void;
   value1: number;
   value2: number;
   isActive: boolean;
+  label1?: string;
+  label2?: string;
 };
 
 export function InputNumbers({ field }: { field: InputNumbersField }) {
   const id = useId();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    field.setValue(e.target.value.replace(",", "."));
+  const handleChange = (e: InputEvent<HTMLInputElement>) => {
+    field.setValue(e.currentTarget.value.replace(",", "."));
   };
 
   const setChange = () => {
@@ -64,21 +72,50 @@ export function InputNumbers({ field }: { field: InputNumbersField }) {
 export function InputPairNumbers({
   field,
   vertical = false,
+  className,
 }: {
   field: InputPairNumbersField;
   vertical?: boolean;
+  className?: string;
 }) {
+  const id1 = useId();
+  const id2 = useId();
   return (
-    <div className={vertical ? styles.vertical : styles.pairRow} role="group">
+    <div
+      className={clsx(
+        vertical ? styles.vertical : styles.pairRow,
+        className && className
+      )}
+      role="group"
+    >
+      {field.label1 ? (
+        <label className={styles.inputTextLabel} htmlFor={id1}>
+          {field.label1}
+        </label>
+      ) : null}
       <input
+        id={id1}
         className={styles.inputTextField}
         value={field.value1}
-        onChange={(e) => field.onChange([+e.target.value, field.value2])}
+        onChange={(e) =>
+          !Number.isNaN(+e.target.value) &&
+          field.onChange(+e.target.value, undefined)
+        }
       />
+
+      {field.label2 ? (
+        <label className={styles.inputTextLabel} htmlFor={id2}>
+          {field.label2}
+        </label>
+      ) : null}
       <input
+        id={id2}
         className={styles.inputTextField}
         value={field.value2}
-        onChange={(e) => field.onChange([field.value1, +e.target.value])}
+        onChange={(e) =>
+          !Number.isNaN(+e.target.value) &&
+          field.onChange(undefined, +e.target.value)
+        }
       />
     </div>
   );

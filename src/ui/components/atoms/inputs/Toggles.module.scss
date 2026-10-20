@@ -2,12 +2,14 @@
   display: flex;
   gap: var(--margin-m);
   align-items: center;
+  flex-shrink: 0;
 }
 
 .toggle {
   appearance: none;
   width: 100%;
   max-width: 60px;
+  min-width: 21px;
   height: var(--inputs-size-toggle-height);
   border-radius: var(--border-radius-s);
   background: var(--interactive-color-interactive-background-primary);

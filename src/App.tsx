@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useSessionStore } from "./store/sessionStore";
 import { LoadScreen } from "./ui/components/screens/LoadScreen";
 import { TestErrorNotifyModal } from "./ui/components/templates/modal/TestErrorNotifyModal";
+import { ExportModal } from "./ui/components/templates/modal/export/ExportModal";
 
 function App() {
   const colorTheme = useSessionStore((s) => s.colorTheme);
@@ -30,6 +31,7 @@ function App() {
         </Routes>
       </MemoryRouter>
       <TestErrorNotifyModal />
+      <ExportModal />
     </>
   );
 }

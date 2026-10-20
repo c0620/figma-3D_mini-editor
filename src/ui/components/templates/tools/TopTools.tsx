@@ -11,9 +11,11 @@ import shadowsOn from "@/assets/images/icons/state/shadowsOn.svg?react";
 import info from "@/assets/images/icons/descriptive/info.svg?react";
 import render from "@/assets/images/icons/descriptive/render.svg?react";
 import { useNavigate } from "react-router";
+import { useSessionStore } from "@/store/sessionStore";
 
 export function TopTools() {
   const navigate = useNavigate();
+  const openExport = useSessionStore((s) => s.setModalType);
   return (
     <div className={styles.toolsRow}>
       <div className={styles.tool}>
@@ -32,7 +34,7 @@ export function TopTools() {
         <SquareButton onClick={() => console.log("delete")} img={info} />
       </div>
       <div className={clsx(styles.tool, styles.toolAccent)}>
-        <SquareButton onClick={() => console.log("delete")} img={render} />
+        <SquareButton onClick={() =>openExport("export")} img={render} />
       </div>
     </div>
   );

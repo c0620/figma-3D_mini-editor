@@ -7,7 +7,7 @@ import { TopTools } from "../templates/tools/TopTools";
 import { BottomTools } from "../templates/tools/BottomTools";
 import { useEffect } from "react";
 import styles from "./EditorPageScreen.module.scss";
-import { Modal } from "../templates/modal/Modal";
+import { BaseModal } from "../templates/modal/BaseModal";
 import { useSessionStore, type ModalType } from "@/store/sessionStore";
 import { AddObjectModalContent } from "../templates/modal/AddObjectModalContent";
 
