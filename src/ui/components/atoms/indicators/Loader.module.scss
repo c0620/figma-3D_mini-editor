@@ -1,0 +1,28 @@
+.loader {
+  width: 100%;
+  height: 100%;
+  max-width: 150px;
+  max-height: 150px;
+  animation: rotate 1s linear infinite forwards;
+}
+
+.loader path {
+  animation: draw 1.5s ease-in-out infinite alternate;
+  transform-origin: center;
+  stroke: var(--common-color-common-accent);
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes draw {
+  from {
+    stroke-dasharray: 10 304;
+  }
+  to {
+    stroke-dasharray: 100 214;
+  }
+}

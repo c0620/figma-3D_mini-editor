@@ -3,16 +3,19 @@
   src: url("/src/assets/fonts/01_NTSomic-Regular.ttf");
   font-weight: 400;
 }
+
 @font-face {
   font-family: "NT Somic";
   src: url("/src/assets/fonts/02_NTSomic-Medium.ttf");
   font-weight: 500;
 }
+
 @font-face {
   font-family: "NT Somic";
   src: url("/src/assets/fonts/03_NTSomic-Bold.ttf");
   font-weight: 700;
 }
+
 .titleStart,
 .textStart,
 h1,
