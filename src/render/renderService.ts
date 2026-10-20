@@ -14,24 +14,29 @@ export class RenderService {
     this.scene = scene;
   }
 
-  exportRender(options: RenderOptions): RenderResult {
+  async exportRender(options: RenderOptions): Promise<Blob> {
     const canvas = document.createElement("canvas");
     canvas.width = options.width;
     canvas.height = options.height;
+    const camera = this.scene.getActiveCamera();
     const result = this.renderer.renderScene(
+      camera,
       canvas,
-      this.scene.getScene(),
-      options
+      options,
+      this.scene.getThree()
     );
-    this.progressListeners.forEach((l) => l(100));
-    return result;
+    // this.progressListeners.forEach((l) => l(100));
+    return (await result).png;
   }
 
   onProgress(listener: (percent: number) => void): void {
     this.progressListeners.push(listener);
   }
 
-  renderMaterialPreview(canvas: HTMLCanvasElement, materialID: MaterialID): void {
+  renderMaterialPreview(
+    canvas: HTMLCanvasElement,
+    materialID: MaterialID
+  ): void {
     this.renderer.renderMaterialPreview(canvas, materialID);
   }
 

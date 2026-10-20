@@ -18,6 +18,7 @@ import { applyToSceneThreeNode } from "@/utils/applyToSceneThreeNode";
 import { threeAssetRegistry } from "../store/threeAssetRegistry";
 import { Color } from "three";
 import { produce } from "immer";
+import type { RootState } from "@react-three/fiber";
 
 type SceneMaterialPatch = Pick<Material, "id"> &
   Partial<Omit<Material, "id" | "color">> & { color?: Color };
@@ -45,6 +46,7 @@ export type EnvironmentPatch = Partial<EnvironmentState>;
 
 interface SceneState {
   scene: Scene | null;
+  canvasContext: (() => RootState) | null;
 }
 
 interface SceneActions {
@@ -63,6 +65,7 @@ interface SceneActions {
   traverseScene(): void; // TODO
   patchMaterial(id: MaterialID, patch: Partial<Omit<Material, "id">>): void;
   deleteObject(objectRef: ObjectRef): void;
+  setCanvasContext(getter: NonNullable<SceneState["canvasContext"]>): void;
 }
 
 function linkIntoGraph(
@@ -99,6 +102,7 @@ function unlinkFromGraph(
 
 export const useSceneStore = create<SceneState & SceneActions>((set) => ({
   scene: null,
+  canvasContext: null,
 
   loadScene: (scene) => set({ scene }),
   clearScene: () => set({ scene: null }),
@@ -301,5 +305,9 @@ export const useSceneStore = create<SceneState & SceneActions>((set) => ({
 
       return { scene: newSceneState };
     });
+  },
+
+  setCanvasContext: (callback) => {
+    set({ canvasContext: callback });
   },
 }));

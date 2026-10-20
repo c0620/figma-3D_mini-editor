@@ -39,12 +39,10 @@ import {
   type ToggleVisibilityPayload,
 } from "../handlers/objectModeChangingHandler";
 import { SceneEncoder } from "../io/sceneEncoder";
-import { SceneImportExportService } from "../io/sceneImportExportService";
+import { DeviceImportExportService } from "../io/deviceImportExportService";
 import { SceneNamingService } from "../io/sceneNamingService";
 import { ScenePersistenceService } from "../io/scenePersistenceService";
 import { SceneTransferFacade } from "../io/sceneTransferFacade";
-import { TextureFigmaService } from "../io/textureFigmaService";
-import { TextureLocalService } from "../io/textureLocalService";
 import { AssetCatalogService } from "../library/assetCatalogService";
 import { Renderer } from "../render/renderer";
 import { RenderService } from "../render/renderService";
@@ -65,6 +63,7 @@ import {
   MaterialEditingHandler,
   type MaterialEditingPayload,
 } from "@/handlers/materialEditingHandler";
+import { TextureService } from "@/io/textureService";
 
 /**
  * Proxy-тип для хэндлеров, команды которых идут через CommandBus (с историей).
@@ -118,7 +117,7 @@ export function buildKernel(): AppKernel {
   const figmaApi = new FigmaAPI();
   const figmaHandler = new FigmaHandler(figmaApi);
   const naming = new SceneNamingService();
-  const encoder = new SceneEncoder();
+  const encoder = new SceneEncoder(sceneStorage);
   const renderer = new Renderer();
 
   // --- Render / Analytics ---
@@ -127,14 +126,17 @@ export function buildKernel(): AppKernel {
   const analyzer = new SceneAnalyzer();
 
   // --- IO ---
-  const sceneIo = new SceneImportExportService(encoder, sceneStorage, analyzer);
-  const textureLocal = new TextureLocalService();
-  const textureFigma = new TextureFigmaService(figmaHandler, naming);
+  const sceneIo = new DeviceImportExportService(
+    encoder,
+    sceneStorage,
+    analyzer
+  );
+  const textureService = new TextureService(sceneStorage, figmaHandler, naming);
   const persistence = new ScenePersistenceService(figmaHandler, naming);
   const assetCatalog = new AssetCatalogService(sceneStorage);
   const transfer = new SceneTransferFacade(
     sceneIo,
-    textureFigma,
+    textureService,
     persistence,
     renderService,
     analyzer,
@@ -158,13 +160,11 @@ export function buildKernel(): AppKernel {
   const environmentHandler = new EnvironmentHandler(sceneStorage);
   const textureImportHandler = new TextureImportHandler(
     sceneStorage,
-    textureLocal,
-    textureFigma
+    textureService
   );
   const textureExportHandler = new TextureExportHandler(
     sceneStorage,
-    textureLocal,
-    textureFigma
+    textureService
   );
   const toggleVisibilityHandler = new ToggleVisibilityHandler(sceneStorage);
   const toggleLockHandler = new ToggleLockHandler(sceneStorage);

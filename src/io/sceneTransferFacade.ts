@@ -2,8 +2,7 @@ import { NotificationService } from "../services/information/notificationService
 import { SceneAnalyzer } from "../services/sceneAnalyzerService";
 import { RenderService } from "../render/renderService";
 import { AssetCatalogService } from "../library/assetCatalogService";
-import { SceneImportExportService } from "./sceneImportExportService";
-import { TextureFigmaService } from "./textureFigmaService";
+import { DeviceImportExportService } from "./deviceImportExportService";
 import { ScenePersistenceService } from "./scenePersistenceService";
 import type { ObjectID } from "@/types/scene";
 import type {
@@ -11,8 +10,19 @@ import type {
   Warning,
 } from "@/services/information/warnings";
 import { OperationContext } from "@/services/information/operationContext";
-import { AppError, CancelError } from "@/services/information/errors";
+import {
+  AppError,
+  CancelError,
+  ErrorCode,
+} from "@/services/information/errors";
 import { ImportTypes } from "@/services/information/types";
+import type {
+  DeviceExportFormat,
+  ExportOptions,
+  ExportResults,
+} from "@/types/io";
+import type { TextureService } from "./textureService";
+import JSZip from "jszip";
 
 export type SceneFileType = "OBJ" | "FBX" | "GLB";
 export type UploadAction = "LoadScene" | "AddScene";
@@ -35,8 +45,8 @@ export type ImportSceneRequest =
     };
 
 export class SceneTransferFacade {
-  sceneIo: SceneImportExportService;
-  textureFigma: TextureFigmaService;
+  deviceIO: DeviceImportExportService;
+  textureService: TextureService;
   persistence: ScenePersistenceService;
   renderService: RenderService;
   analyzer: SceneAnalyzer;
@@ -46,16 +56,16 @@ export class SceneTransferFacade {
   lastExportTasks: OperationContext[] = [];
 
   constructor(
-    sceneIo: SceneImportExportService,
-    textureFigma: TextureFigmaService,
+    deviceIO: DeviceImportExportService,
+    textureService: TextureService,
     persistence: ScenePersistenceService,
     renderService: RenderService,
     analyzer: SceneAnalyzer,
     notifications: NotificationService,
     assetCatalog: AssetCatalogService
   ) {
-    this.sceneIo = sceneIo;
-    this.textureFigma = textureFigma;
+    this.deviceIO = deviceIO;
+    this.textureService = textureService;
     this.persistence = persistence;
     this.renderService = renderService;
     this.analyzer = analyzer;
@@ -65,8 +75,42 @@ export class SceneTransferFacade {
 
   readonly exportSceneToFigmaLinked = (): void => {};
 
-  readonly exportSceneToDevice = (type: SceneFileType): Blob => {
-    return this.sceneIo.exportToDevice(type);
+  readonly exportSceneToDevice = async (
+    options: ExportOptions
+  ): Promise<ExportResults> => {
+    const output: ExportResults = {
+      png: undefined,
+      gltf: undefined,
+      zip: undefined,
+    };
+    if (options.renderOptions.render) {
+      output.png = await this.renderService.exportRender(options.renderOptions);
+    }
+    if (options.fileOptions.file) {
+      output.gltf = await this.deviceIO.exportToDevice(
+        "GLTF",
+        options.fileOptions.onlyVisible
+      );
+    }
+    if (options.fileOptions.appendTextures) {
+      const textureURLs = this.textureService.exportTexturesToFile();
+      if (textureURLs) {
+        const zip = new JSZip();
+        textureURLs.forEach((texture) => {
+          const index = texture.url.indexOf("base64,") + "base64.".length;
+          const content = texture.url.substring(index);
+          zip.file(`${texture.name}.png`, content, { base64: true });
+        });
+        output.zip = await zip.generateAsync({ type: "blob" });
+      }
+    }
+    if (!output.gltf && !output.png && !output.zip) {
+      throw new AppError(
+        ErrorCode.UnsupportedExportFormat,
+        `Unsupported export format`
+      );
+    }
+    return output;
   };
 
   private abortPreviousTask(context: OperationContext) {
@@ -92,8 +136,12 @@ export class SceneTransferFacade {
 
           const result =
             request.intent === "LoadScene"
-              ? await this.sceneIo.importFromDevice(request.type, data, context)
-              : await this.sceneIo.addFromDevice(request.type, data, context);
+              ? await this.deviceIO.importFromDevice(
+                  request.type,
+                  data,
+                  context
+                )
+              : await this.deviceIO.addFromDevice(request.type, data, context);
 
           if (!context.isAborted()) {
             context.pushLogs();

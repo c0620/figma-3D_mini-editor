@@ -3,12 +3,17 @@ import type { SuccessCode } from "./success";
 import type { WarningCode } from "./warnings";
 
 export enum ImportTypes {
-  device = "device",
-  figma = "figma",
-  library = "library",
+  device = "deviceI",
+  figma = "figmaI",
+  library = "libraryI",
 }
 
-export type OperationType = ImportTypes;
+export enum ExportTypes {
+  device = "deviceE",
+  figma = "figmaE",
+}
+
+export type OperationType = ImportTypes | ExportTypes;
 
 export type DecisionQuestion = {
   id: string;

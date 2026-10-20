@@ -1,3 +1,4 @@
+import { AppError, ErrorCode } from "@/services/information/errors";
 import type {
   SceneCamera,
   EnvironmentState,
@@ -61,8 +62,31 @@ export class SceneStorage {
   /** Сцена с гарантией наличия. Бросает, если сцена не загружена (для IO/render). */
   getScene(): Scene {
     const scene = useSceneStore.getState().scene;
-    if (!scene) throw new Error("SceneStorage.getScene: no scene loaded");
+    if (!scene)
+      throw new AppError(
+        ErrorCode.NoScene,
+        "SceneStorage.getScene: no scene loaded"
+      );
     return scene;
+  }
+
+  getThree() {
+    const get = useSceneStore.getState().canvasContext;
+    if (!get)
+      throw new AppError(
+        ErrorCode.NoScene,
+        "SceneStorage.getScene: no scene loaded"
+      );
+    return get;
+  }
+
+  getTextures() {
+    const sceneMaterials = useSceneStore.getState().scene?.materials;
+    if (!sceneMaterials) return;
+    return Object.values(sceneMaterials).map((v) => ({
+      textures: v.textures,
+      matName: v.name,
+    }));
   }
 
   /** Безопасное чтение сцены без исключения. */

@@ -4,10 +4,10 @@ import { SceneEncoder } from "./sceneEncoder";
 import type { Scene } from "@/types/scene";
 import { OperationContext } from "@/services/information/operationContext";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
+import type { DeviceExportFormat, DeviceImportFormat } from "@/types/io";
+import { AppError, ErrorCode } from "@/services/information/errors";
 
-type SceneFileType = "OBJ" | "FBX" | "GLB";
-
-export class SceneImportExportService {
+export class DeviceImportExportService {
   encoder: SceneEncoder;
   scene: SceneStorage;
   analyzer: SceneAnalyzer;
@@ -22,13 +22,37 @@ export class SceneImportExportService {
     this.analyzer = analyzer;
   }
 
-  exportToDevice(type: SceneFileType): Blob {
-    const raw = this.encoder.export(type, this.scene.getScene());
-    return new Blob([raw]);
+  async exportToDevice(
+    type: Exclude<DeviceExportFormat, "PNG">,
+    onlyVisible?: boolean
+  ): Promise<Blob> {
+    let raw;
+    let result: string | ArrayBuffer | undefined = undefined;
+    switch (type) {
+      case "OBJ":
+        result = this.encoder.exportOBJ();
+        break;
+      case "GLTF":
+        raw = await this.encoder.exportGLTF(onlyVisible);
+        break;
+      default:
+        throw new AppError(
+          ErrorCode.UnsupportedExportFormat,
+          `Unsupported export format: ${type}`
+        );
+    }
+    if (typeof raw === "object" && !Array.isArray(raw) && raw !== null) {
+      result = JSON.stringify(raw);
+    }
+    if (!result)
+      throw new AppError(ErrorCode.UnknownError, "Failed to export scene");
+    return new Blob([result], {
+      type: type === "OBJ" ? "text/plain" : "application/octet-stream",
+    });
   }
 
   async importFromDevice(
-    type: SceneFileType,
+    type: DeviceImportFormat,
     input: ArrayBuffer | string,
     context: OperationContext
   ): Promise<Scene | undefined> {
@@ -48,7 +72,7 @@ export class SceneImportExportService {
   }
 
   async addFromDevice(
-    type: SceneFileType,
+    type: DeviceImportFormat,
     input: ArrayBuffer | string,
     context: OperationContext
   ): Promise<Scene | undefined> {

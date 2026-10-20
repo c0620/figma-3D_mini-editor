@@ -1,6 +1,10 @@
 export enum ErrorCode {
+  NoScene = "no-scene",
+  UnknownError = "unknown-error",
   ParsingError = "parsing-error",
   DecisionContextAborted = "decision-context-aborted",
+  UnsupportedExportFormat = "unsupported-export-format",
+  UnsupportedImportFormat = "unsupported-import-format",
 }
 
 export enum QuestionCode {

@@ -1,15 +1,20 @@
-import type { MaterialID, Scene } from "../types/scene";
+import type { MaterialID, Scene, SceneCamera } from "../types/scene";
 import type { RenderOptions, RenderResult } from "../types/render";
 import {
   AmbientLight,
   Mesh,
   OrthographicCamera,
+  PerspectiveCamera,
   PointLight,
   SphereGeometry,
   Scene as TScene,
   WebGLRenderer,
 } from "three";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
+import { useSceneStore } from "@/store/sceneStore";
+import { AppError, ErrorCode } from "@/services/information/errors";
+import type { RootState } from "@react-three/fiber";
+import { useSessionStore } from "@/store/sessionStore";
 
 type PreviewState = {
   canvas: HTMLCanvasElement;
@@ -23,15 +28,52 @@ type PreviewState = {
 export class Renderer {
   private previewState: PreviewState | null = null;
 
-  renderScene(
+  async renderScene(
+    camera: SceneCamera,
     canvas: HTMLCanvasElement,
-    scene: Scene,
-    options: RenderOptions
-  ): RenderResult {
-    void canvas;
-    void scene;
-    void options;
-    return { png: new Blob(), durationMs: 0 };
+    options: RenderOptions,
+    sceneGetter: RootState["get"]
+  ): Promise<RenderResult> {
+    const renderer = new WebGLRenderer({
+      canvas,
+      alpha: options.transparentBackground,
+    });
+    const scene = sceneGetter().scene;
+    const threeCamera = sceneGetter().camera.clone();
+    const aspect = camera.aspect[0] / camera.aspect[1];
+    if (threeCamera instanceof PerspectiveCamera) {
+      threeCamera.aspect = aspect;
+    }
+    if (threeCamera instanceof OrthographicCamera) {
+      const halfH = options.height / 2;
+      const halfW = halfH * aspect;
+
+      threeCamera.left = -halfW;
+      threeCamera.right = halfW;
+      threeCamera.top = halfH;
+      threeCamera.bottom = -halfH;
+    }
+    threeCamera.updateProjectionMatrix();
+    renderer.setSize(options.width, options.height, false);
+
+    renderer.render(scene, threeCamera);
+    const resultBlob: Blob = await new Promise((resolve, reject) =>
+      canvas.toBlob((blob) =>
+        blob
+          ? resolve(blob)
+          : reject(
+              new AppError(ErrorCode.UnknownError, "failed to create PNG blob")
+            )
+      )
+    );
+    if (!resultBlob) {
+      console.log(resultBlob);
+      throw new AppError(
+        ErrorCode.UnknownError,
+        "Failed to generate PNG blob from canvas"
+      );
+    }
+    return { png: resultBlob, durationMs: 0 };
   }
 
   renderTexture(canvas: HTMLCanvasElement, textureId: string): Blob {

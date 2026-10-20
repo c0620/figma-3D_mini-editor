@@ -2,6 +2,7 @@ export interface RenderOptions {
   transparentBackground: boolean;
   width: number;
   height: number;
+  render: boolean;
 }
 
 export interface RenderResult {

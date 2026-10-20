@@ -49,9 +49,12 @@ import {
   QuestionCode,
 } from "@/services/information/errors";
 import { randomUUID } from "@/lib/randomId";
+import type { DeviceExportFormat, DeviceImportFormat } from "@/types/io";
+import { OBJExporter } from "three/examples/jsm/exporters/OBJExporter.js";
+import { useThree } from "@react-three/fiber";
+import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
+import type { SceneStorage } from "@/store/sceneStorage";
 
-type SceneFileType = "OBJ" | "FBX" | "GLB";
-type ImportFileType = SceneFileType | "Figma";
 type SceneProperties = {
   hasLight: boolean;
   hasCamera: boolean;
@@ -454,15 +457,38 @@ async function threeObjectToDomainScene(
 }
 
 export class SceneEncoder {
-  export(type: SceneFileType, scene: Scene): string {
-    // TODO: сериализация доменной сцены в нужный формат
-    void type;
-    void scene;
-    return "";
+  scene: SceneStorage;
+
+  constructor(scene: SceneStorage) {
+    this.scene = scene;
+  }
+
+  exportOBJ(): string {
+    const exporter = new OBJExporter();
+    const get = this.scene.getThree();
+    const scene = get().scene;
+    const result = exporter.parse(scene);
+    return result;
+  }
+
+  async exportGLTF(
+    onlyVisible = true
+  ): Promise<ArrayBuffer | { [key: string]: unknown }> {
+    const exporter = new GLTFExporter();
+    const get = this.scene.getThree();
+    const scene = get().scene;
+    try {
+      return await exporter.parseAsync(scene, { onlyVisible });
+    } catch {
+      throw new AppError(
+        ErrorCode.UnsupportedExportFormat,
+        "GLTF export failed"
+      );
+    }
   }
 
   async import(
-    type: ImportFileType,
+    type: DeviceImportFormat,
     raw: ArrayBuffer | string,
     action: UploadAction,
     context: OperationContext
@@ -503,8 +529,11 @@ export class SceneEncoder {
         const gltf = await loader.parseAsync(buffer, "");
         return threeObjectToDomainScene(gltf, action, context.ask, context.log);
       }
-      case "Figma":
-        throw new Error("SceneEncoder.import: Figma is not implemented");
+      default:
+        throw new AppError(
+          ErrorCode.ParsingError,
+          `Unsupported format: ${type}`
+        );
     }
   }
 }

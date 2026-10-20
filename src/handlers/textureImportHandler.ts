@@ -1,12 +1,8 @@
-import {
-  TextureSlot,
-  type TextureMiniature,
-} from "../types/scene";
+import { TextureSlot, type TextureMiniature } from "../types/scene";
 import { CommandType, type HistoryEntry } from "@/types/commands";
 import { SceneToolHandler } from "./sceneToolHandler";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
-import { TextureLocalService } from "@/io/textureLocalService";
-import { TextureFigmaService } from "@/io/textureFigmaService";
+import { TextureService } from "@/io/textureService";
 import type { Texture } from "three";
 import { SceneStorage } from "@/store/sceneStorage";
 
@@ -41,22 +37,16 @@ export class TextureImportHandler extends SceneToolHandler<
   TextureImportPayload,
   TextureImportSnapshot
 > {
-  local: TextureLocalService;
-  figma: TextureFigmaService;
+  textureService: TextureService;
 
-  constructor(
-    scene: SceneStorage,
-    local: TextureLocalService,
-    figma: TextureFigmaService
-  ) {
+  constructor(scene: SceneStorage, textureService: TextureService) {
     super(scene);
-    this.local = local;
-    this.figma = figma;
+    this.textureService = textureService;
   }
 
   execute(payload: TextureImportPayload): void {
     if ("file" in payload && payload.file) {
-      void this.local
+      void this.textureService
         .loadTextureFromFile(payload.file, payload.slot)
         .then((texture) =>
           this.applyTexture(payload.materialId, payload.slot, texture)
@@ -65,7 +55,7 @@ export class TextureImportHandler extends SceneToolHandler<
     }
 
     if ("frameId" in payload && payload.source === "figma") {
-      this.figma.importTextureFromFrame(
+      this.textureService.importTextureFromFrame(
         payload.frameId,
         payload.materialId,
         payload.slot
