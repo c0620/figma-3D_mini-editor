@@ -12,8 +12,12 @@
       "@/*": ["./src/*"]
     },
 
-    "typeRoots": ["./node_modules/@types", "./node_modules/@figma"],
-    "types": ["plugin-typings"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@figma",
+      "./node_modules"
+    ],
+    "types": ["plugin-typings", "vitest-browser-react"],
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
