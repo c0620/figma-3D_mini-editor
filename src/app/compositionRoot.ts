@@ -54,7 +54,7 @@ import { ActionExecutor } from "../commands/actionExecutor";
 import { CommandBus } from "../commands/commandBus";
 import { DeletionGarbageCollector } from "../commands/deletionGarbageCollector";
 import { History } from "../store/history";
-import { NotificationService } from "../services/information/notificationService";
+import { NotificationService } from "../services/alert/notificationService";
 import { SceneStorage } from "../store/sceneStorage";
 
 import type { SceneEntitySummary } from "../store/sceneEntityList";

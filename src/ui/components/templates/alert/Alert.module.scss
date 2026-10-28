@@ -1,0 +1,33 @@
+.container {
+  position: fixed;
+  top: var(--padding-outer);
+  right: var(--padding-outer);
+  max-width: calc(100% - var(--padding-outer) * 2);
+  z-index: 10000;
+  color: var(--common-color-common-white);
+  background-color: var(--common-color-common-accent);
+  padding: var(--margin-m) var(--margin-l);
+  border-radius: var(--border-radius-m);
+  display: flex;
+  align-items: start;
+  gap: var(--margin-l);
+}
+
+.error {
+  background-color: var(--utils-color-error);
+}
+
+.close {
+  height: var(--button-size-button-icon-height);
+  aspect-ratio: 1;
+  padding-top: var(--margin-m);
+  & svg g {
+    stroke-width: 4px;
+  }
+}
+
+.buttons {
+  display: flex;
+  gap: var(--margin-s);
+  margin-top: var(--margin-m);
+}

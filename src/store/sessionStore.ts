@@ -6,7 +6,8 @@ import type {
   Notification,
   PendingQuestion,
   StackedNotification,
-} from "@/services/information/types";
+} from "@/services/alert/types";
+import type { QuestionCode } from "@/services/alert/errors";
 
 type colorTheme = "Light" | "Dark";
 type windowSize = "Small" | "Large";

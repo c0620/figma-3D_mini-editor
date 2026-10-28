@@ -2,10 +2,10 @@ import { SceneStorage } from "../store/sceneStorage";
 import { SceneAnalyzer } from "../services/sceneAnalyzerService";
 import { SceneEncoder } from "./sceneEncoder";
 import type { Scene } from "@/types/scene";
-import { OperationContext } from "@/services/information/operationContext";
+import { OperationContext } from "@/services/alert/operationContext";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
 import type { DeviceExportFormat, DeviceImportFormat } from "@/types/io";
-import { AppError, ErrorCode } from "@/services/information/errors";
+import { AppError, ErrorCode } from "@/services/alert/errors";
 
 export class DeviceImportExportService {
   encoder: SceneEncoder;

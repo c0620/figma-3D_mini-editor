@@ -9,6 +9,7 @@ export enum ErrorCode {
 
 export enum QuestionCode {
   UnknownTypeOfLight = "unknown-type-of-light",
+  UnknownQuestion = "unknown-question",
 }
 
 export class AppError extends Error {
@@ -27,18 +28,6 @@ export class CancelError extends Error {
   constructor(message: string) {
     super(message);
     this.code = ErrorCode.DecisionContextAborted;
-    this.name = new.target.name;
-  }
-}
-
-export class DecisionRequiredError extends Error {
-  //AppError?
-  readonly code: QuestionCode;
-  readonly type = "error";
-
-  constructor(code: QuestionCode, message: string) {
-    super(message);
-    this.code = code;
     this.name = new.target.name;
   }
 }

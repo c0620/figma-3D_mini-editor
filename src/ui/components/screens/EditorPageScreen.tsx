@@ -9,7 +9,8 @@ import { useEffect } from "react";
 import styles from "./EditorPageScreen.module.scss";
 import { BaseModal } from "../templates/modal/BaseModal";
 import { useSessionStore, type ModalType } from "@/store/sessionStore";
-import { AddObjectModalContent } from "../templates/modal/AddObjectModalContent";
+import { AddObjectModalContent } from "../templates/modal/import/AddObjectModalContent";
+import { ExportModal } from "../templates/modal/export/ExportModal";
 
 export default function EditorPage() {
   const activeObj = useActiveObject();
@@ -23,7 +24,7 @@ export default function EditorPage() {
 
   const modals: Record<NonNullable<ModalType>, React.ReactNode> = {
     addObject: <AddObjectModalContent />,
-    export: undefined,
+    export: <ExportModal />,
     help: undefined,
   };
 

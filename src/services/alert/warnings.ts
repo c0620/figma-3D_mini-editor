@@ -3,6 +3,7 @@ export enum WarningCode {
   PluginCamera = "plugin-camera",
   UnknownNode = "unknown-node",
   UnknownWarning = "unknown-warning",
+  SkeletonNotSupported = "skeleton-not-supported",
 }
 
 export interface BaseWarning {
@@ -27,8 +28,19 @@ export class Warning implements BaseWarning {
 export class UnknownNodeWarning extends Warning {
   descriptionTemp = "UnknownNode";
   code = WarningCode.UnknownNode;
+  message?: string;
 
-  constructor(source: string, nodeType: string) {
+  constructor(source: string, nodeType: string, message?: string) {
+    super(source, nodeType);
+    this.message = message;
+  }
+}
+
+export class SkeletonNotSupportedWarning extends Warning {
+  descriptionTemp = "Skeleton is not supported";
+  code = WarningCode.SkeletonNotSupported;
+
+  constructor(source: string, nodeType?: string) {
     super(source, nodeType);
   }
 }

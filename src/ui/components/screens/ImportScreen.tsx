@@ -2,13 +2,13 @@ import { FileInput } from "../atoms/inputs/FileInputs";
 import { MainButton, SquareButton } from "../atoms/buttons/Button";
 import { useTransfer } from "@/app/ApplicationKernelContext";
 import { NavTitle } from "../atoms/buttons/Navigation";
-import styles from "./LoadScreen.module.scss";
+import styles from "./ImportScreen.module.scss";
 import { TextBlock } from "../atoms/outputs/TextBlock";
 import { useState } from "react";
 import InfoIcon from "@/assets/images/icons/descriptive/info.svg?react";
-import { ImportTypes } from "@/services/information/types";
+import { ImportTypes } from "@/services/alert/types";
 
-export function LoadScreen({ type }: { type: "Local" | "Figma" }) {
+export function ImportScreen({ type }: { type: "Local" | "Figma" }) {
   const transferFacade = useTransfer();
   const [loadStatus, setLoadStatus] = useState(false);
   return (

@@ -1,4 +1,4 @@
-import { AppError, ErrorCode } from "@/services/information/errors";
+import { AppError, ErrorCode } from "@/services/alert/errors";
 import type {
   SceneCamera,
   EnvironmentState,

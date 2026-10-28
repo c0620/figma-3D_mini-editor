@@ -1,18 +1,18 @@
 import { useRef, useState } from "react";
-import { BaseModal } from "./BaseModal";
+import { BaseModal } from "../BaseModal";
 import {
   ActionButton,
   MainButton,
   OptionButton,
-} from "../../atoms/buttons/Button";
-import { CardAsset } from "../../molecules/cards/Cards";
+} from "../../../atoms/buttons/Button";
+import { CardAsset } from "../../../molecules/cards/Cards";
 import styles from "./AddObjectModalContent.module.scss";
-import { FileInput } from "../../atoms/inputs/FileInputs";
+import { FileInput } from "../../../atoms/inputs/FileInputs";
 import { useSceneAddition } from "@/app/ApplicationKernelContext";
 import { type SceneFileType } from "@/io/sceneTransferFacade";
 import { useSessionStore } from "@/store/sessionStore";
 import { Torus } from "@react-three/drei";
-import { ImportTypes } from "@/services/information/types";
+import { ImportTypes } from "@/services/alert/types";
 
 export function AssetPreview({ assetId }: { assetId: string }) {
   return <Torus />;

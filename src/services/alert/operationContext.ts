@@ -2,21 +2,31 @@ import { Warning } from "./warnings";
 import { randomUUID } from "@/lib/randomId";
 import type { NotificationService } from "./notificationService";
 import type {
-  DecisionQuestion,
+  DecisionByCode,
   Notification,
   OperationType,
+  PendingQuestion,
+  PendingQuestionByCode,
   StackedNotification,
 } from "./types";
 import { Success } from "./success";
-import { CancelError, AppError } from "./errors";
+import { CancelError, AppError, QuestionCode } from "./errors";
 import { useSessionStore } from "@/store/sessionStore";
+import type { DecisionRequiredError } from "./decisions";
+
+type DecisionQuestionInputByCode = {
+  [C in QuestionCode]: Omit<DecisionByCode[C]["question"], "contextId">;
+};
+type CachedAnswers = Partial<{
+  [C in QuestionCode]: DecisionByCode[C]["answer"];
+}>;
 
 export class OperationContext {
   private readonly controller = new AbortController();
   private readonly logs: (Notification | Success | Warning | AppError)[] = [];
   private readonly cachedAnswers = new Map<
-    DecisionQuestion["error"]["code"],
-    DecisionQuestion
+    QuestionCode,
+    Promise<DecisionByCode[QuestionCode]["answer"]>
   >();
   private readonly notifications: NotificationService;
   readonly ofType: OperationType;
@@ -65,33 +75,51 @@ export class OperationContext {
     });
   }
 
-  private async queueQuestion(q: DecisionQuestion) {
-    return new Promise<DecisionQuestion>((resolve, reject) =>
-      useSessionStore.getState().pushDecision({
-        ...q,
+  private queueQuestion<C extends QuestionCode>(
+    question: DecisionRequiredError<C>
+  ) {
+    return new Promise<DecisionByCode[C]["answer"]>((resolve, reject) => {
+      const pending = {
         contextId: this.id,
-        resolve,
-        reject: (abort: boolean = true) => {
-          {
-            if (abort) this.abort();
-            reject(new CancelError("cancelled by user"));
-          }
+        id: question.id,
+        error: question,
+        choices: question.choices,
+
+        resolve: (value: DecisionByCode[C]["answer"]) => {
+          resolve(value);
         },
-      }),
-    );
+
+        reject: (abort: boolean = true) => {
+          if (abort) this.abort();
+          reject(new CancelError("cancelled by user"));
+        },
+      } as PendingQuestion;
+
+      useSessionStore.getState().pushDecision(pending);
+    });
   }
 
-  ask = async (question: Omit<DecisionQuestion, "contextId">) => {
+  ask = async <C extends QuestionCode>(
+    question: DecisionRequiredError<C>
+  ): Promise<DecisionByCode[C]["answer"]> => {
     this.controller.signal.throwIfAborted();
-    if (this.cachedAnswers.has(question.error.code)) {
-      return this.cachedAnswers.get(question.error.code)!;
+
+    let pendingAnswer = this.cachedAnswers.get(question.code);
+
+    if (!pendingAnswer) {
+      pendingAnswer = this.queueQuestion<C>(question).catch((error) => {
+        if (error instanceof CancelError) {
+          console.warn(error);
+        }
+        if (error instanceof AppError) {
+          this.log(error);
+          this.pushLogs();
+        }
+        throw error;
+      });
+      this.cachedAnswers.set(question.code, pendingAnswer);
     }
-    const answer = await this.queueQuestion({
-      ...question,
-      contextId: this.id,
-    });
-    this.cachedAnswers.set(question.error.code, answer);
-    return answer;
+    return pendingAnswer;
   };
 
   isAborted() {

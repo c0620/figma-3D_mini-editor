@@ -12,7 +12,7 @@ import {
 } from "three";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
 import { useSceneStore } from "@/store/sceneStore";
-import { AppError, ErrorCode } from "@/services/information/errors";
+import { AppError, ErrorCode } from "@/services/alert/errors";
 import type { RootState } from "@react-three/fiber";
 import { useSessionStore } from "@/store/sessionStore";
 
@@ -67,7 +67,6 @@ export class Renderer {
       )
     );
     if (!resultBlob) {
-      console.log(resultBlob);
       throw new AppError(
         ErrorCode.UnknownError,
         "Failed to generate PNG blob from canvas"

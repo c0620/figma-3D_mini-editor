@@ -34,6 +34,7 @@ export function MainButton({
         <div
           className={clsx("h2", styles.mainButton, { [styles.frozen]: frozen })}
           onClick={onClick ?? undefined}
+          role="button"
         >
           {text}
         </div>
@@ -51,6 +52,7 @@ export function ActionButton({
 }: ButtonProps) {
   return (
     <div
+      role="button"
       className={clsx(styles.actionButton, "h4", {
         [styles.frozen]: deactivated,
       })}
@@ -118,6 +120,7 @@ export function MidiButton({
 }) {
   return (
     <div
+      role="button"
       className={clsx("t3", styles.midiButton, {
         [styles.active]: isActive,
       })}
@@ -136,6 +139,7 @@ export function SquareButton({
 }: ButtonProps) {
   return (
     <div
+      role="button"
       className={clsx(styles.squareButton, { [styles.frozen]: deactivated })}
       onClick={onClick}
     >
@@ -170,6 +174,7 @@ export function SquareStateButton({
         [styles.frozen]: deactivated,
       })}
       onClick={handleClick}
+      role="button"
     >
       <Icon />
     </div>
@@ -184,7 +189,7 @@ export function NavLinkButton({
   Img?: IconComponent;
 }) {
   return (
-    <div>
+    <div role="button">
       <Link to={to}>{Img ? <Img /> : to}</Link>
     </div>
   );
@@ -200,9 +205,10 @@ export function OptionButton({
   const [isActive, setIsActive] = useState(false);
   return (
     <div
+      role="button"
       className={clsx(styles.optionButton, { [styles.activeOption]: isActive })}
       onClick={() => {
-        onClick;
+        onClick();
         setIsActive((s) => !s);
       }}
     >

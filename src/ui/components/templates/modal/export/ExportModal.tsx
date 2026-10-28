@@ -29,7 +29,7 @@ import clsx from "clsx";
 import { useSceneStore } from "@/store/sceneStore";
 import type { InputPairValues } from "@/ui/components/atoms/inputs/TextInputs";
 import { Loader } from "@/ui/components/atoms/indicators/Loader";
-import { AppError, ErrorCode } from "@/services/information/errors";
+import { AppError, ErrorCode } from "@/services/alert/errors";
 import { randomUUID } from "@/lib/randomId";
 
 import infoIcon from "@/assets/images/icons/descriptive/info.svg?react";

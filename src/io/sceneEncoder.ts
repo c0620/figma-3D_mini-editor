@@ -18,6 +18,8 @@ import {
   HemisphereLight,
   RectAreaLight,
   Scene as ThreeScene,
+  Bone,
+  Skeleton,
 } from "three";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
@@ -38,22 +40,19 @@ import type { UploadAction } from "./sceneTransferFacade";
 import {
   AddCameraWarning,
   AddLightsWarning,
+  SkeletonNotSupportedWarning,
   UnknownNodeWarning,
   type Warning,
-} from "@/services/information/warnings";
-import type { OperationContext } from "@/services/information/operationContext";
-import {
-  AppError,
-  DecisionRequiredError,
-  ErrorCode,
-  QuestionCode,
-} from "@/services/information/errors";
+} from "@/services/alert/warnings";
+import type { OperationContext } from "@/services/alert/operationContext";
+import { AppError, ErrorCode, QuestionCode } from "@/services/alert/errors";
 import { randomUUID } from "@/lib/randomId";
 import type { DeviceExportFormat, DeviceImportFormat } from "@/types/io";
 import { OBJExporter } from "three/examples/jsm/exporters/OBJExporter.js";
 import { useThree } from "@react-three/fiber";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
 import type { SceneStorage } from "@/store/sceneStorage";
+import { DecisionRequiredError } from "@/services/alert/decisions";
 
 type SceneProperties = {
   hasLight: boolean;
@@ -160,15 +159,12 @@ async function decideUnknownLight(
 ): Promise<boolean> {
   const key = nodeTypeName(node);
   const mapped = replacementLightType(node);
-  const answer = await ctx.ask({
-    id: randomUUID(),
-    error: new DecisionRequiredError(
-      QuestionCode.UnknownTypeOfLight,
-      `Unknown light: ${key} → ${mapped}`
-    ),
-    choice: false,
-  });
-  const replace = Boolean(answer.choice);
+  const error = new DecisionRequiredError(
+    QuestionCode.UnknownTypeOfLight,
+    `Unknown light: ${key} → ${mapped}`
+  );
+  const answer = await ctx.ask<QuestionCode.UnknownTypeOfLight>(error);
+  const replace = answer.answer;
   return replace;
 }
 
@@ -282,8 +278,12 @@ async function parseObjectThree(
       pendingDelete: false,
     } as SceneGroup;
     keep = true;
+
+    if (node instanceof Skeleton || node instanceof Bone) {
+      ctx.warn(new SkeletonNotSupportedWarning(node.name));
+    }
     if (!isGroupLike(node)) {
-      ctx.warn(new UnknownNodeWarning(node.name, nodeTypeName(node)));
+      ctx.warn(new SkeletonNotSupportedWarning(node.name));
     }
   }
 

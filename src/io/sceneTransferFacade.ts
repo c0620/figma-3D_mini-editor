@@ -1,21 +1,14 @@
-import { NotificationService } from "../services/information/notificationService";
+import { NotificationService } from "../services/alert/notificationService";
 import { SceneAnalyzer } from "../services/sceneAnalyzerService";
 import { RenderService } from "../render/renderService";
 import { AssetCatalogService } from "../library/assetCatalogService";
 import { DeviceImportExportService } from "./deviceImportExportService";
 import { ScenePersistenceService } from "./scenePersistenceService";
 import type { ObjectID } from "@/types/scene";
-import type {
-  AddLightsWarning,
-  Warning,
-} from "@/services/information/warnings";
-import { OperationContext } from "@/services/information/operationContext";
-import {
-  AppError,
-  CancelError,
-  ErrorCode,
-} from "@/services/information/errors";
-import { ImportTypes } from "@/services/information/types";
+import type { AddLightsWarning, Warning } from "@/services/alert/warnings";
+import { OperationContext } from "@/services/alert/operationContext";
+import { AppError, CancelError, ErrorCode } from "@/services/alert/errors";
+import { ImportTypes } from "@/services/alert/types";
 import type {
   DeviceExportFormat,
   ExportOptions,
