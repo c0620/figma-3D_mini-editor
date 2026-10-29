@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { OperationContext } from "@/services/information/operationContext";
+import type { OperationContext } from "@/services/alert/operationContext";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
 import { IDs, SceneEncoder } from "@/io/sceneEncoder";
+import { SceneStorage } from "@/store/sceneStorage";
 
 const TRIANGLE_OBJ = [
   "v 0.0 0.0 0.0",
@@ -26,7 +27,8 @@ describe("SceneEncoder.import", () => {
   });
 
   it("parses an OBJ mesh and fills in plugin camera and lights on LoadScene", async () => {
-    const encoder = new SceneEncoder();
+    const sceneStorage = new SceneStorage();
+    const encoder = new SceneEncoder(sceneStorage);
     const context = stubContext();
     const result = await encoder.import(
       "OBJ",
@@ -55,7 +57,8 @@ describe("SceneEncoder.import", () => {
   });
 
   it("does not inject plugin lights when adding into an existing scene", async () => {
-    const encoder = new SceneEncoder();
+    const sceneStorage = new SceneStorage();
+    const encoder = new SceneEncoder(sceneStorage);
     const context = stubContext();
     const result = await encoder.import(
       "OBJ",
@@ -69,12 +72,5 @@ describe("SceneEncoder.import", () => {
     expect(scene.cameras[IDs.PluginCamera]).toBeUndefined();
     expect(scene.lights[IDs.PluginSpotLight]).toBeUndefined();
     expect(Object.keys(scene.meshes).length).toBeGreaterThan(0);
-  });
-
-  it("rejects unimplemented Figma import", async () => {
-    const encoder = new SceneEncoder();
-    await expect(
-      encoder.import("Figma", "", "LoadScene", stubContext())
-    ).rejects.toThrow(/Figma is not implemented/);
   });
 });

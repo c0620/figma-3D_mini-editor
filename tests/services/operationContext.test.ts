@@ -1,19 +1,19 @@
+import { DecisionRequiredError } from "@/services/alert/decisions";
 import {
   AppError,
   CancelError,
-  DecisionRequiredError,
   ErrorCode,
   QuestionCode,
-} from "@/services/information/errors";
-import { NotificationService } from "@/services/information/notificationService";
-import { OperationContext } from "@/services/information/operationContext";
-import { Success } from "@/services/information/success";
+} from "@/services/alert/errors";
+import { NotificationService } from "@/services/alert/notificationService";
+import { OperationContext } from "@/services/alert/operationContext";
+import { Success } from "@/services/alert/success";
 import type {
   ImportTypes,
   Notification,
   StackedNotification,
-} from "@/services/information/types";
-import { UnknownNodeWarning, Warning } from "@/services/information/warnings";
+} from "@/services/alert/types";
+import { UnknownNodeWarning, Warning } from "@/services/alert/warnings";
 import { useSessionStore } from "@/store/sessionStore";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -51,7 +51,7 @@ describe("operationContext", () => {
   let notificationService = new NotificationService();
   let operationContext = new OperationContext(
     "test" as ImportTypes,
-    notificationService,
+    notificationService
   );
 
   beforeEach(() => {
@@ -66,7 +66,7 @@ describe("operationContext", () => {
     session.notifications = [];
     operationContext = new OperationContext(
       "test" as ImportTypes,
-      notificationService,
+      notificationService
     );
   });
 
@@ -96,7 +96,7 @@ describe("operationContext", () => {
     operationContext.log(eLog2);
     expect(operationContext["logs"]).toContain(eLog2);
     expect(operationContext["logs"].length).toBe(2);
-    console.log("Inner logs:", operationContext["logs"]);
+    //console.log("Inner logs:", operationContext["logs"]);
   });
 
   test("accept all types of logs", () => {
@@ -115,7 +115,7 @@ describe("operationContext", () => {
     expect(notificationService.toStackedNotification).toHaveBeenCalledTimes(2);
     expect(notificationService.pushStacked).toHaveBeenCalled();
     const pushed = session.notifications;
-    console.log("Pushed notifications:", pushed);
+    //console.log("Pushed notifications:", pushed);
     expect(pushed.length).toBe(2);
     expect(pushed[0].count).toBe(2);
     expect(pushed[1].count).toBe(1);
@@ -146,20 +146,8 @@ describe("operationContext", () => {
   test("abort cancels only decisions of this context", async () => {
     const spyQueueQuestion = vi.spyOn(operationContext, "queueQuestion");
     const decisions = [
-      {
-        id: "1",
-        error: new DecisionRequiredError(
-          QuestionCode.UnknownTypeOfLight,
-          "test",
-        ),
-      },
-      {
-        id: "2",
-        error: new DecisionRequiredError(
-          QuestionCode.UnknownTypeOfLight,
-          "test",
-        ),
-      },
+      new DecisionRequiredError(QuestionCode.UnknownTypeOfLight, "test"),
+      new DecisionRequiredError(QuestionCode.UnknownTypeOfLight, "test"),
     ];
 
     session.pushDecision(decisions[1]);
@@ -168,18 +156,15 @@ describe("operationContext", () => {
 
     expect(
       spyQueueQuestion,
-      "check assigning of context ID",
-    ).toHaveBeenCalledWith({
-      ...decisions[0],
-      contextId: operationContext.id,
-    });
+      "check assigning of context ID"
+    ).toHaveBeenCalledWith(decisions[0]);
 
     operationContext.abort();
 
     await expect(answer).rejects.toThrow(CancelError);
 
     expect(notificationService.removeByContext).toHaveBeenCalledWith(
-      operationContext.id,
+      operationContext.id
     );
 
     expect(operationContext.isAborted()).toBe(true);

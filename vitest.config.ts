@@ -12,7 +12,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-
+    setupFiles: ["./tests/setup.ts"],
     include: ["tests/**/*.test.{ts,tsx}", "tests/**/*.spec.{ts,tsx}"],
     exclude: [
       "tests/**/*.browser.test.{ts,tsx}",

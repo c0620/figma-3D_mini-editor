@@ -493,47 +493,57 @@ export class SceneEncoder {
     action: UploadAction,
     context: OperationContext
   ): Promise<Parsed> {
-    switch (type) {
-      case "OBJ": {
-        const text =
-          typeof raw === "string" ? raw : new TextDecoder().decode(raw);
-        const loader = new OBJLoader();
-        const group = loader.parse(text);
-        return threeObjectToDomainScene(
-          group,
-          action,
-          context.ask,
-          context.log
-        );
+    try {
+      switch (type) {
+        case "OBJ": {
+          const text =
+            typeof raw === "string" ? raw : new TextDecoder().decode(raw);
+          const loader = new OBJLoader();
+          const group = loader.parse(text);
+          return threeObjectToDomainScene(
+            group,
+            action,
+            context.ask,
+            context.log
+          );
+        }
+        case "FBX": {
+          const buffer =
+            raw instanceof ArrayBuffer
+              ? raw
+              : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
+          const loader = new FBXLoader();
+          const group = loader.parse(buffer, "");
+          return threeObjectToDomainScene(
+            group,
+            action,
+            context.ask,
+            context.log
+          );
+        }
+        case "GLB": {
+          const buffer =
+            raw instanceof ArrayBuffer
+              ? raw
+              : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
+          const loader = new GLTFLoader();
+          const gltf = await loader.parseAsync(buffer, "");
+          return threeObjectToDomainScene(
+            gltf,
+            action,
+            context.ask,
+            context.log
+          );
+        }
+        default:
+          throw new AppError(
+            ErrorCode.UnsupportedImportFormat,
+            `Unsupported format: ${type}`
+          );
       }
-      case "FBX": {
-        const buffer =
-          raw instanceof ArrayBuffer
-            ? raw
-            : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
-        const loader = new FBXLoader();
-        const group = loader.parse(buffer, "");
-        return threeObjectToDomainScene(
-          group,
-          action,
-          context.ask,
-          context.log
-        );
-      }
-      case "GLB": {
-        const buffer =
-          raw instanceof ArrayBuffer
-            ? raw
-            : Uint8Array.from(raw, (c) => c.charCodeAt(0)).buffer;
-        const loader = new GLTFLoader();
-        const gltf = await loader.parseAsync(buffer, "");
-        return threeObjectToDomainScene(gltf, action, context.ask, context.log);
-      }
-      default:
-        throw new AppError(
-          ErrorCode.ParsingError,
-          `Unsupported format: ${type}`
-        );
+    } catch (error) {
+      console.error(error);
+      throw new AppError(ErrorCode.ParsingError, "parsing failed");
     }
   }
 }

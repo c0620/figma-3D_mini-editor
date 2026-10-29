@@ -1,11 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { ErrorCode } from "@/services/information/errors";
+import { ErrorCode } from "@/services/alert/errors";
 import { useSessionStore } from "@/store/sessionStore";
-import type {
-  Notification,
-  StackedNotification,
-} from "@/services/information/types";
+import type { Notification, StackedNotification } from "@/services/alert/types";
 
 import { resetStores } from "../helpers/resetStores";
 import { TEST_IDS } from "../helpers/sceneFixtures";

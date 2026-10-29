@@ -1,6 +1,6 @@
 import type { RenderOptions } from "./render";
 
-export type DeviceImportFormat = "OBJ" | "GLTF" | "FBX" | "GLB";
+export type DeviceImportFormat = "OBJ" | "FBX" | "GLB";
 export type DeviceExportFormat = "PNG" | "OBJ" | "GLTF";
 
 export type FigmaImportFormat = "FigmaI";

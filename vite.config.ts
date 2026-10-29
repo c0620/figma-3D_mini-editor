@@ -6,6 +6,7 @@ import svgr from "vite-plugin-svgr";
 
 // https://vite.dev/config/
 export default defineConfig({
+  assetsInclude: ["**/*.glb", "**/*.gltf"],
   build: {
     assetsInlineLimit: 100000000,
     chunkSizeWarningLimit: 100000000,

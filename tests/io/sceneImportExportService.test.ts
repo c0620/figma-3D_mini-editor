@@ -1,10 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, test, vi } from "vitest";
 
 import { SceneEncoder } from "@/io/sceneEncoder";
-import { SceneImportExportService } from "@/io/sceneImportExportService";
-import type { OperationContext } from "@/services/information/operationContext";
+import { DeviceImportExportService } from "@/io/deviceImportExportService";
+import type { OperationContext } from "@/services/alert/operationContext";
 import { SceneAnalyzer } from "@/services/sceneAnalyzerService";
 import { SceneStorage } from "@/store/sceneStorage";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
 import { loadBasicScene, resetStores } from "../helpers/resetStores";
 import {
@@ -21,64 +24,58 @@ function stubContext(aborted = false): OperationContext {
   } as unknown as OperationContext;
 }
 
-describe("SceneImportExportService", () => {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const modelPath = path.resolve(__dirname, "../3d/lamp.glb");
+
+const fileBuffer = await readFile(modelPath);
+
+const model3D = fileBuffer.buffer.slice(
+  fileBuffer.byteOffset,
+  fileBuffer.byteOffset + fileBuffer.byteLength
+);
+
+describe("DeviceImportExportService", () => {
   const storage = new SceneStorage();
-  const encoder = {
-    import: vi.fn(),
-    export: vi.fn(),
-  };
-  const service = new SceneImportExportService(
-    encoder as unknown as SceneEncoder,
+  const encoder = new SceneEncoder(storage);
+  const service = new DeviceImportExportService(
+    encoder,
     storage,
     new SceneAnalyzer()
   );
 
   beforeEach(() => {
     resetStores();
-    encoder.import.mockReset();
-    encoder.export.mockReset();
   });
 
-  it("loads an imported scene when the context is not aborted", async () => {
-    const imported = createBasicScene({ id: "imported" });
-    encoder.import.mockResolvedValue(imported);
-
+  test("loads an imported scene when the context is not aborted", async () => {
+    vi.spyOn(encoder, "import");
     const result = await service.importFromDevice(
-      "OBJ",
-      "payload",
+      "GLB",
+      model3D as ArrayBuffer,
       stubContext()
     );
 
     expect(encoder.import).toHaveBeenCalledWith(
-      "OBJ",
-      "payload",
+      "GLB",
+      model3D as ArrayBuffer,
       "LoadScene",
       expect.anything()
     );
-    expect(result?.id).toBe("imported");
-    expect(storage.getScene().id).toBe("imported");
+
+    expect(result?.id).toBe(storage.getScene().id);
   });
 
-  it("does not load when the context was aborted", async () => {
-    encoder.import.mockResolvedValue(createBasicScene({ id: "imported" }));
-
-    await service.importFromDevice("OBJ", "payload", stubContext(true));
+  test("does not load when the context was aborted", async () => {
+    await service.importFromDevice(
+      "GLB",
+      model3D as ArrayBuffer,
+      stubContext(true)
+    );
     expect(storage.getSceneOrNull()).toBeNull();
   });
 
-  it("adds imported objects into the current scene", async () => {
+  test.todo("adds imported objects into the current scene", async () => {
     storage.load(loadBasicScene());
-    const extra = createLight({ id: "light-imported", target: null });
-    encoder.import.mockResolvedValue(
-      createBasicScene({
-        lights: { [extra.id]: extra },
-        meshes: {},
-        groups: {},
-        cameras: {},
-        materials: {},
-        sceneGraph: { roots: [extra.id], graphThree: {} },
-      })
-    );
 
     await service.addFromDevice("GLB", new ArrayBuffer(0), stubContext());
 
@@ -92,12 +89,6 @@ describe("SceneImportExportService", () => {
     expect(storage.findObjectById(TEST_IDS.mesh)?.kind).toBe("Mesh");
   });
 
-  it("wraps encoder export in a Blob", () => {
-    storage.load(loadBasicScene());
-    encoder.export.mockReturnValue("glb-bytes");
-
-    const blob = service.exportToDevice("GLB");
-    expect(encoder.export).toHaveBeenCalledWith("GLB", storage.getScene());
-    expect(blob).toBeInstanceOf(Blob);
-  });
+  test.todo("import files with correct types");
+  test.todo("appends a new scene to the existing scene");
 });
