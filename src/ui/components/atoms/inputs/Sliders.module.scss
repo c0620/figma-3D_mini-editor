@@ -92,7 +92,8 @@
   &::before {
     content: "";
     position: absolute;
-    z-index: 10;
+    z-index: 1;
+    pointer-events: none;
     left: calc(50% - 4px);
     top: -5px;
     border-radius: 10px;

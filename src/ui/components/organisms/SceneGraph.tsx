@@ -88,7 +88,13 @@ export function SceneGraph({
     }
   }
   return (
-    <ScrollPanel fill img={sceneIcon} disableScroll={false} isOpen={isOpen}>
+    <ScrollPanel
+      fill
+      img={sceneIcon}
+      disableScroll={false}
+      isOpen={isOpen}
+      text="Содержимое сцены"
+    >
       {graphItems}
     </ScrollPanel>
   );

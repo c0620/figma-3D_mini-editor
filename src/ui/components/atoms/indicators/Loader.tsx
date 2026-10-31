@@ -7,8 +7,8 @@ export function Loader() {
         <path
           d="M 10 60 A 50 50 0 1 1 10 61"
           fill="none"
-          stroke-width="14"
-          stroke-linecap="round"
+          strokeWidth="14"
+          strokeLinecap="round"
         />
       </svg>
     </div>
