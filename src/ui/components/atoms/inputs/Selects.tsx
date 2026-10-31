@@ -1,5 +1,5 @@
 import type { Material } from "@/types/scene";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "./Selects.module.scss";
 import { Color } from "three";
@@ -35,6 +35,18 @@ function variableColorToCss(value: unknown): string | undefined {
   return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
 }
 
+function flipElement(element: HTMLUListElement | null) {
+  if (!element) return;
+  const rect = element.getBoundingClientRect();
+
+  const viewportHeight = window.innerHeight;
+  const spaceBelow = viewportHeight - rect.bottom;
+
+  if (spaceBelow < rect.height) {
+    element.style.bottom = "0";
+  }
+}
+
 export function SelectVariable<T extends PropertyKey>({
   variables,
   value,
@@ -62,6 +74,7 @@ export function SelectVariable<T extends PropertyKey>({
         </button>
       ) : (
         <ul
+          ref={flipElement}
           className={styles.selectDropdown}
           onPointerLeave={() => setOpen(false)}
         >
@@ -94,6 +107,7 @@ export function SelectColor({
   variables: FigmaVariableListItem[] | null;
 }) {
   const [open, setOpen] = useState(false);
+
   return (
     <div className={styles.selectContainer + " t3"}>
       {!open ? (
@@ -114,6 +128,7 @@ export function SelectColor({
         </button>
       ) : (
         <ul
+          ref={flipElement}
           className={styles.selectDropdown}
           onPointerLeave={() => setOpen(false)}
         >
