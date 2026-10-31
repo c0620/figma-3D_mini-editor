@@ -24,7 +24,7 @@ function lightNumberField(
   return {
     isActive: false as const,
     value,
-    onChange: (next: number) => patch({ [key]: next }),
+    onApply: (next: number) => patch({ [key]: next }),
     range: { ...range, variant: "default" as const },
   };
 }

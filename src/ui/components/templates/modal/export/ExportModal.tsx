@@ -27,12 +27,12 @@ import type { RenderOptions } from "@/types/render";
 import { produce } from "immer";
 import clsx from "clsx";
 import { useSceneStore } from "@/store/sceneStore";
-import type { InputPairValues } from "@/ui/components/atoms/inputs/TextInputs";
 import { Loader } from "@/ui/components/atoms/indicators/Loader";
 import { AppError, ErrorCode } from "@/services/alert/errors";
 import { randomUUID } from "@/lib/randomId";
 
 import infoIcon from "@/assets/images/icons/descriptive/info.svg?react";
+import type { InputPairValues } from "@/ui/components/atoms/inputs/TextInputs";
 
 type ModalType = "figma" | "device";
 type ModalState = "settings" | "loading" | "success" | "finish";
@@ -203,18 +203,21 @@ function ExportDevice({
             <NumberFieldPairSettings
               title="Разрешение"
               label="Соотношение сторон рендера"
-              value1={exportType.renderOptions.width}
-              value2={exportType.renderOptions.height}
-              onChange={(...values: InputPairValues) => {
-                const [newWidth, newHeight] = toRatio(values);
-                update("renderOptions", {
-                  ...exportType.renderOptions,
-                  width: newWidth,
-                  height: newHeight,
-                });
+              field={{
+                label1: "w",
+                label2: "h",
+                value1: exportType.renderOptions.width + "",
+                value2: exportType.renderOptions.height + "",
+                onApply: (...values: InputPairValues) => {
+                  const [newWidth, newHeight] = toRatio(values);
+                  update("renderOptions", {
+                    ...exportType.renderOptions,
+                    width: newWidth,
+                    height: newHeight,
+                  });
+                },
+                isActive: false,
               }}
-              label1="w"
-              label2="h"
             />
             <ToggleSettings
               title="Прозрачность"

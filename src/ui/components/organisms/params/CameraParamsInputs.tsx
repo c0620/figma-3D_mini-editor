@@ -36,7 +36,7 @@ export function CameraParamsInputs({
       <NumberFieldInput
         title="Приближение"
         field={{
-          onChange: (value) =>
+          onApply: (value) =>
             activeCamera.type == CameraType.Perspective
               ? camera.execute({ id: activeCamera.id, dolly: value })
               : camera.execute({ id: activeCamera.id, zoom: value }),
@@ -62,18 +62,20 @@ export function CameraParamsInputs({
         <NumberFieldInput
           title="Ближняя граница видимости"
           field={{
-            onChange: (value) =>
+            onApply: (value) =>
               camera.execute({ id: activeCamera.id, near: value }),
-            isActive: false,
-            value:
-              activeCamera.near > activeCamera.far
+            beforeApply: (value) =>
+              value > activeCamera.far
                 ? activeCamera.far - 100 > 0
                   ? activeCamera.far - 100
                   : 0.1
-                : activeCamera.near,
+                : value,
+            isActive: false,
+            value: activeCamera.near,
+
             range: {
               min: activeCamera.type === CameraType.Perspective ? 0.1 : 0,
-              max: 10000,
+              max: activeCamera.far,
               step: 10,
               variant: "default",
             },
@@ -83,15 +85,14 @@ export function CameraParamsInputs({
         <NumberFieldInput
           title="Дальняя граница видимости"
           field={{
-            onChange: (value) =>
+            onApply: (value) =>
               camera.execute({ id: activeCamera.id, far: value }),
+            beforeApply: (value) =>
+              activeCamera.near > value ? activeCamera.near + 100 : value,
             isActive: false,
-            value:
-              activeCamera.near > activeCamera.far
-                ? activeCamera.near + 100
-                : activeCamera.far,
+            value: activeCamera.far,
             range: {
-              min: activeCamera.type === CameraType.Perspective ? 0.1 : 0,
+              min: activeCamera.near,
               max: 10000,
               step: 10,
               variant: "default",
@@ -119,11 +120,11 @@ export function CameraParamsInputs({
       <RatioInput
         title="Соотношение сторон рендера"
         field={{
-          onChange: (val1, val2) =>
+          onApply: (val1, val2) =>
             camera.execute({ id: activeCamera.id, aspect: [val1!, val2!] }),
           isActive: false,
-          value1: activeCamera.aspect[0],
-          value2: activeCamera.aspect[1],
+          value1: activeCamera.aspect[0] + "",
+          value2: activeCamera.aspect[1] + "",
         }}
         isOpen={isOpen}
       />

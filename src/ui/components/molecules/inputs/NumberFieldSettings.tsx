@@ -1,36 +1,37 @@
 import {
   InputNumbers,
   InputPairNumbers,
+  type InputPairNumbersField,
   type InputPairValues,
 } from "../../atoms/inputs/TextInputs";
 import styles from "./Settings.module.scss";
 import reset from "./NumberFieldSettings.module.scss";
+import { useEffect, useState, type SetStateAction } from "react";
 
 export function NumberFieldPairSettings({
   title,
   label,
-  value1,
-  value2,
-  onChange,
-  label1,
-  label2,
+  field,
 }: {
   title: string;
   label: string;
   labelInput?: string;
-  value1: number;
-  value2: number;
-  onChange: (...vals: InputPairValues) => void;
-  label1?: string;
-  label2?: string;
+  field: Omit<InputPairNumbersField, "setValues">;
 }) {
-  const field = {
-    onChange,
-    value1,
-    value2,
-    isActive: true,
-    label1,
-    label2,
+  useEffect(
+    () => setValues([field.value1, field.value2]),
+    [field.value1, field.value2]
+  );
+  const [values, setValues] = useState<[string, string]>([
+    field.value1,
+    field.value2,
+  ]);
+
+  const inputField: InputPairNumbersField = {
+    ...field,
+    setValues: setValues,
+    value1: values[0],
+    value2: values[1],
   };
   return (
     <div className={styles.settingsContainer}>
@@ -38,7 +39,7 @@ export function NumberFieldPairSettings({
         <h3 className="h3">{title}</h3>
         {label && <p className="t2">{label}</p>}
       </div>
-      <InputPairNumbers field={field} className={reset.container} />
+      <InputPairNumbers field={inputField} className={reset.container} />
     </div>
   );
 }

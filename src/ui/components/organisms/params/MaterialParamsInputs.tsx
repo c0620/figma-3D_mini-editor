@@ -33,7 +33,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
             <NumberFieldInput
               title={isOpen ? "Шероховатость" : undefined}
               field={{
-                onChange: (value) =>
+                onApply: (value) =>
                   materialEditing.execute({
                     id: material.id,
                     roughness: value,
@@ -60,7 +60,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
             <NumberFieldInput
               title={isOpen ? "Металлик" : undefined}
               field={{
-                onChange: (value) =>
+                onApply: (value) =>
                   materialEditing.execute({
                     id: material.id,
                     metalness: value,
@@ -88,7 +88,7 @@ export function MaterialParamsInputs({ material }: { material: Material }) {
       <NumberFieldInput
         title={isOpen ? "Свечение" : undefined}
         field={{
-          onChange: (value) =>
+          onApply: (value) =>
             materialEditing.execute({
               id: material.id,
               emissiveIntensity: value,

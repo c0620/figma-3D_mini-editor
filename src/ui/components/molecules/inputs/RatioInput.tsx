@@ -1,9 +1,12 @@
 import { SliderCentered } from "../../atoms/inputs/Sliders";
 import {
   InputPairNumbers,
+  type InputNumbersField,
   type InputPairNumbersField,
+  type InputPairValues,
 } from "../../atoms/inputs/TextInputs";
 import styles from "./Common.module.scss";
+import { useState, type SetStateAction } from "react";
 
 function gcd(a: number, b: number): number {
   a = Math.abs(Math.round(a));
@@ -50,25 +53,80 @@ export function RatioInput({
   isOpen = true,
 }: {
   title?: string;
-  field: InputPairNumbersField;
+  field: Omit<InputPairNumbersField, "setValues">;
   isOpen?: boolean;
 }) {
+  const [values, setValues] = useState<[string, string]>([
+    field.value1,
+    field.value2,
+  ]);
+
+  const sliderField: InputNumbersField = {
+    onApply: (value: number) => {
+      const [v1, v2] = findRatio(value);
+      field.onApply(v1, v2);
+      setValues([v1 + "", v2 + ""]);
+    },
+    value: pairToSlider(+field.value1, +field.value2) + "",
+    setValue: (value) => {
+      field.onApply(
+        ...findRatio(
+          parseFloat(
+            typeof value == "function"
+              ? value(pairToSlider(+field.value1, +field.value2) + "")
+              : value
+          )
+        )
+      );
+    },
+    isActive: false,
+    range: {
+      min: -1,
+      max: 1,
+      step: 0.01,
+      variant: "centered",
+    },
+  };
+
+  const inputField: InputPairNumbersField = {
+    ...field,
+    value1: values[0],
+    value2: values[1],
+    setValues: (values) => {
+      setValues(values);
+    },
+    onApply: (...vals: InputPairValues) => {
+      const v1 = vals[0] === undefined ? +field.value1 : vals[0];
+      const v2 = vals[1] === undefined ? +field.value2 : vals[1];
+      let result: [number, number];
+      if (v1 !== 0 && v2 !== 0) result = [v1, v2];
+      else if (v1 === 0 && v2 === 0) {
+        result = [+field.value1, +field.value2];
+      } else if (v1 === 0) {
+        result = [+field.value1, v2];
+      } else {
+        result = [v1, +field.value2];
+      }
+      field.onApply(...result);
+    },
+    beforeApply: (...vals) => {
+      const v1 = vals[0] === undefined ? +field.value1 : vals[0];
+      const v2 = vals[1] === undefined ? +field.value2 : vals[1];
+      if (v1 === 0 && v2 === 0) {
+        return [+field.value1, +field.value2];
+      } else if (v1 === 0) {
+        return [+field.value1, v2];
+      } else if (v2 === 0) return [v1, +field.value2];
+      return [...vals];
+    },
+  };
+
   return (
     <div className={styles.commonContainer}>
       {isOpen && <p className="t3">{title}</p>}
       <div className={styles.commonInputRow}>
-        <InputPairNumbers field={field} vertical={!isOpen} />
-        {isOpen && (
-          <SliderCentered
-            value={pairToSlider(field.value1, field.value2)}
-            min={-1}
-            max={1}
-            step={0.01}
-            onChange={(value) => {
-              field.onChange(...findRatio(value));
-            }}
-          />
-        )}
+        <InputPairNumbers field={inputField} vertical={!isOpen} />
+        {isOpen && <SliderCentered field={sliderField} />}
       </div>
     </div>
   );

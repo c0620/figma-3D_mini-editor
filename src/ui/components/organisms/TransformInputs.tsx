@@ -34,7 +34,6 @@ export function TransformInputs({
   activeObj: ActiveEntity;
   isOpen: boolean;
 }) {
-
   const { transform } = useHandlers();
   const scene = useSceneStore((s) => s.scene);
   const sceneId = scene?.id ?? null;
@@ -68,7 +67,7 @@ export function TransformInputs({
           field={{
             value: activeObjTrans[transform as keyof Transform][i],
             isActive: false,
-            onChange: (v: number) =>
+            onApply: (v: number) =>
               transformHandler(transform as keyof Transform, +i, v),
             label: AXES[i],
           }}

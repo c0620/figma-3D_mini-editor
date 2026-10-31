@@ -21,7 +21,7 @@ export function NumberFieldInput({
     console.warn("NumberFieldInput: provided value is null");
 
   const [value, setValue] = useState("" + (field.value ?? 0));
-  useEffect(() => setValue("" + field.value), [field.value]);
+  //useEffect(() => setValue("" + field.value), [field.value]);
   const inputField: InputNumbersField = {
     ...field,
     value: value,
