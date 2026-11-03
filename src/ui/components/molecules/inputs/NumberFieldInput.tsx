@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-import { Slider } from "../../atoms/inputs/Sliders";
-import {
-  InputNumbers,
-  type InputNumbersField,
-} from "../../atoms/inputs/TextInputs";
+import { Slider } from "@atoms/inputs/Sliders";
+import { InputNumbers, type InputNumbersField } from "@atoms/inputs/TextInputs";
 import styles from "./Common.module.scss";
 
 export function NumberFieldInput({

@@ -8,8 +8,8 @@ import {
 } from "@react-three/drei";
 import { Canvas, type RootState } from "@react-three/fiber";
 
-import { useSceneStore } from "../../../store/sceneStore";
-import { threeAssetRegistry } from "../../../store/threeAssetRegistry";
+import { useSceneStore } from "@/store/sceneStore";
+import { threeAssetRegistry } from "@/store/threeAssetRegistry";
 import { useViewportObjectStore } from "@/store/viewportObjectStore";
 import {
   CameraType,
@@ -19,7 +19,7 @@ import {
   type SceneCamera,
   type SceneLight,
   type SceneObject,
-} from "../../../types/scene";
+} from "@/types/scene";
 import { useSessionStore } from "@/store/sessionStore";
 import { useHandlers, useSceneObject } from "@/app/ApplicationKernelContext";
 import {

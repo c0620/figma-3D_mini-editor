@@ -1,17 +1,17 @@
 import { LightType, type SceneLight } from "@/types/scene";
-import { NumberFieldInput } from "../../molecules/inputs/NumberFieldInput";
+import { NumberFieldInput } from "@molecules/inputs/NumberFieldInput";
 import { useHandlers } from "@/app/ApplicationKernelContext";
-import { PickerColor } from "../../molecules/inputs/PickerColor";
-import { SelectColor } from "../../atoms/inputs/Selects";
+import { PickerColor } from "@molecules/inputs/PickerColor";
+import { SelectColor } from "@atoms/inputs/Selects";
 import { type LightPatch } from "@/store/sceneStore";
 import { useSessionStore } from "@/store/sessionStore";
 import { useViewportObjectStore } from "@/store/viewportObjectStore";
-import type { InputNumbersField } from "../../atoms/inputs/TextInputs";
+import type { InputNumbersField } from "@atoms/inputs/TextInputs";
 import type { SpotLight } from "three";
 import { getMockFigmaVariables } from "./materialParamsInputs.mocks";
 import styles from "./ParamsCommon.module.scss";
 import clsx from "clsx";
-import { SelectLightTarget } from "../../molecules/inputs/SelectLightTarget";
+import { SelectLightTarget } from "@molecules/inputs/SelectLightTarget";
 
 type LightNumberKey = "intensity" | "distance" | "decay" | "angle" | "penumbra";
 

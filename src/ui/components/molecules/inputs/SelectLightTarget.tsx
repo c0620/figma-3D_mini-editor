@@ -1,8 +1,5 @@
 import { useSceneStore } from "@/store/sceneStore";
-import {
-  SelectVariable,
-  type SelectVariables,
-} from "../../atoms/inputs/Selects";
+import { SelectVariable, type SelectVariables } from "@atoms/inputs/Selects";
 import styles from "./Common.module.scss";
 
 function useLightTargetOptions(activeTargetId: string | null) {

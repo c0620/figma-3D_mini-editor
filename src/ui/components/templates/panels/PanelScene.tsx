@@ -2,16 +2,16 @@ import { useState } from "react";
 
 import { Panel } from "./BasePanel";
 
-import cameraSecIcon from "@/assets/images/icons/state/selectOff.svg?react";
-import cameraPrimcon from "@/assets/images/icons/state/selectOn.svg?react";
+import cameraSecIcon from "@images/icons/state/selectOff.svg?react";
+import cameraPrimcon from "@images/icons/state/selectOn.svg?react";
 
-import { TransformInputs } from "../../organisms/TransformInputs";
+import { TransformInputs } from "@organisms/TransformInputs";
 import styles from "./Panel.module.scss";
 import type { ActiveEntity } from "@/types/scene";
-import { SceneGraph } from "../../organisms/SceneGraph";
+import { SceneGraph } from "@organisms/SceneGraph";
 import { useSessionStore } from "@/store/sessionStore";
-import { ObjectAddButton } from "../../molecules/buttons/ObjectAddButton";
-import { PanelModeButton } from "../../molecules/buttons/PanelModeButton";
+import { ObjectAddButton } from "@molecules/buttons/ObjectAddButton";
+import { PanelModeButton } from "@molecules/buttons/PanelModeButton";
 
 export function PanelScene({ activeObj }: { activeObj: ActiveEntity | null }) {
   const [isOpen, setIsOpen] = useState(true);

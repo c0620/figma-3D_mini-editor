@@ -1,14 +1,14 @@
-import { SmallButton } from "../../atoms/buttons/Button";
+import { SmallButton } from "@atoms/buttons/Button";
 
-import pickLocal from "@/assets/images/icons/descriptive/pickTextureLocal.svg?react";
-import pickFigma from "@/assets/images/icons/descriptive/pickTextureFigma.svg?react";
-import saveFigma from "@/assets/images/icons/descriptive/saveTextureFigma.svg?react";
-import saveLocal from "@/assets/images/icons/descriptive/saveTextureLocal.svg?react";
-import garbage from "@/assets/images/icons/descriptive/garbage.svg?react";
+import pickLocal from "@images/icons/descriptive/pickTextureLocal.svg?react";
+import pickFigma from "@images/icons/descriptive/pickTextureFigma.svg?react";
+import saveFigma from "@images/icons/descriptive/saveTextureFigma.svg?react";
+import saveLocal from "@images/icons/descriptive/saveTextureLocal.svg?react";
+import garbage from "@images/icons/descriptive/garbage.svg?react";
 
 import styles from "./TextureItem.module.scss";
 
-import { TexturePreview } from "../../atoms/scene/TexturePreview";
+import { TexturePreview } from "@atoms/scene/TexturePreview";
 import type { Texture } from "three";
 import type { MaterialID, TextureSlot } from "@/types/scene";
 import { useHandlers } from "@/app/ApplicationKernelContext";
@@ -33,7 +33,6 @@ export function TextureItem({
   openImportModal: () => void;
   isOpen: boolean;
 }) {
-
   const { textureImport, textureExport } = useHandlers();
 
   return (

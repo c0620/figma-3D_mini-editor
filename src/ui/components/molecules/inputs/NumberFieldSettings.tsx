@@ -3,7 +3,7 @@ import {
   InputPairNumbers,
   type InputPairNumbersField,
   type InputPairValues,
-} from "../../atoms/inputs/TextInputs";
+} from "@atoms/inputs/TextInputs";
 import styles from "./Settings.module.scss";
 import reset from "./NumberFieldSettings.module.scss";
 import { useEffect, useState, type SetStateAction } from "react";

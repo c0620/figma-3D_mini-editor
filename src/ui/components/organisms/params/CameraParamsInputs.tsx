@@ -1,10 +1,10 @@
 import { CameraType, type SceneCamera } from "@/types/scene";
-import { NumberFieldInput } from "../../molecules/inputs/NumberFieldInput";
+import { NumberFieldInput } from "@molecules/inputs/NumberFieldInput";
 import styles from "./ParamsCommon.module.scss";
-import { ToggleState } from "../../molecules/inputs/ToggleState";
+import { ToggleState } from "@molecules/inputs/ToggleState";
 
-import { RatioInput } from "../../molecules/inputs/RatioInput";
-import { SelectLens } from "../../molecules/inputs/SelectLens";
+import { RatioInput } from "@molecules/inputs/RatioInput";
+import { SelectLens } from "@molecules/inputs/SelectLens";
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import { useSessionStore } from "@/store/sessionStore";
 import clsx from "clsx";

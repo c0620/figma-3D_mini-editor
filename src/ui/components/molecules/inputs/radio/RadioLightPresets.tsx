@@ -1,10 +1,10 @@
-import { Radio, type RadioProps } from "../../../atoms/inputs/Radio";
+import { Radio, type RadioProps } from "@atoms/inputs/Radio";
 import styles from "./RadioCommon.module.scss";
 import type { SceneLight } from "@/types/scene";
 import type { LightPatch } from "@/store/sceneStore";
-import softLight from "@/assets/images/icons/descriptive/softLight.svg?react";
-import hardLight from "@/assets/images/icons/descriptive/hardLight.svg?react";
-import areaLight from "@/assets/images/icons/descriptive/areaLight.svg?react";
+import softLight from "@images/icons/descriptive/softLight.svg?react";
+import hardLight from "@images/icons/descriptive/hardLight.svg?react";
+import areaLight from "@images/icons/descriptive/areaLight.svg?react";
 
 export function RadioLightPresets({
   value,

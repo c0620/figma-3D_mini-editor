@@ -1,4 +1,4 @@
-import { ActionButton, type ButtonProps } from "../../atoms/buttons/Button";
+import { ActionButton, type ButtonProps } from "@atoms/buttons/Button";
 
 export function PanelModeButton({
   text,
@@ -7,7 +7,6 @@ export function PanelModeButton({
   deactivated = false,
   isOpen,
 }: ButtonProps & { isOpen: boolean }) {
-
   if (!isOpen)
     return (
       <ActionButton onClick={onClick} img={img} deactivated={deactivated} />

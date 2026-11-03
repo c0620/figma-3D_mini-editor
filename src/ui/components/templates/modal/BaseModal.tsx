@@ -1,7 +1,7 @@
 import { useSessionStore } from "@/store/sessionStore";
 import styles from "./BaseModal.module.scss";
-import Close from "@/assets/images/icons/descriptive/closeX.svg?react";
-import { MidiButton, SmallButton } from "../../atoms/buttons/Button";
+import Close from "@images/icons/descriptive/closeX.svg?react";
+import { MidiButton, SmallButton } from "@atoms/buttons/Button";
 
 export function BaseModal({
   size,

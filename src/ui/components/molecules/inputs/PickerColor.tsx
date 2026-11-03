@@ -1,5 +1,5 @@
 import type { Color } from "three";
-import { InputColorPicker } from "../../atoms/inputs/Pickers";
+import { InputColorPicker } from "@atoms/inputs/Pickers";
 import styles from "./Common.module.scss";
 import type { Material } from "@/types/scene";
 

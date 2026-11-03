@@ -6,7 +6,7 @@ import type {
 } from "@/services/alert/types";
 import { useSessionStore } from "@/store/sessionStore";
 import styles from "./Alert.module.scss";
-import CloseIcon from "@/assets/images/icons/descriptive/closeX.svg?react";
+import CloseIcon from "@images/icons/descriptive/closeX.svg?react";
 import {
   OptionButton,
   SmallButton,

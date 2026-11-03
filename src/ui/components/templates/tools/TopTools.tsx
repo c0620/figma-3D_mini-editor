@@ -1,15 +1,22 @@
-import { SquareButton, SquareStateButton } from "../../atoms/buttons/Button";
+import { SquareButton, SquareStateButton } from "@atoms/buttons/Button";
 import styles from "./Tools.module.scss";
 import clsx from "clsx";
 
-import leave from "@/assets/images/icons/descriptive/leave.svg?react";
-import del from "@/assets/images/icons/descriptive/garbage.svg?react";
-import bgOff from "@/assets/images/icons/state/bgOff.svg?react";
-import bgOn from "@/assets/images/icons/state/bgOn.svg?react";
-import shadowsOff from "@/assets/images/icons/state/shadowsOff.svg?react";
-import shadowsOn from "@/assets/images/icons/state/shadowsOn.svg?react";
-import info from "@/assets/images/icons/descriptive/info.svg?react";
-import render from "@/assets/images/icons/descriptive/render.svg?react";
+import languageEn from "@images/icons/state/langEn.svg?react";
+import languageRu from "@images/icons/state/langRu.svg?react";
+import themeD from "@images/icons/state/themeD.svg?react";
+import themeL from "@images/icons/state/themeL.svg?react";
+import windowL from "@images/icons/state/windowSizeL.svg?react";
+import windowS from "@images/icons/state/windowSizeS.svg?react";
+
+import leave from "@images/icons/descriptive/leave.svg?react";
+import del from "@images/icons/descriptive/garbage.svg?react";
+import bgOff from "@images/icons/state/bgOff.svg?react";
+import bgOn from "@images/icons/state/bgOn.svg?react";
+import shadowsOff from "@images/icons/state/shadowsOff.svg?react";
+import shadowsOn from "@images/icons/state/shadowsOn.svg?react";
+import info from "@images/icons/descriptive/info.svg?react";
+import render from "@images/icons/descriptive/render.svg?react";
 import { useNavigate } from "react-router";
 import { useSessionStore } from "@/store/sessionStore";
 

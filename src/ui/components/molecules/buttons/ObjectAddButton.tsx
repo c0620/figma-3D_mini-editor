@@ -1,4 +1,4 @@
-import { ChoiceButton } from "../../atoms/buttons/Button";
+import { ChoiceButton } from "@atoms/buttons/Button";
 import arrowheadR from "@/assets/images/icons/descriptive/arrowheadR.svg?react";
 
 import meshIcon from "@/assets/images/icons/descriptive/mesh.svg?react";

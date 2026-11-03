@@ -5,7 +5,7 @@ import { NavTitle } from "../atoms/buttons/Navigation";
 import styles from "./ImportScreen.module.scss";
 import { TextBlock } from "../atoms/outputs/TextBlock";
 import { useState } from "react";
-import InfoIcon from "@/assets/images/icons/descriptive/info.svg?react";
+import InfoIcon from "@images/icons/descriptive/info.svg?react";
 import { ImportTypes } from "@/services/alert/types";
 
 export function ImportScreen({ type }: { type: "Local" | "Figma" }) {

@@ -1,14 +1,14 @@
 import { Radio, type RadioProps } from "../../../atoms/inputs/Radio";
 import styles from "./RadioCommon.module.scss";
 
-import backIcon from "@/assets/images/icons/descriptive/cameraPBack.svg?react";
-import bottomIcon from "@/assets/images/icons/descriptive/cameraPBot.svg?react";
-import frontIcon from "@/assets/images/icons/descriptive/cameraPFront.svg?react";
-import leftIcon from "@/assets/images/icons/descriptive/cameraPLeft.svg?react";
-import rightIcon from "@/assets/images/icons/descriptive/cameraPRight.svg?react";
-import topIcon from "@/assets/images/icons/descriptive/cameraPTop.svg?react";
-import customIcon from "@/assets/images/icons/descriptive/cameraPUser.svg?react";
-import saveIcon from "@/assets/images/icons/descriptive/cameraPSave.svg?react";
+import backIcon from "@images/icons/descriptive/cameraPBack.svg?react";
+import bottomIcon from "@images/icons/descriptive/cameraPBot.svg?react";
+import frontIcon from "@images/icons/descriptive/cameraPFront.svg?react";
+import leftIcon from "@images/icons/descriptive/cameraPLeft.svg?react";
+import rightIcon from "@images/icons/descriptive/cameraPRight.svg?react";
+import topIcon from "@images/icons/descriptive/cameraPTop.svg?react";
+import customIcon from "@images/icons/descriptive/cameraPUser.svg?react";
+import saveIcon from "@images/icons/descriptive/cameraPSave.svg?react";
 import { ActionButton } from "../../../atoms/buttons/Button";
 import { useSessionStore } from "@/store/sessionStore";
 import type { SceneCamera } from "@/types/scene";

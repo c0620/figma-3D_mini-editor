@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { IconComponent } from "../../types/icon";
+import type { IconComponent } from "@/ui/components/types/icon";
 import styles from "./SwitchItem.module.scss";
 
 export function SwitchItem({

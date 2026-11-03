@@ -1,4 +1,4 @@
-import { Toggle } from "../../atoms/inputs/Toggles";
+import { Toggle } from "@atoms/inputs/Toggles";
 import styles from "./Toggle.module.scss";
 
 export function ToggleState({

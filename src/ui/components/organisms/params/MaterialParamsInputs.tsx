@@ -1,12 +1,12 @@
 import styles from "./ParamsCommon.module.scss";
 import type { Material } from "@/types/scene";
 import { useHandlers } from "@/app/ApplicationKernelContext";
-import { NumberFieldInput } from "../../molecules/inputs/NumberFieldInput";
+import { NumberFieldInput } from "@molecules/inputs/NumberFieldInput";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
-import { SelectColor } from "../../atoms/inputs/Selects";
+import { SelectColor } from "@atoms/inputs/Selects";
 import { getMockFigmaVariables } from "./materialParamsInputs.mocks";
 import clsx from "clsx";
-import { PickerColor } from "../../molecules/inputs/PickerColor";
+import { PickerColor } from "@molecules/inputs/PickerColor";
 import { useSessionStore } from "@/store/sessionStore";
 
 export function MaterialParamsInputs({ material }: { material: Material }) {

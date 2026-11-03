@@ -2,7 +2,7 @@ import React from "react";
 
 import styles from "./ScrollPanel.module.scss";
 import clsx from "clsx";
-import type { IconComponent } from "../../types/icon";
+import type { IconComponent } from "@/ui/components/types/icon";
 
 export function ScrollPanel({
   fill = false,

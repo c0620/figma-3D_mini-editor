@@ -1,5 +1,5 @@
 import styles from "./Panel.module.scss";
-import { PanelModeToggle } from "../../atoms/buttons/Navigation";
+import { PanelModeToggle } from "@atoms/buttons/Navigation";
 import clsx from "clsx";
 
 export function Panel({

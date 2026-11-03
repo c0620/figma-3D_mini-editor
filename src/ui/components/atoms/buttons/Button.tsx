@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import styles from "./Button.module.scss";
 import clsx from "clsx";
 import { useState } from "react";
-import type { IconComponent } from "../../types/icon";
+import type { IconComponent } from "@/ui/components/types/icon";
 
 export interface ButtonProps {
   onClick: () => void;

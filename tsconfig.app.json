@@ -9,9 +9,13 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
+      "@images/*": ["./src/assets/images/*"],
+      "@atoms/*": ["./src/ui/components/atoms/*"],
+      "@molecules/*": ["./src/ui/components/molecules/*"],
+      "@organisms/*": ["./src/ui/components/organisms/*"],
+      "@styles/*": ["./src/styles/*"],
       "@/*": ["./src/*"]
     },
-
     "typeRoots": [
       "./node_modules/@types",
       "./node_modules/@figma",

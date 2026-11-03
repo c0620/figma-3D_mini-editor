@@ -10,7 +10,7 @@ import { useCallback, useMemo } from "react";
 
 import styles from "./TransformInputs.module.scss";
 import clsx from "clsx";
-import { NumberFieldInput } from "../molecules/inputs/NumberFieldInput";
+import { NumberFieldInput } from "@molecules/inputs/NumberFieldInput";
 
 export function activeEntityEditorHeading(active: ActiveEntity): string {
   switch (active.kind) {

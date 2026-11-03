@@ -1,7 +1,7 @@
 import { Panel } from "./BasePanel.tsx";
 import styles from "./Panel.module.scss";
-import { ScrollPanel } from "../../atoms/outputs/ScrollPanel.tsx";
-import { MaterialParamsInputs } from "../../organisms/params/MaterialParamsInputs.tsx";
+import { ScrollPanel } from "@atoms/outputs/ScrollPanel.tsx";
+import { MaterialParamsInputs } from "@organisms/params/MaterialParamsInputs.tsx";
 import { useSceneStore } from "@/store/sceneStore";
 import type {
   ActiveEntity,
@@ -14,29 +14,26 @@ import type {
 } from "@/types/scene.ts";
 import { CameraType, LightType, TextureSlot } from "@/types/scene.ts";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry.ts";
-import { MaterialPreview } from "../../atoms/scene/MaterialPreview.tsx";
+import { MaterialPreview } from "@atoms/scene/MaterialPreview.tsx";
 import { useState } from "react";
-import {
-  TextureInput,
-  TextureItem,
-} from "../../molecules/inputs/TextureItem.tsx";
-import { ModalMini } from "../../organisms/ModalTextureImport.tsx";
+import { TextureInput, TextureItem } from "@molecules/inputs/TextureItem.tsx";
+import { ModalMini } from "@organisms/ModalTextureImport.tsx";
 import clsx from "clsx";
-import materialsIcon from "@/assets/images/icons/descriptive/materials.svg?react";
-import texturesIcon from "@/assets/images/icons/descriptive/texturesP.svg?react";
-import perspectiveCameraIcon from "@/assets/images/icons/descriptive/cameraP.svg?react";
-import orthographicCameraIcon from "@/assets/images/icons/descriptive/cameraO.svg?react";
-import lensIcon from "@/assets/images/icons/descriptive/lens.svg?react";
-import ambientLightIcon from "@/assets/images/icons/descriptive/lighting.svg?react";
-import pointLightIcon from "@/assets/images/icons/descriptive/pointLight.svg?react";
-import spotLightIcon from "@/assets/images/icons/descriptive/spotLight.svg?react";
+import materialsIcon from "@images/icons/descriptive/materials.svg?react";
+import texturesIcon from "@images/icons/descriptive/texturesP.svg?react";
+import perspectiveCameraIcon from "@images/icons/descriptive/cameraP.svg?react";
+import orthographicCameraIcon from "@images/icons/descriptive/cameraO.svg?react";
+import lensIcon from "@images/icons/descriptive/lens.svg?react";
+import ambientLightIcon from "@images/icons/descriptive/lighting.svg?react";
+import pointLightIcon from "@images/icons/descriptive/pointLight.svg?react";
+import spotLightIcon from "@images/icons/descriptive/spotLight.svg?react";
 
-import { CameraParamsInputs } from "../../organisms/params/CameraParamsInputs.tsx";
-import { SwitchItem } from "../../molecules/inputs/SwitchItem.tsx";
-import { RadioCameraAnglePresets } from "../../molecules/inputs/radio/RadioCameraAnglePresets.tsx";
+import { CameraParamsInputs } from "@organisms/params/CameraParamsInputs.tsx";
+import { SwitchItem } from "@molecules/inputs/SwitchItem.tsx";
+import { RadioCameraAnglePresets } from "@molecules/inputs/radio/RadioCameraAnglePresets.tsx";
 import { useHandlers } from "@/app/ApplicationKernelContext.tsx";
-import { LightParamsInputs } from "../../organisms/params/LightParamsInputs.tsx";
-import { RadioLightPresets } from "../../molecules/inputs/radio/RadioLightPresets.tsx";
+import { LightParamsInputs } from "@organisms/params/LightParamsInputs.tsx";
+import { RadioLightPresets } from "@molecules/inputs/radio/RadioLightPresets.tsx";
 import { useSessionStore } from "@/store/sessionStore.ts";
 
 function getChildrenData(

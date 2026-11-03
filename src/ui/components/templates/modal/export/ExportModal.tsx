@@ -18,9 +18,9 @@ import type {
   ExportResults,
   FileOptions,
 } from "@/types/io";
-import { MainButton, MidiButton } from "../../../atoms/buttons/Button";
-import { TextBlock } from "../../../atoms/outputs/TextBlock";
-import { ToggleSettings } from "../../../molecules/inputs/ToggleSettings";
+import { MainButton, MidiButton } from "@atoms/buttons/Button";
+import { TextBlock } from "@atoms/outputs/TextBlock";
+import { ToggleSettings } from "@molecules/inputs/ToggleSettings";
 import styles from "./ExportModal.module.scss";
 import { NumberFieldPairSettings } from "@/ui/components/molecules/inputs/NumberFieldSettings";
 import type { RenderOptions } from "@/types/render";
@@ -31,7 +31,7 @@ import { Loader } from "@/ui/components/atoms/indicators/Loader";
 import { AppError, ErrorCode } from "@/services/alert/errors";
 import { randomUUID } from "@/lib/randomId";
 
-import infoIcon from "@/assets/images/icons/descriptive/info.svg?react";
+import infoIcon from "@images/icons/descriptive/info.svg?react";
 import type { InputPairValues } from "@/ui/components/atoms/inputs/TextInputs";
 
 type ModalType = "figma" | "device";

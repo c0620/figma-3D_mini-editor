@@ -1,21 +1,21 @@
 import { useHandlers } from "@/app/ApplicationKernelContext";
 import type { SceneEntitySummary } from "@/store/sceneEntityList";
-import { SmallButton } from "../../atoms/buttons/Button";
+import { SmallButton } from "@atoms/buttons/Button";
 
 import styles from "./GraphItem.module.scss";
 
-import meshIcon from "@/assets/images/icons/descriptive/mesh.svg?react";
-import cameraPIcon from "@/assets/images/icons/descriptive/cameraP.svg?react";
-import cameraOIcon from "@/assets/images/icons/descriptive/cameraO.svg?react";
-import groupIcon from "@/assets/images/icons/descriptive/scene.svg?react";
-import showIcon from "@/assets/images/icons/state/visibilityOn.svg?react";
-import hideIcon from "@/assets/images/icons/state/visibilityOff.svg?react";
-import lockIcon from "@/assets/images/icons/state/lockOn.svg?react";
-import freeIcon from "@/assets/images/icons/state/lockOff.svg?react";
-import garbIcon from "@/assets/images/icons/descriptive/garbage.svg?react";
-import ambientLightIcon from "@/assets/images/icons/descriptive/lighting.svg?react";
-import pointLightIcon from "@/assets/images/icons/descriptive/pointLight.svg?react";
-import spotLightIcon from "@/assets/images/icons/descriptive/spotLight.svg?react";
+import meshIcon from "@images/icons/descriptive/mesh.svg?react";
+import cameraPIcon from "@images/icons/descriptive/cameraP.svg?react";
+import cameraOIcon from "@images/icons/descriptive/cameraO.svg?react";
+import groupIcon from "@images/icons/descriptive/scene.svg?react";
+import showIcon from "@images/icons/state/visibilityOn.svg?react";
+import hideIcon from "@images/icons/state/visibilityOff.svg?react";
+import lockIcon from "@images/icons/state/lockOn.svg?react";
+import freeIcon from "@images/icons/state/lockOff.svg?react";
+import garbIcon from "@images/icons/descriptive/garbage.svg?react";
+import ambientLightIcon from "@images/icons/descriptive/lighting.svg?react";
+import pointLightIcon from "@images/icons/descriptive/pointLight.svg?react";
+import spotLightIcon from "@images/icons/descriptive/spotLight.svg?react";
 
 import clsx from "clsx";
 import { useSessionStore } from "@/store/sessionStore";
@@ -46,7 +46,6 @@ export function GraphItem({
   ref: React.RefObject<HTMLDivElement | null> | null;
   isOpen: boolean;
 }) {
-
   const changeVisibilityHandler = useHandlers().visibility;
   const changeLockHandler = useHandlers().lock;
   const deleteHandler = useHandlers().deletion;

@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 
 import styles from "./Selects.module.scss";
 import { Color } from "three";
-import type { IconComponent } from "../../types/icon";
+import type { IconComponent } from "@/ui/components/types/icon";
+
 import clsx from "clsx";
 
 export type SelectVariableType<T> = {

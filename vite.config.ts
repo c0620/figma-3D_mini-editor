@@ -60,6 +60,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      "@images": path.resolve(__dirname, "./src/assets/images"),
+      "@atoms": path.resolve(__dirname, "./src/ui/components/atoms"),
+      "@molecules": path.resolve(__dirname, "./src/ui/components/molecules"),
+      "@organisms": path.resolve(__dirname, "./src/ui/components/organisms"),
+      "@styles": path.resolve(__dirname, "./src/styles"),
       "@": path.resolve(__dirname, "./src"),
     },
   },

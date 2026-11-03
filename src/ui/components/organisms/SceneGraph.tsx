@@ -2,12 +2,12 @@ import { useHandlers, useSceneEntities } from "@/app/ApplicationKernelContext";
 import { useSceneStore } from "@/store/sceneStore";
 import type { ActiveEntity, ObjectID } from "@/types/scene";
 import { useEffect, useRef, useState } from "react";
-import { GraphItem } from "../molecules/scene/GraphItem";
+import { GraphItem } from "@molecules/scene/GraphItem";
 import { produce } from "immer";
 import { useSessionStore } from "@/store/sessionStore";
 import { enableMapSet } from "immer";
-import { ScrollPanel } from "../atoms/outputs/ScrollPanel";
-import sceneIcon from "@/assets/images/icons/descriptive/scene.svg?react";
+import { ScrollPanel } from "@atoms/outputs/ScrollPanel";
+import sceneIcon from "@images/icons/descriptive/scene.svg?react";
 
 enableMapSet();
 

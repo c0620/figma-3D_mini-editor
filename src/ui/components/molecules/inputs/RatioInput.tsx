@@ -1,10 +1,10 @@
-import { SliderCentered } from "../../atoms/inputs/Sliders";
+import { SliderCentered } from "@atoms/inputs/Sliders";
 import {
   InputPairNumbers,
   type InputNumbersField,
   type InputPairNumbersField,
   type InputPairValues,
-} from "../../atoms/inputs/TextInputs";
+} from "@atoms/inputs/TextInputs";
 import styles from "./Common.module.scss";
 import { useState, type SetStateAction } from "react";
 

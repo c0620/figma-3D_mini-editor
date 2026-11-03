@@ -1,14 +1,11 @@
 import styles from "./Common.module.scss";
-import {
-  SelectVariable,
-  type SelectVariables,
-} from "../../atoms/inputs/Selects";
+import { SelectVariable, type SelectVariables } from "@atoms/inputs/Selects";
 
-import fov15Icon from "@/assets/images/icons/descriptive/fov15.svg?react";
-import fov35Icon from "@/assets/images/icons/descriptive/fov35.svg?react";
-import fov50Icon from "@/assets/images/icons/descriptive/fov50.svg?react";
-import fov70Icon from "@/assets/images/icons/descriptive/fov70.svg?react";
-import fov400Icon from "@/assets/images/icons/descriptive/fov400.svg?react";
+import fov15Icon from "@images/icons/descriptive/fov15.svg?react";
+import fov35Icon from "@images/icons/descriptive/fov35.svg?react";
+import fov50Icon from "@images/icons/descriptive/fov50.svg?react";
+import fov70Icon from "@images/icons/descriptive/fov70.svg?react";
+import fov400Icon from "@images/icons/descriptive/fov400.svg?react";
 
 export function SelectLens({
   title,
