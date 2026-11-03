@@ -1,5 +1,5 @@
 import { Routes, Route, MemoryRouter } from "react-router";
-import StartScreen from "./ui/components/screens/StartScreen";
+import StartScreen from "./ui/components/screens/start/StartScreen";
 import EditorPage from "./ui/components/screens/EditorPageScreen";
 import AssetLibraryScreen from "./ui/components/screens/AssetLibraryScreen";
 import { useEffect, useState } from "react";

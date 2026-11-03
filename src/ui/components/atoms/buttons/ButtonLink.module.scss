@@ -1,0 +1,9 @@
+.button {
+  background-color: var(--common-color-common-black);
+  height: var(--button-size-button-nav-height);
+  aspect-ratio: 1;
+  border-radius: var(--border-radius-s);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

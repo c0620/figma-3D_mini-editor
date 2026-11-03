@@ -35,7 +35,7 @@ export default function EditorPage() {
         {activeObj && <PanelParams activeObj={activeObj} />}
       </div>
       <div className={styles.tools}>
-        <TopTools />
+        <TopTools type="project" />
         <BottomTools activeObj={activeObj} />
       </div>
       <div className={styles.renderer}>

@@ -40,6 +40,12 @@
       #ffebc0 58%,
       var(--common-color-common-accent) 80%
     );
+  --radial-gradient: radial-gradient(
+    circle at 50%,
+    #ffa353,
+    #fc934e 70%,
+    var(--common-color-common-accent) 95%
+  );
 }
 
 [data-theme="Light"] {
@@ -84,4 +90,10 @@
       #ffebc0 58%,
       var(--common-color-common-accent) 80%
     );
+  --radial-gradient: radial-gradient(
+    circle at 100%,
+    #333333,
+    #333333 50%,
+    #eeeeee 75%
+  );
 }

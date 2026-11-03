@@ -1,7 +1,7 @@
 import { NavLink } from "react-router";
-import { ActionButton } from "../../atoms/buttons/Button";
-import styles from "./Cards.module.scss";
-import { Tag } from "../../atoms/outputs/Tag";
+import { ActionButton } from "@atoms/buttons/Button";
+import styles from "./CardAsset.module.scss";
+import { Tag } from "@atoms/outputs/Tag";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Torus } from "@react-three/drei";
 import { useRef, useState } from "react";
@@ -15,30 +15,9 @@ export type CardAsset = {
   image: string;
 };
 
-export function CardStart({
-  title,
-  text,
-  image,
-  to,
-}: {
-  title: string;
-  text: string;
-  image: string;
-  to: string;
-}) {
-  return (
-    <div>
-      <h3>{title}</h3>
-      <div>{text}</div>
-      <img src={image}></img>
-      <NavLink to={to}>Загрузить</NavLink>
-    </div>
-  );
-}
-
 function Asset() {
   const torus = useRef<Mesh | null>(null);
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (torus.current) {
       torus.current.rotateY(delta);
     }

@@ -1,9 +1,9 @@
-import { NavLinkButton } from "./Button";
 import clsx from "clsx";
 
 import styles from "./Navigation.module.scss";
 import ArrowL from "@/assets/images/icons/descriptive/arrowL.svg?react";
 import ArrowR from "@/assets/images/icons/descriptive/arrowR.svg?react";
+import { ButtonLink } from "./ButtonLink";
 
 export function PanelModeToggle({
   isOpen,
@@ -54,7 +54,7 @@ export function PanelModeToggle({
 export function NavTitle({ title, to }: { title: string; to: string }) {
   return (
     <div className={styles.navTitle}>
-      <NavLinkButton to={to} Img={ArrowL} />
+      <ButtonLink to={to} Img={ArrowL} />
       <h1>{title}</h1>
     </div>
   );

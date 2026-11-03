@@ -20,14 +20,37 @@ import render from "@images/icons/descriptive/render.svg?react";
 import { useNavigate } from "react-router";
 import { useSessionStore } from "@/store/sessionStore";
 
-export function TopTools() {
+function AppSettings() {
+  return (
+    <div className={styles.toolsRow}>
+      <div className={styles.tool}>
+        <SquareStateButton
+          onClick={() => console.log("delete")}
+          imgs={{ active: languageEn, inactive: languageRu }}
+        />
+        <SquareStateButton
+          onClick={() => console.log("delete")}
+          imgs={{ active: themeD, inactive: themeL }}
+        />
+        <SquareStateButton
+          onClick={() => console.log("delete")}
+          imgs={{ active: windowS, inactive: windowL }}
+        />
+      </div>
+      <div className={styles.tool}>
+        <SquareButton onClick={() => console.log("delete")} img={info} />
+      </div>
+    </div>
+  );
+}
+
+function ProjectSettings() {
   const navigate = useNavigate();
   const openExport = useSessionStore((s) => s.setModalType);
   return (
     <div className={styles.toolsRow}>
       <div className={styles.tool}>
         <SquareButton onClick={() => navigate("/")} img={leave} />
-        <SquareButton onClick={() => console.log("delete")} img={del} />
       </div>
       <div className={styles.tool}>
         <SquareStateButton
@@ -41,8 +64,12 @@ export function TopTools() {
         <SquareButton onClick={() => console.log("delete")} img={info} />
       </div>
       <div className={clsx(styles.tool, styles.toolAccent)}>
-        <SquareButton onClick={() =>openExport("export")} img={render} />
+        <SquareButton onClick={() => openExport("export")} img={render} />
       </div>
     </div>
   );
+}
+
+export function TopTools({ type }: { type: "app" | "project" }) {
+  return type == "app" ? <AppSettings /> : <ProjectSettings />;
 }

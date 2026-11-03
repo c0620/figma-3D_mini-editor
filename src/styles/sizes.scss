@@ -31,6 +31,9 @@
   --border-weight: 2px;
   --border-weight-bold: 3px;
   --asset-card-height: 460px;
+  --text-title-start: 120px;
+  --text-card-title-start: 32px;
+  --text-card-description: 24px;
 }
 
 [data-window-size="Small"] {
@@ -64,4 +67,7 @@
   --border-weight: 2px;
   --border-weight-bold: 3px;
   --asset-card-height: 230px;
+  --text-title-start: 60px;
+  --text-card-title-start: 16px;
+  --text-card-description: 12px;
 }

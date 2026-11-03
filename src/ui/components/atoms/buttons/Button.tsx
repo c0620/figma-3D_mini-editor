@@ -181,20 +181,6 @@ export function SquareStateButton({
   );
 }
 
-export function NavLinkButton({
-  to,
-  Img,
-}: {
-  to: string;
-  Img?: IconComponent;
-}) {
-  return (
-    <div role="button">
-      <Link to={to}>{Img ? <Img /> : to}</Link>
-    </div>
-  );
-}
-
 export function OptionButton({
   text,
   onClick,
