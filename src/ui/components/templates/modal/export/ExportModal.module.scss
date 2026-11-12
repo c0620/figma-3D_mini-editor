@@ -3,8 +3,8 @@
   gap: var(--margin-l);
   grid-template-rows: max-content max-content auto;
   //   grid-template: repeat(2, max-content) / repeat(2, 1fr);
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-areas: "info info" "setL setR" "button button";
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-areas: "info info info info info" "setL setL setR setR setR" "button button button button button";
   height: 100%;
 }
 
@@ -14,7 +14,7 @@
 
 .grid-setL {
   grid-area: setL;
-  & > *,
+  л & > *,
   .grid-inner {
     display: flex;
     flex-direction: column;

@@ -5,6 +5,7 @@ export enum ErrorCode {
   DecisionContextAborted = "decision-context-aborted",
   UnsupportedExportFormat = "unsupported-export-format",
   UnsupportedImportFormat = "unsupported-import-format",
+  UnknownFigmaExportError = "unknown-figma-export-error",
 }
 
 export enum QuestionCode {

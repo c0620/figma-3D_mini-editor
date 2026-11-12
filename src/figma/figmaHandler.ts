@@ -1,7 +1,18 @@
-import { FigmaAPI } from './figmaApi';
+import {
+  FigmaAPITypes,
+  type FigmaAPIParams,
+  type UIParams,
+  type UIRequests,
+} from "../../plugin-src/types";
+import { FigmaAPI } from "./figmaApi";
+import { randomUUID } from "@/lib/randomId";
 
-export class FigmaHandler {
-  errors: string = '';
+type FigmaContract = {
+  [K in FigmaAPITypes]: (request: UIParams[K]) => Promise<FigmaAPIParams[K]>;
+};
+
+export class FigmaHandler implements FigmaContract {
+  errors: string = "";
   private api: FigmaAPI;
 
   constructor(api: FigmaAPI) {
@@ -20,27 +31,58 @@ export class FigmaHandler {
     return [];
   }
 
-  getFrameBytes(nodeId: string): Uint8Array | null {
-    void nodeId;
-    return null;
+  placeRender(params: UIParams[FigmaAPITypes.placeRender]) {
+    return this.api.postMessage({
+      id: randomUUID(),
+      type: FigmaAPITypes.placeRender,
+      ...params,
+    });
   }
 
-  createFrame(name: string, width: number, height: number): string {
-    this.api.postMessage({ type: 'create-frame', name, width, height });
-    return '';
+  findPluginFrames(params: UIParams[FigmaAPITypes.findPluginFrames]) {
+    return this.api.postMessage({
+      id: randomUUID(),
+      type: FigmaAPITypes.findPluginFrames,
+      ...params,
+    });
   }
 
-  setPluginData(nodeID: string, key: string, value: string): void {
-    this.api.postMessage({ type: 'set-plugin-data', nodeID, key, value });
+  createFrame(params: UIParams[FigmaAPITypes.createFrame]) {
+    return this.api.postMessage({
+      id: randomUUID(),
+      type: FigmaAPITypes.createFrame,
+      ...params,
+    });
   }
 
-  getPluginData(nodeID: string, key: string): string | null {
-    void nodeID;
-    void key;
-    return null;
+  setPluginData(params: UIParams[FigmaAPITypes.setPluginData]) {
+    return this.api.postMessage({
+      id: randomUUID(),
+      type: FigmaAPITypes.setPluginData,
+      ...params,
+    });
   }
 
-  insertImage(nodeID: string, bytes: Uint8Array): void {
-    this.api.postMessage({ type: 'insert-image', nodeID, bytes });
+  getPluginData(params: UIParams[FigmaAPITypes.getPluginData]) {
+    return this.api.postMessage({
+      id: randomUUID(),
+      type: FigmaAPITypes.getPluginData,
+      ...params,
+    });
+  }
+
+  insertImage(params: UIParams[FigmaAPITypes.insertImage]) {
+    return this.api.postMessage({
+      id: randomUUID(),
+      type: FigmaAPITypes.insertImage,
+      ...params,
+    });
+  }
+
+  closePlugin() {
+    return this.api.postMessage({
+      id: randomUUID(),
+      type: FigmaAPITypes.closePlugin,
+    });
   }
 }

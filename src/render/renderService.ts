@@ -1,7 +1,7 @@
 import type { RenderOptions, RenderResult } from "../types/render";
 import { SceneStorage } from "../store/sceneStorage";
 import { Renderer } from "./renderer";
-import type { MaterialID } from "@/types/scene";
+import type { MaterialID, SceneCamera } from "@/types/scene";
 
 export class RenderService {
   renderer: Renderer;
@@ -14,13 +14,15 @@ export class RenderService {
     this.scene = scene;
   }
 
-  async exportRender(options: RenderOptions): Promise<Blob> {
+  async exportRender(
+    options: RenderOptions,
+    camera?: SceneCamera
+  ): Promise<Blob> {
     const canvas = document.createElement("canvas");
     canvas.width = options.width;
     canvas.height = options.height;
-    const camera = this.scene.getActiveCamera();
     const result = this.renderer.renderScene(
-      camera,
+      camera ?? this.scene.getActiveCamera(),
       canvas,
       options,
       this.scene.getThree()

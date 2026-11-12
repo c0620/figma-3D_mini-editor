@@ -27,6 +27,7 @@ export const messageHeaders: UserHeaders = {
   [ErrorCode.UnknownError]: "Неизвестная ошибка",
   [ErrorCode.UnsupportedExportFormat]: "Формат экспорта не поддерживается",
   [ErrorCode.UnsupportedImportFormat]: "Формат импорта не поддерживается",
+  [ErrorCode.UnknownFigmaExportError]: "Неизвестная ошибка экспорта в Figma",
   [QuestionCode.UnknownTypeOfLight]: "Неизвестный тип света",
   [QuestionCode.UnknownQuestion]: "Неизвестное решение",
   [WarningCode.PluginCamera]: "Автоматически добавлена камера",

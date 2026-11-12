@@ -1,5 +1,4 @@
 import { SceneStorage } from "../store/sceneStorage";
-import { SceneAnalyzer } from "../services/sceneAnalyzerService";
 import { SceneEncoder } from "./sceneEncoder";
 import type { Scene } from "@/types/scene";
 import { OperationContext } from "@/services/alert/operationContext";
@@ -10,44 +9,25 @@ import { AppError, ErrorCode } from "@/services/alert/errors";
 export class DeviceImportExportService {
   encoder: SceneEncoder;
   scene: SceneStorage;
-  analyzer: SceneAnalyzer;
 
-  constructor(
-    encoder: SceneEncoder,
-    scene: SceneStorage,
-    analyzer: SceneAnalyzer
-  ) {
+  constructor(encoder: SceneEncoder, scene: SceneStorage) {
     this.encoder = encoder;
     this.scene = scene;
-    this.analyzer = analyzer;
   }
 
-  async exportToDevice(
-    type: Exclude<DeviceExportFormat, "PNG">,
-    onlyVisible?: boolean
-  ): Promise<Blob> {
+  async exportToDevice(onlyVisible?: boolean): Promise<Blob> {
     let raw;
     let result: string | ArrayBuffer | undefined = undefined;
-    switch (type) {
-      case "OBJ":
-        result = this.encoder.exportOBJ();
-        break;
-      case "GLTF":
-        raw = await this.encoder.exportGLTF(onlyVisible);
-        break;
-      default:
-        throw new AppError(
-          ErrorCode.UnsupportedExportFormat,
-          `Unsupported export format: ${type}`
-        );
-    }
+
+    raw = await this.encoder.exportGLTF(onlyVisible);
+
     if (typeof raw === "object" && !Array.isArray(raw) && raw !== null) {
       result = JSON.stringify(raw);
     }
     if (!result)
       throw new AppError(ErrorCode.UnknownError, "Failed to export scene");
     return new Blob([result], {
-      type: type === "OBJ" ? "text/plain" : "application/octet-stream",
+      type: "application/octet-stream",
     });
   }
 

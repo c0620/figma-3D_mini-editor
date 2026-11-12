@@ -1,4 +1,4 @@
-import type { MaterialID, Scene, SceneCamera } from "../types/scene";
+import { CameraType, type MaterialID, type SceneCamera } from "../types/scene";
 import type { RenderOptions, RenderResult } from "../types/render";
 import {
   AmbientLight,
@@ -11,10 +11,8 @@ import {
   WebGLRenderer,
 } from "three";
 import { threeAssetRegistry } from "@/store/threeAssetRegistry";
-import { useSceneStore } from "@/store/sceneStore";
 import { AppError, ErrorCode } from "@/services/alert/errors";
 import type { RootState } from "@react-three/fiber";
-import { useSessionStore } from "@/store/sessionStore";
 
 type PreviewState = {
   canvas: HTMLCanvasElement;
@@ -39,15 +37,31 @@ export class Renderer {
       alpha: options.transparentBackground,
     });
     const scene = sceneGetter().scene;
-    const threeCamera = sceneGetter().camera.clone();
+
+    const threeCamera =
+      camera.type == CameraType.Perspective
+        ? new PerspectiveCamera()
+        : new OrthographicCamera();
+
+    const [positionX, positionY, positionZ] = camera.transform.position;
+    const [targetX, targetY, targetZ] = camera.target;
+    threeCamera.position.set(positionX, positionY, positionZ);
+    threeCamera.lookAt(targetX, targetY, targetZ);
+
     const aspect = camera.aspect[0] / camera.aspect[1];
     if (threeCamera instanceof PerspectiveCamera) {
       threeCamera.aspect = aspect;
+      threeCamera.near = camera.near;
+      threeCamera.far = camera.far;
+      threeCamera.fov = camera.fov;
+      threeCamera.zoom = camera.zoom ?? 1;
     }
     if (threeCamera instanceof OrthographicCamera) {
       const halfH = options.height / 2;
       const halfW = halfH * aspect;
-
+      threeCamera.zoom = camera.zoom ?? 1;
+      threeCamera.near = camera.near;
+      threeCamera.far = camera.far;
       threeCamera.left = -halfW;
       threeCamera.right = halfW;
       threeCamera.top = halfH;
@@ -66,6 +80,7 @@ export class Renderer {
             )
       )
     );
+    renderer.dispose();
     if (!resultBlob) {
       throw new AppError(
         ErrorCode.UnknownError,

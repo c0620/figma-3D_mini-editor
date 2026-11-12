@@ -6,7 +6,7 @@ import styles from "./ImportScreen.module.scss";
 import { TextBlock } from "../atoms/outputs/TextBlock";
 import { useState } from "react";
 import InfoIcon from "@images/icons/descriptive/info.svg?react";
-import { ImportTypes } from "@/services/alert/types";
+import { ImportTypes } from "@/types/io";
 
 export function ImportScreen({ type }: { type: "Local" | "Figma" }) {
   const transferFacade = useTransfer();

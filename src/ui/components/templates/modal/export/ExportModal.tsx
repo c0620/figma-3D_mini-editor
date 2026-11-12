@@ -9,14 +9,18 @@ import {
   useRef,
   useState,
   type Dispatch,
+  type ReactNode,
   type SetStateAction,
 } from "react";
 import { useSessionStore } from "@/store/sessionStore";
-import type {
-  DeviceExportFormat,
-  ExportOptions,
-  ExportResults,
-  FileOptions,
+import {
+  type DeviceExportFormat,
+  type ExportOptions,
+  type DeviceExportResults,
+  type FigmaOptions,
+  type FileOptions,
+  type FigmaExportResults,
+  ExportTypes,
 } from "@/types/io";
 import { MainButton, MidiButton } from "@atoms/buttons/Button";
 import { TextBlock } from "@atoms/outputs/TextBlock";
@@ -33,10 +37,23 @@ import { randomUUID } from "@/lib/randomId";
 
 import infoIcon from "@images/icons/descriptive/info.svg?react";
 import type { InputPairValues } from "@/ui/components/atoms/inputs/TextInputs";
+import type { SceneCamera } from "@/types/scene";
 
 type ModalType = "figma" | "device";
 type ModalState = "settings" | "loading" | "success" | "finish";
 type ModalData = { type: ModalType; state: ModalState };
+type Frames = { frameID: string; name: string }[];
+
+function toRatio(
+  [width, height]: InputPairValues,
+  aspect: SceneCamera["aspect"]
+): [number, number] {
+  const other = width
+    ? (width * aspect[1]) / aspect[0]
+    : (height! * aspect[0]) / aspect[1];
+
+  return [width ?? other, height ?? other];
+}
 
 function FileLoader({
   action,
@@ -44,12 +61,12 @@ function FileLoader({
   text,
   frozen,
 }: {
-  action: () => Promise<ExportResults>;
+  action: () => Promise<DeviceExportResults | undefined>;
   filename: string;
   text: string;
   frozen: boolean;
 }) {
-  type ExportResultURLs = Partial<Record<keyof ExportResults, string>>;
+  type ExportResultURLs = Partial<Record<keyof DeviceExportResults, string>>;
 
   const [links, setLinks] = useState<ExportResultURLs | null>(null);
   const [modalData, setModalData] = useContext(ExportModalContext)!;
@@ -73,7 +90,10 @@ function FileLoader({
       };
 
       (
-        Object.entries(resultBlobs!) as [keyof ExportResults, Blob | null][]
+        Object.entries(resultBlobs!) as [
+          keyof DeviceExportResults,
+          Blob | null,
+        ][]
       ).forEach(([k, v]) => {
         if (!v) return;
         const a = document.createElement("a");
@@ -124,181 +144,361 @@ function FileLoader({
   );
 }
 
-function ExportDevice({
+function FigmaLoader({
   action,
-  aspect,
-  showContent,
+  text,
+  frozen,
 }: {
-  action: (param: ExportOptions) => Promise<ExportResults>;
-  aspect: number[];
-  showContent: boolean;
+  action: () => Promise<FigmaExportResults | undefined>;
+  text: string;
+  frozen: boolean;
 }) {
-  const toRatio = ([width, height]: InputPairValues): [number, number] => {
-    const other = width
-      ? (width * aspect[1]) / aspect[0]
-      : (height! * aspect[0]) / aspect[1];
+  const [modalData, setModalData] = useContext(ExportModalContext)!;
+  const notifications = useNotifications();
 
-    return [width ?? other, height ?? other];
-  };
+  const id = useRef(randomUUID());
 
-  const initialSize: InputPairValues =
-    aspect[0] > aspect[1] ? [undefined, 1000] : [1000, undefined];
-
-  const renderOptions: RenderOptions = {
-    transparentBackground: false,
-    width: toRatio(initialSize)[0],
-    height: toRatio(initialSize)[1],
-    render: true,
-  };
-  const fileOptions: FileOptions = {
-    appendTextures: false,
-    onlyVisible: true,
-    file: false,
-  };
-
-  const [exportType, setExportType] = useState<ExportOptions>({
-    renderOptions,
-    fileOptions,
-  });
-
-  const update = <K extends keyof typeof exportType>(
-    k: K,
-    v: (typeof exportType)[K]
-  ) => {
-    setExportType((state: ExportOptions) =>
-      produce(state, (d: ExportOptions) => {
-        d[k] = v;
-      })
-    );
-  };
+  async function loadFrame() {
+    try {
+      const result = await action();
+      if (result?.success)
+        setModalData((prev) => ({ ...prev, state: "success" }));
+      else
+        throw new AppError(
+          ErrorCode.UnknownFigmaExportError,
+          "Unknown error while exporting files"
+        );
+    } catch (error) {
+      if (error instanceof AppError) {
+        notifications.push(error, id.current);
+      } else {
+        notifications.push(
+          new AppError(
+            ErrorCode.UnknownError,
+            "Unknown error while exporting files"
+          ),
+          id.current
+        );
+        console.error(error);
+      }
+    } finally {
+      setModalData((prev) => ({ ...prev, state: "finish" }));
+    }
+  }
 
   return (
     <>
-      <div className={clsx(styles.grid, { [styles.hidden]: !showContent })}>
-        <TextBlock className={styles.gridInfo} Icon={infoIcon}>
-          <p>
-            Сохраняйте настроенную сцену на устройство в виде изображения в
-            формате .PNG и/или файла сцены формата .GLTF (включает геометрию и
-            материалы)
-          </p>
-        </TextBlock>
-        <TextBlock max className={styles.gridSetL}>
-          <h3 className="h2">Изображение</h3>
-          <ToggleSettings
-            title="Экспортировать рендер"
-            value={exportType.renderOptions.render!}
-            frozen={false}
-            onChange={() =>
-              update("renderOptions", {
-                ...exportType.renderOptions,
-                render: !exportType.renderOptions.render,
-              })
-            }
-          />
-          <div
-            className={clsx(styles.gridInner, {
-              [styles.gridInnerFrozen]: !exportType.renderOptions.render,
-            })}
-          >
-            <NumberFieldPairSettings
-              title="Разрешение"
-              label="Соотношение сторон рендера"
-              field={{
-                label1: "w",
-                label2: "h",
-                value1: exportType.renderOptions.width + "",
-                value2: exportType.renderOptions.height + "",
-                onApply: (...values: InputPairValues) => {
-                  const [newWidth, newHeight] = toRatio(values);
-                  update("renderOptions", {
-                    ...exportType.renderOptions,
-                    width: newWidth,
-                    height: newHeight,
-                  });
-                },
-                isActive: false,
-              }}
-            />
-            <ToggleSettings
-              title="Прозрачность"
-              label="Сохранить прозрачный фон изображения вместо белого"
-              value={exportType.renderOptions.transparentBackground}
-              frozen={!exportType.renderOptions.render}
-              onChange={() =>
-                update("renderOptions", {
-                  ...exportType.renderOptions,
-                  transparentBackground:
-                    !exportType.renderOptions.transparentBackground,
-                })
-              }
-            />
-          </div>
-        </TextBlock>
-        <TextBlock max className={styles.gridSetR}>
-          <h3 className="h2">Сцена</h3>
-          <ToggleSettings
-            title="Экспортировать файл сцены"
-            value={exportType.fileOptions.file!}
-            onChange={() =>
-              update("fileOptions", {
-                ...exportType.fileOptions,
-                file: !exportType.fileOptions.file,
-              })
-            }
-            frozen={false}
-          />
-          <div
-            className={clsx(styles.gridInner, {
-              [styles.gridInnerFrozen]: !exportType.fileOptions.file,
-            })}
-          >
-            <ToggleSettings
-              title="Только видимые"
-              label="Сохранить только видимые в сцене объекты"
-              value={exportType.fileOptions.onlyVisible}
-              frozen={!exportType.fileOptions.file}
-              onChange={() =>
-                update("fileOptions", {
-                  ...exportType.fileOptions,
-                  onlyVisible: !exportType.fileOptions.onlyVisible,
-                })
-              }
-            />
-          </div>
-          <ToggleSettings
-            title="Текстуры архивом"
-            label="Дополнительно сохранить текстуры как zip-архив"
-            value={exportType.fileOptions.appendTextures}
-            frozen={false}
-            onChange={() =>
-              update("fileOptions", {
-                ...exportType.fileOptions,
-                appendTextures: !exportType.fileOptions.appendTextures,
-              })
-            }
-          />
-        </TextBlock>
-        <div className={styles.gridButton}>
-          <FileLoader
-            action={() => action(exportType)}
-            filename="scene"
-            text="Экспортировать"
-            frozen={
-              !(
-                exportType.renderOptions.render ||
-                exportType.fileOptions.file ||
-                exportType.fileOptions.appendTextures
-              )
-            }
-          />
-        </div>
+      <MainButton
+        text={text}
+        onClick={() => {
+          if (!frozen) {
+            setModalData((prev) => ({ ...prev, state: "loading" }));
+            loadFrame();
+          }
+        }}
+        frozen={frozen}
+      />
+    </>
+  );
+}
+
+function ImageSettings({
+  renderOptions,
+  aspect,
+  updateOption,
+}: {
+  renderOptions: RenderOptions;
+  aspect: SceneCamera["aspect"];
+  updateOption: <K extends keyof ExportOptions>(
+    k: K,
+    v: ExportOptions[K]
+  ) => void;
+}) {
+  return (
+    <>
+      <h3 className="h2">Изображение</h3>
+      <ToggleSettings
+        title="Экспортировать рендер"
+        value={renderOptions.render!}
+        frozen={false}
+        onChange={() =>
+          updateOption("renderOptions", {
+            ...renderOptions,
+            render: !renderOptions.render,
+          })
+        }
+      />
+      <div
+        className={clsx(styles.gridInner, {
+          [styles.gridInnerFrozen]: !renderOptions.render,
+        })}
+      >
+        <NumberFieldPairSettings
+          title="Разрешение"
+          label="Соотношение сторон рендера"
+          field={{
+            label1: "w",
+            label2: "h",
+            value1: renderOptions.width + "",
+            value2: renderOptions.height + "",
+            onApply: (...values: InputPairValues) => {
+              const [newWidth, newHeight] = toRatio(values, aspect);
+              updateOption("renderOptions", {
+                ...renderOptions,
+                width: newWidth,
+                height: newHeight,
+              });
+            },
+            isActive: false,
+          }}
+        />
+        <ToggleSettings
+          title="Прозрачность"
+          label="Сохранить прозрачный фон изображения вместо белого"
+          value={renderOptions.transparentBackground}
+          frozen={!renderOptions.render}
+          onChange={() =>
+            updateOption("renderOptions", {
+              ...renderOptions,
+              transparentBackground: !renderOptions.transparentBackground,
+            })
+          }
+        />
       </div>
     </>
   );
 }
 
-function ExportFigmaStub() {
-  return <p>Stub</p>;
+function ExportModalLayout({
+  show,
+  info,
+  left,
+  right,
+  button,
+}: {
+  show: boolean;
+  info: ReactNode;
+  left: ReactNode;
+  right: ReactNode;
+  button: ReactNode;
+}) {
+  return (
+    <div className={clsx(styles.grid, { [styles.hidden]: !show })}>
+      <TextBlock className={styles.gridInfo} Icon={infoIcon}>
+        {info}
+      </TextBlock>
+      <TextBlock max className={styles.gridSetL}>
+        {left}
+      </TextBlock>
+      <TextBlock max className={styles.gridSetR}>
+        {right}
+      </TextBlock>
+      <div className={styles.gridButton}>{button}</div>
+    </div>
+  );
+}
+
+function ExportDevice({
+  options,
+  updateOption,
+  action,
+  aspect,
+  showContent,
+}: {
+  options: ExportOptions;
+  updateOption: <K extends keyof ExportOptions>(
+    k: K,
+    v: ExportOptions[K]
+  ) => void;
+  action: () => Promise<DeviceExportResults | undefined>;
+  aspect: SceneCamera["aspect"];
+  showContent: boolean;
+}) {
+  const info = (
+    <p>
+      Сохраняйте настроенную сцену на устройство в виде изображения в формате
+      .PNG и/или файла сцены формата .GLTF (включает геометрию и материалы)
+    </p>
+  );
+
+  const left = (
+    <ImageSettings
+      renderOptions={options.renderOptions}
+      aspect={aspect}
+      updateOption={updateOption}
+    />
+  );
+
+  const right = (
+    <>
+      <h3 className="h2">Сцена</h3>
+      <ToggleSettings
+        title="Экспортировать файл сцены"
+        value={options.fileOptions.file!}
+        onChange={() =>
+          updateOption("fileOptions", {
+            ...options.fileOptions,
+            file: !options.fileOptions.file,
+          })
+        }
+        frozen={false}
+      />
+      <div
+        className={clsx(styles.gridInner, {
+          [styles.gridInnerFrozen]: !options.fileOptions.file,
+        })}
+      >
+        <ToggleSettings
+          title="Только видимые"
+          label="Сохранить только видимые в сцене объекты"
+          value={options.fileOptions.onlyVisible}
+          frozen={!options.fileOptions.file}
+          onChange={() =>
+            updateOption("fileOptions", {
+              ...options.fileOptions,
+              onlyVisible: !options.fileOptions.onlyVisible,
+            })
+          }
+        />
+      </div>
+      <ToggleSettings
+        title="Текстуры архивом"
+        label="Дополнительно сохранить текстуры как zip-архив"
+        value={options.fileOptions.appendTextures}
+        frozen={false}
+        onChange={() =>
+          updateOption("fileOptions", {
+            ...options.fileOptions,
+            appendTextures: !options.fileOptions.appendTextures,
+          })
+        }
+      />
+    </>
+  );
+
+  const button = (
+    <FileLoader
+      action={() => action()}
+      filename="scene"
+      text="Экспортировать"
+      frozen={
+        !(
+          options.renderOptions.render ||
+          options.fileOptions.file ||
+          options.fileOptions.appendTextures
+        )
+      }
+    />
+  );
+
+  return (
+    <ExportModalLayout
+      show={showContent}
+      info={info}
+      left={left}
+      right={right}
+      button={button}
+    />
+  );
+}
+
+function ExportFigma({
+  options,
+  updateOption,
+  action,
+  aspect,
+  showContent,
+  framesToReplace,
+}: {
+  options: ExportOptions;
+  updateOption: <K extends keyof ExportOptions>(
+    k: K,
+    v: ExportOptions[K]
+  ) => void;
+  action: () => Promise<FigmaExportResults | undefined>;
+  aspect: SceneCamera["aspect"];
+  showContent: boolean;
+  framesToReplace: Frames;
+}) {
+  const info = (
+    <p>
+      Продолжайте работу с ранее загруженной в Figma 3D-сценой без повторной
+      настройки материалов и камеры. Вы можете импортировать сцену с любого
+      аккаунта и устройства. Для работы с данной функцией: Экспортируйте сцену в
+      Figma как связанный рендер Не удаляйте файлы текстур, экспортированные
+      вместе с рендером
+    </p>
+  );
+
+  const left = (
+    <ImageSettings
+      renderOptions={options.renderOptions}
+      aspect={aspect}
+      updateOption={updateOption}
+    />
+  );
+
+  const right = (
+    <>
+      <h3 className="h2">Дополнительные возможности с Figma</h3>
+      <ToggleSettings
+        title="Связанный рендер"
+        label="Сохранить сцену для возможности быстрого редактирования (для сцены до 5Мб)"
+        value={options.figmaOptions.linkedRender}
+        frozen={false}
+        onChange={() =>
+          updateOption("figmaOptions", {
+            ...options.figmaOptions,
+            linkedRender: !options.figmaOptions.linkedRender,
+          })
+        }
+      />
+      <div
+        className={clsx(styles.gridInner, {
+          [styles.gridInnerFrozen]: !options.figmaOptions.linkedRender,
+        })}
+      >
+        <ToggleSettings
+          title="Обновить фреймы с этой сценой"
+          value={options.figmaOptions.updateFrames}
+          frozen={false}
+          onChange={() =>
+            updateOption("figmaOptions", {
+              ...options.figmaOptions,
+              updateFrames: !options.figmaOptions.updateFrames,
+            })
+          }
+        />
+        <div>
+          {framesToReplace.map((frame) => (
+            <p>
+              {frame.name} {frame.frameID}
+            </p>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  const button = (
+    <FigmaLoader
+      action={action}
+      text="Экспорт в Figma"
+      frozen={
+        !(options.renderOptions.render || options.figmaOptions.linkedRender)
+      }
+    />
+  );
+
+  return (
+    <ExportModalLayout
+      show={showContent}
+      info={info}
+      left={left}
+      right={right}
+      button={button}
+    />
+  );
 }
 
 const ExportModalContext = createContext<
@@ -316,13 +516,13 @@ function ModalStateWrapper({ children }: { children: React.ReactNode }) {
             : "default"
         }
         title="Export Scene"
-        // buttonTitle={modalData.type == "device" ? "figma" : "device"}
-        // buttonAction={() =>
-        //   setModalData({
-        //     ...modalData,
-        //     type: modalData.type == "device" ? "figma" : "device",
-        //   })
-        // }
+        buttonTitle={modalData.type == "device" ? "figma" : "device"}
+        buttonAction={() =>
+          setModalData({
+            ...modalData,
+            type: modalData.type == "device" ? "figma" : "device",
+          })
+        }
       >
         {children}
       </BaseModal>
@@ -353,6 +553,51 @@ export function ExportModal() {
   if (!cameras) return;
 
   const activeCamera = cameras[activeCameraID];
+  const aspect = activeCamera.aspect;
+
+  const initialRenderSize: InputPairValues =
+    aspect[0] > aspect[1] ? [undefined, 1000] : [1000, undefined];
+
+  const [exportOptions, setExportOptions] = useState<ExportOptions>(() => {
+    const renderOptions: RenderOptions = {
+      transparentBackground: false,
+      width: toRatio(initialRenderSize, aspect)[0],
+      height: toRatio(initialRenderSize, aspect)[1],
+      render: true,
+    };
+
+    const fileOptions: FileOptions = {
+      appendTextures: false,
+      onlyVisible: true,
+      file: false,
+    };
+
+    const figmaOptions: FigmaOptions = {
+      linkedRender: false,
+      updateFrames: false,
+      framesToUpdate: [],
+    };
+
+    return {
+      renderOptions,
+      fileOptions,
+      figmaOptions,
+    };
+  });
+
+  const updateOption = <K extends keyof ExportOptions>(
+    k: K,
+    v: ExportOptions[K]
+  ) => {
+    setExportOptions((state: ExportOptions) =>
+      produce(state, (d: ExportOptions) => {
+        d[k] = v;
+      })
+    );
+  };
+
+  const tempFrames: Frames = [{ name: "test", frameID: "1323" }];
+
   return (
     <>
       {type == "export" && (
@@ -360,12 +605,33 @@ export function ExportModal() {
           <ModalStateWrapper>
             {modalData.type == "device" && (
               <ExportDevice
-                action={(param) => transfer.exportSceneToDevice(param)}
+                options={exportOptions}
+                updateOption={updateOption}
+                action={() =>
+                  transfer.exportScene({
+                    format: exportOptions,
+                    to: ExportTypes.device,
+                  })
+                }
                 aspect={activeCamera.aspect}
                 showContent={modalData.state == "settings"}
               />
             )}
-            {modalData.type == "figma" && <ExportFigmaStub />}
+            {modalData.type == "figma" && (
+              <ExportFigma
+                options={exportOptions}
+                updateOption={updateOption}
+                action={() =>
+                  transfer.exportScene({
+                    format: exportOptions,
+                    to: ExportTypes.figma,
+                  })
+                }
+                aspect={activeCamera.aspect}
+                showContent={modalData.state == "settings"}
+                framesToReplace={tempFrames}
+              />
+            )}
             {modalData.state == "loading" && (
               <div
                 style={{

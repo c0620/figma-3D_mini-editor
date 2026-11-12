@@ -3,44 +3,29 @@ import { SceneAnalyzer } from "../services/sceneAnalyzerService";
 import { RenderService } from "../render/renderService";
 import { AssetCatalogService } from "../library/assetCatalogService";
 import { DeviceImportExportService } from "./deviceImportExportService";
-import { ScenePersistenceService } from "./scenePersistenceService";
 import type { ObjectID } from "@/types/scene";
 import type { AddLightsWarning, Warning } from "@/services/alert/warnings";
 import { OperationContext } from "@/services/alert/operationContext";
 import { AppError, CancelError, ErrorCode } from "@/services/alert/errors";
-import { ImportTypes } from "@/services/alert/types";
-import type {
-  DeviceExportFormat,
-  ExportOptions,
-  ExportResults,
+import {
+  ExportTypes,
+  ImportTypes,
+  type DeviceExportFormat,
+  type DeviceExportResults,
+  type ExportOptions,
+  type ExportSceneRequests,
+  type ExportSceneResults,
+  type FigmaExportResults,
+  type ImportSceneRequest,
 } from "@/types/io";
 import type { TextureService } from "./textureService";
 import JSZip from "jszip";
-
-export type SceneFileType = "OBJ" | "FBX" | "GLB";
-export type UploadAction = "LoadScene" | "AddScene";
-
-export type ImportSceneRequest =
-  | {
-      source: ImportTypes.device;
-      type: SceneFileType;
-      input: ArrayBuffer | File | string;
-      intent: UploadAction;
-    }
-  | {
-      source: ImportTypes.figma;
-      frameId: string;
-      intent: UploadAction;
-    }
-  | {
-      source: ImportTypes.library;
-      assetId: string;
-    };
+import type { FigmaImportExportService } from "./figmaImportExportService";
 
 export class SceneTransferFacade {
   deviceIO: DeviceImportExportService;
+  figmaIO: FigmaImportExportService;
   textureService: TextureService;
-  persistence: ScenePersistenceService;
   renderService: RenderService;
   analyzer: SceneAnalyzer;
   notifications: NotificationService;
@@ -50,60 +35,97 @@ export class SceneTransferFacade {
 
   constructor(
     deviceIO: DeviceImportExportService,
+    figmaIO: FigmaImportExportService,
     textureService: TextureService,
-    persistence: ScenePersistenceService,
     renderService: RenderService,
     analyzer: SceneAnalyzer,
     notifications: NotificationService,
     assetCatalog: AssetCatalogService
   ) {
     this.deviceIO = deviceIO;
+    this.figmaIO = figmaIO;
     this.textureService = textureService;
-    this.persistence = persistence;
     this.renderService = renderService;
     this.analyzer = analyzer;
     this.notifications = notifications;
     this.assetCatalog = assetCatalog;
   }
 
-  readonly exportSceneToFigmaLinked = (): void => {};
+  readonly exportScene = async <R extends ExportSceneRequests[ExportTypes]>(
+    request: R
+  ): Promise<ExportSceneResults[R["to"]] | undefined> => {
+    const context = new OperationContext(request.to, this.notifications);
+    this.abortPreviousTask(context);
 
-  readonly exportSceneToDevice = async (
-    options: ExportOptions
-  ): Promise<ExportResults> => {
-    const output: ExportResults = {
-      png: undefined,
-      gltf: undefined,
-      zip: undefined,
-    };
-    if (options.renderOptions.render) {
-      output.png = await this.renderService.exportRender(options.renderOptions);
-    }
-    if (options.fileOptions.file) {
-      output.gltf = await this.deviceIO.exportToDevice(
-        "GLTF",
-        options.fileOptions.onlyVisible
-      );
-    }
-    if (options.fileOptions.appendTextures) {
-      const textureURLs = this.textureService.exportTexturesToFile();
-      if (textureURLs) {
-        const zip = new JSZip();
-        textureURLs.forEach((texture) => {
-          const index = texture.url.indexOf("base64,") + "base64.".length;
-          const content = texture.url.substring(index);
-          zip.file(`${texture.name}.png`, content, { base64: true });
-        });
-        output.zip = await zip.generateAsync({ type: "blob" });
+    const options = request.format;
+
+    try {
+      if (request.to == ExportTypes.device) {
+        const output: DeviceExportResults = {
+          png: undefined,
+          gltf: undefined,
+          zip: undefined,
+        };
+
+        if (options.renderOptions.render) {
+          output.png = await this.renderService.exportRender(
+            options.renderOptions
+          );
+        }
+        if (options.fileOptions.file) {
+          output.gltf = await this.deviceIO.exportToDevice(
+            options.fileOptions.onlyVisible
+          );
+        }
+        if (options.fileOptions.appendTextures) {
+          const textureURLs = this.textureService.exportTexturesToFile();
+          if (textureURLs) {
+            const zip = new JSZip();
+            textureURLs.forEach((texture) => {
+              const index = texture.url.indexOf("base64,") + "base64.".length;
+              const content = texture.url.substring(index);
+              zip.file(`${texture.name}.png`, content, { base64: true });
+            });
+            output.zip = await zip.generateAsync({ type: "blob" });
+          }
+        }
+        if (!output.gltf && !output.png && !output.zip) {
+          throw new AppError(
+            ErrorCode.UnsupportedExportFormat,
+            `Unsupported export format`
+          );
+        }
+        if (context.isAborted()) throw new CancelError("Context was aborted");
+        return output as unknown as ExportSceneResults[R["to"]];
       }
+      if (request.to == ExportTypes.figma) {
+        if (options.renderOptions.render) {
+          const png = await this.renderService.exportRender(
+            options.renderOptions
+          );
+          await this.figmaIO.exportPlainRender(png, [
+            options.renderOptions.width,
+            options.renderOptions.height,
+          ]);
+        }
+        if (options.figmaOptions.linkedRender) {
+          throw new Error("not implemented"); //toDo
+        }
+        if (
+          options.figmaOptions.updateFrames &&
+          options.figmaOptions.framesToUpdate.length !== 0
+        ) {
+          throw new Error("not implemented"); //toDo
+        }
+        if (context.isAborted()) throw new CancelError("Context was aborted");
+        return { success: true } as unknown as ExportSceneResults[R["to"]];
+      }
+    } catch (error) {
+      if (error instanceof AppError) {
+        this.notifications.push(error, context.id);
+      } else if (error instanceof CancelError) return;
+      else console.error(error);
     }
-    if (!output.gltf && !output.png && !output.zip) {
-      throw new AppError(
-        ErrorCode.UnsupportedExportFormat,
-        `Unsupported export format`
-      );
-    }
-    return output;
   };
 
   private abortPreviousTask(context: OperationContext) {

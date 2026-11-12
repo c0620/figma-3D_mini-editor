@@ -1,17 +1,17 @@
-import type { SceneFileType } from "@/io/sceneTransferFacade";
 import styles from "./FileInputs.module.scss";
 import { useRef, useState } from "react";
 import FileIcon from "@/assets/images/icons/descriptive/file.svg?react";
 import UploadIcon from "@/assets/images/icons/descriptive/loadFile.svg?react";
 
 import clsx from "clsx";
+import type { DeviceImportFormat } from "@/types/io";
 
 export function FileInput({
   onUpload,
   error: _error = null,
   success: _success = true,
 }: {
-  onUpload: (type: SceneFileType, file: File) => void;
+  onUpload: (type: DeviceImportFormat, file: File) => void;
   error?: any;
   success?: boolean;
 }) {
@@ -22,7 +22,7 @@ export function FileInput({
     if (!file) return;
     setFileName(file.name);
     const fileType = file.name.split(".")[1].toUpperCase();
-    onUpload(fileType as SceneFileType, file); //ToDo: check if fileType is really SceneFileType
+    onUpload(fileType as DeviceImportFormat, file); //ToDo: check if fileType is really SceneFileType
   };
 
   return (

@@ -7,7 +7,7 @@ import { buildSceneEntityList } from "../store/sceneEntityList";
 import { findSceneObject } from "../store/sceneStorage";
 import { useSceneStore } from "../store/sceneStore";
 import { useSessionStore } from "../store/sessionStore";
-import type { ImportSceneRequest } from "@/io/sceneTransferFacade";
+import type { ImportSceneRequest } from "@/types/io";
 
 export type { SceneEntitySummary } from "../store/sceneEntityList";
 

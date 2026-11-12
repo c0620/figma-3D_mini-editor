@@ -41,7 +41,6 @@ import {
 import { SceneEncoder } from "../io/sceneEncoder";
 import { DeviceImportExportService } from "../io/deviceImportExportService";
 import { SceneNamingService } from "../io/sceneNamingService";
-import { ScenePersistenceService } from "../io/scenePersistenceService";
 import { SceneTransferFacade } from "../io/sceneTransferFacade";
 import { AssetCatalogService } from "../library/assetCatalogService";
 import { Renderer } from "../render/renderer";
@@ -64,6 +63,7 @@ import {
   type MaterialEditingPayload,
 } from "@/handlers/materialEditingHandler";
 import { TextureService } from "@/io/textureService";
+import { FigmaImportExportService } from "@/io/figmaImportExportService";
 
 /**
  * Proxy-тип для хэндлеров, команды которых идут через CommandBus (с историей).
@@ -126,18 +126,18 @@ export function buildKernel(): AppKernel {
   const analyzer = new SceneAnalyzer();
 
   // --- IO ---
-  const sceneIo = new DeviceImportExportService(
+  const sceneIo = new DeviceImportExportService(encoder, sceneStorage);
+  const figmaIo = new FigmaImportExportService(
     encoder,
     sceneStorage,
-    analyzer
+    figmaHandler
   );
   const textureService = new TextureService(sceneStorage, figmaHandler, naming);
-  const persistence = new ScenePersistenceService(figmaHandler, naming);
   const assetCatalog = new AssetCatalogService(sceneStorage);
   const transfer = new SceneTransferFacade(
     sceneIo,
+    figmaIo,
     textureService,
-    persistence,
     renderService,
     analyzer,
     notifications,

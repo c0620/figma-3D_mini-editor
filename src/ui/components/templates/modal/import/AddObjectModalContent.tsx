@@ -5,10 +5,9 @@ import { CardAsset } from "@molecules/cards/CardAsset/CardAsset";
 import styles from "./AddObjectModalContent.module.scss";
 import { FileInput } from "@atoms/inputs/FileInputs";
 import { useSceneAddition } from "@/app/ApplicationKernelContext";
-import { type SceneFileType } from "@/io/sceneTransferFacade";
 import { useSessionStore } from "@/store/sessionStore";
 import { Torus } from "@react-three/drei";
-import { ImportTypes } from "@/services/alert/types";
+import { ImportTypes, type DeviceImportFormat } from "@/types/io";
 
 export function AssetPreview({ assetId }: { assetId: string }) {
   console.log(assetId);
@@ -21,9 +20,10 @@ export function AddObjectModalContent() {
 
   const [loadType, setLoadType] = useState<"local" | "library">("library");
 
-  const [file, setFile] = useState<{ type: SceneFileType; input: File } | null>(
-    null
-  );
+  const [file, setFile] = useState<{
+    type: DeviceImportFormat;
+    input: File;
+  } | null>(null);
   const [hoverID, setHoverID] = useState<string | null>(null);
 
   const mockCards: CardAsset[] = [];

@@ -1,18 +1,8 @@
+import type { ExportTypes, ImportTypes } from "@/types/io";
 import type { DecisionRequiredError } from "./decisions";
 import type { AppError, ErrorCode, QuestionCode } from "./errors";
 import type { SuccessCode } from "./success";
 import type { WarningCode } from "./warnings";
-
-export enum ImportTypes {
-  device = "deviceI",
-  figma = "figmaI",
-  library = "libraryI",
-}
-
-export enum ExportTypes {
-  device = "deviceE",
-  figma = "figmaE",
-}
 
 export type OperationType = ImportTypes | ExportTypes;
 

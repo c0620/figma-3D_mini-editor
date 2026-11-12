@@ -36,7 +36,7 @@ import type {
 } from "../types/scene";
 import { CameraType, LightType } from "../types/scene";
 import { ThreeAssetRegistry } from "../store/threeAssetRegistry";
-import type { UploadAction } from "./sceneTransferFacade";
+
 import {
   AddCameraWarning,
   AddLightsWarning,
@@ -47,7 +47,11 @@ import {
 import type { OperationContext } from "@/services/alert/operationContext";
 import { AppError, ErrorCode, QuestionCode } from "@/services/alert/errors";
 import { randomUUID } from "@/lib/randomId";
-import type { DeviceExportFormat, DeviceImportFormat } from "@/types/io";
+import type {
+  DeviceExportFormat,
+  DeviceImportFormat,
+  UploadAction,
+} from "@/types/io";
 import { OBJExporter } from "three/examples/jsm/exporters/OBJExporter.js";
 import { useThree } from "@react-three/fiber";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
@@ -463,6 +467,7 @@ export class SceneEncoder {
     this.scene = scene;
   }
 
+  /** Legacy function (redundant type of export), export params are not supported */
   exportOBJ(): string {
     const exporter = new OBJExporter();
     const get = this.scene.getThree();
@@ -542,7 +547,6 @@ export class SceneEncoder {
           );
       }
     } catch (error) {
-      console.error(error);
       throw new AppError(ErrorCode.ParsingError, "parsing failed");
     }
   }
